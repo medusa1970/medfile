@@ -120,6 +120,8 @@ Debe contener:
 - Constantes compartidas.
 - Respuestas API comunes.
 
+**Build produccion:** compila a `dist/` con `npm run build:types` (raiz) antes de `@medfile/api` o `@medfile/web`. Railway y CI deben ejecutar ese paso porque el monorepo no publica solo fuentes TypeScript.
+
 ### `packages/config`
 
 Configuracion comun.

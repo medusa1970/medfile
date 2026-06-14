@@ -2,10 +2,16 @@ export default defineNuxtConfig({
   compatibilityDate: '2026-05-26',
   devtools: { enabled: true },
   components: [{ path: '~/components', pathPrefix: false }],
+  build: {
+    transpile: ['@medfile/types'],
+  },
   css: ['@medfile/ui/tokens.css', '@/assets/css/main.css', '@/assets/css/marketing.css', '@/assets/css/auth.css'],
   vite: {
     optimizeDeps: {
       include: ['@vue/devtools-core', '@vue/devtools-kit'],
+    },
+    ssr: {
+      noExternal: ['@medfile/types'],
     },
   },
   app: {

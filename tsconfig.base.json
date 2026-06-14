@@ -9,9 +9,6 @@
     "ignoreDeprecations": "6.0",
     "forceConsistentCasingInFileNames": true,
     "resolveJsonModule": true,
-    "baseUrl": ".",
-    "paths": {
-      "@medfile/types": ["packages/types/src/index.ts"]
-    }
+    "baseUrl": "."
   }
 }

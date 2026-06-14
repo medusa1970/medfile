@@ -2,9 +2,26 @@
   "name": "@medfile/types",
   "version": "0.1.0",
   "private": true,
-  "type": "module",
-  "scripts": {},
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "scripts": {
+    "build": "tsc -p tsconfig.json"
+  },
   "exports": {
-    ".": "./src/index.ts"
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./src/index.ts",
+      "default": "./dist/index.js"
+    },
+    "./plans": {
+      "types": "./dist/plans.d.ts",
+      "import": "./src/plans.ts",
+      "default": "./dist/plans.js"
+    },
+    "./medfile-code": {
+      "types": "./dist/medfile-code.d.ts",
+      "import": "./src/medfile-code.ts",
+      "default": "./dist/medfile-code.js"
+    }
   }
 }

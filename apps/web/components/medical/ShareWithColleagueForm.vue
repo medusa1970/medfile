@@ -54,7 +54,7 @@
 
 <script setup lang="ts">
 import type { TenantPublicProfile } from '@medfile/types'
-import { normalizeMedfileCode } from '@medfile/types'
+import { normalizeMedfileCode } from '@medfile/types/medfile-code'
 
 const props = defineProps<{
   patientId: string

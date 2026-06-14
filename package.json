@@ -10,8 +10,11 @@
   "scripts": {
     "dev": "npm run dev:web",
     "dev:web": "npm run dev --workspace @medfile/web",
-    "dev:api": "npm run start:dev --workspace @medfile/api",
-    "build": "npm run build --workspaces --if-present",
+    "dev:api": "npm run build:types && npm run start:dev --workspace @medfile/api",
+    "build:types": "npm run build --workspace @medfile/types",
+    "build:api": "npm run build:types && npm run build --workspace @medfile/api",
+    "build:web": "npm run build:types && npm run build --workspace @medfile/web",
+    "build": "npm run build:types && npm run build --workspaces --if-present",
     "lint": "npm run lint --workspaces --if-present",
     "typecheck": "npm run typecheck --workspaces --if-present"
   }

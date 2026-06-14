@@ -121,7 +121,7 @@ Guardala como `MONGODB_URI` en Railway (servicio API).
 | Campo | Valor |
 |-------|-------|
 | **Root Directory** | `/` (raiz del monorepo) |
-| **Build Command** | `npm ci && npm run build --workspace @medfile/api` |
+| **Build Command** | `npm ci && npm run build:types && npm run build --workspace @medfile/api` |
 | **Start Command** | `npm run start:prod --workspace @medfile/api` |
 | **Watch Paths** | `apps/api`, `packages/types` |
 
@@ -164,7 +164,7 @@ Generar secreto JWT (PowerShell):
 
 | Campo | Valor |
 |-------|-------|
-| **Build Command** | `npm ci && npm run build --workspace @medfile/web` |
+| **Build Command** | `npm ci && npm run build:types && npm run build --workspace @medfile/web` |
 | **Start Command** | `node apps/web/.output/server/index.mjs` |
 | **Watch Paths** | `apps/web`, `packages/types`, `packages/ui` |
 
