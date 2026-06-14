@@ -16,7 +16,7 @@ Medfile debe aislar los datos de cada medico. Ningun endpoint privado debe depen
 
 Backend:
 
-- `SecurityModule` registra `JwtModule` con `JWT_ACCESS_SECRET` y exporta `TenantAuthGuard` junto con `JwtModule` para que los modulos que usan el guard puedan resolver `JwtService`.
+- `SecurityModule` es **global** (`@Global()`), se importa en `AppModule` y registra `JwtModule` con `JWT_ACCESS_SECRET`. Exporta `TenantAuthGuard`, `JwtModule` y `UsersModule` para que cualquier modulo que use el guard resuelva dependencias en produccion (Railway).
 - `TenantAuthGuard` valida Bearer token y adjunta `request.auth`.
 - `CurrentTenant` expone el contexto autenticado a controladores.
 - `PatientsController`, `EncountersController`, `DocumentsController` y `SubscriptionsController` ya usan tenant desde JWT para endpoints privados.
