@@ -82,7 +82,9 @@ export class MailService {
     const transporter = this.getTransporter();
     const from = this.config.get<string>('SMTP_FROM', 'Medfile <noreply@medfile.my>');
 
-    this.logger.log(`SMTP enviando a ${input.to}: ${input.subject}`);
+    this.logger.log(
+      `SMTP enviando a ${input.to} via ${this.config.get<string>('SMTP_HOST')}:${this.config.get<string>('SMTP_PORT', '465')}`,
+    );
 
     try {
       await this.withTimeout(

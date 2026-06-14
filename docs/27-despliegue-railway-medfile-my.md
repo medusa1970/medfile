@@ -417,6 +417,7 @@ Semana 5+ — WhatsApp API
 | Web muestra **Upgrade Required** | Railway arranca `dev` en vez de produccion | Start: `npm run start --workspace @medfile/web` |
 | API **Application failed to respond** / **502** | `nest start` en prod, MongoDB caído, puerto distinto | Start: `node apps/api/dist/main.js`, `PORT=8080`, URI Mongo correcta |
 | OTP no llega | SMTP no configurado en prod | Configurar Hostinger SMTP |
+| OTP `Connection timeout` en logs | Puerto 465 bloqueado desde Railway | Usar `SMTP_PORT=587` y `SMTP_SECURE=false` |
 | Registro **409** / cuenta atascada | Intento previo creo usuario pero fallo el correo | Borrar en Atlas (ver abajo) o `scripts/delete-account-by-email.mjs` |
 | MP checkout falla | Token TEST invalido o webhook | Revisar credenciales y URL webhook |
 | 502 en dominio | Servicio dormido (plan free Railway) | Upgrade plan o healthcheck |

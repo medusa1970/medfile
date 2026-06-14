@@ -468,6 +468,7 @@ export class AuthService {
           `No se pudo enviar OTP a ${email}`,
           error instanceof Error ? error.stack : String(error),
         );
+        throw error;
       }
       return;
     }
@@ -494,6 +495,7 @@ export class AuthService {
           `No se pudo enviar reset a ${email}`,
           error instanceof Error ? error.stack : String(error),
         );
+        throw error;
       }
       return;
     }
