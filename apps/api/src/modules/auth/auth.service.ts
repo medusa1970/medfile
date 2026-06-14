@@ -426,11 +426,18 @@ export class AuthService {
 
   private async deliverVerificationCode(email: string, code: string) {
     if (this.mailService.isConfigured()) {
-      await this.mailService.sendVerificationCode({
-        to: email,
-        code,
-        expiresInMinutes: VERIFICATION_TTL_MINUTES,
-      });
+      try {
+        await this.mailService.sendVerificationCode({
+          to: email,
+          code,
+          expiresInMinutes: VERIFICATION_TTL_MINUTES,
+        });
+      } catch (error) {
+        this.logger.error(
+          `No se pudo enviar OTP a ${email}`,
+          error instanceof Error ? error.stack : String(error),
+        );
+      }
       return;
     }
 
@@ -445,11 +452,18 @@ export class AuthService {
   private async deliverPasswordReset(email: string, token: string) {
     if (this.mailService.isConfigured()) {
       const resetUrl = `${this.getPublicWebUrl()}/restablecer-contrasena?token=${encodeURIComponent(token)}&email=${encodeURIComponent(email)}`;
-      await this.mailService.sendPasswordResetLink({
-        to: email,
-        resetUrl,
-        expiresInMinutes: PASSWORD_RESET_TTL_MINUTES,
-      });
+      try {
+        await this.mailService.sendPasswordResetLink({
+          to: email,
+          resetUrl,
+          expiresInMinutes: PASSWORD_RESET_TTL_MINUTES,
+        });
+      } catch (error) {
+        this.logger.error(
+          `No se pudo enviar reset a ${email}`,
+          error instanceof Error ? error.stack : String(error),
+        );
+      }
       return;
     }
 

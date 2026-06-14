@@ -82,13 +82,19 @@ export class MailService {
     const transporter = this.getTransporter();
     const from = this.config.get<string>('SMTP_FROM', 'Medfile <noreply@medfile.my>');
 
-    await transporter.sendMail({
-      from,
-      to: input.to,
-      subject: input.subject,
-      text: input.text,
-      html: input.html,
-    });
+    try {
+      await transporter.sendMail({
+        from,
+        to: input.to,
+        subject: input.subject,
+        text: input.text,
+        html: input.html,
+      });
+    } catch (error) {
+      const message = error instanceof Error ? error.message : String(error);
+      this.logger.error(`Fallo SMTP hacia ${input.to}: ${message}`);
+      throw error;
+    }
 
     this.logger.log(`Correo enviado a ${input.to}: ${input.subject}`);
   }
@@ -97,7 +103,8 @@ export class MailService {
     if (this.transporter) return this.transporter;
 
     const port = Number(this.config.get<string>('SMTP_PORT', '465'));
-    const secure = this.config.get<string>('SMTP_SECURE', port === 465 ? 'true' : 'false') === 'true';
+    const secure =
+      this.config.get<string>('SMTP_SECURE', port === 465 ? 'true' : 'false') === 'true';
 
     this.transporter = createTransport({
       host: this.config.get<string>('SMTP_HOST'),
@@ -107,6 +114,10 @@ export class MailService {
         user: this.config.get<string>('SMTP_USER'),
         pass: this.config.get<string>('SMTP_PASS'),
       },
+      connectionTimeout: 15_000,
+      greetingTimeout: 15_000,
+      socketTimeout: 20_000,
+      ...(port === 587 ? { requireTLS: true } : {}),
     });
 
     return this.transporter;
