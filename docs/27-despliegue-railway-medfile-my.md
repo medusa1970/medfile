@@ -167,7 +167,7 @@ Generar secreto JWT (PowerShell):
 | Campo | Valor |
 |-------|-------|
 | **Build Command** | `npm ci && npm run build:types && npm run build --workspace @medfile/web` |
-| **Start Command** | `node apps/web/.output/server/index.mjs` |
+| **Start Command** | `npm run start --workspace @medfile/web` |
 | **Watch Paths** | `apps/web`, `packages/types`, `packages/ui` |
 
 **Variables de entorno (Web):**
@@ -408,6 +408,8 @@ Semana 5+ — WhatsApp API
 | CORS error en registro | `WEB_ORIGIN` no incluye `https://medfile.my` | Actualizar variable API y redeploy |
 | API no responde | Build fallo o `MONGODB_URI` mal | Logs en Railway → servicio API |
 | Web muestra localhost en fetch | `NUXT_PUBLIC_API_URL` incorrecto | Rebuild Web con URL correcta |
+| Web muestra **Upgrade Required** | Railway arranca `dev` en vez de produccion | Start: `npm run start --workspace @medfile/web` |
+| API **Application failed to respond** | `start` en vez de `start:prod`, sin MongoDB, sin `0.0.0.0` | Start: `start:prod`, `MONGODB_URI`, redeploy API |
 | OTP no llega | SMTP no configurado en prod | Configurar Hostinger SMTP |
 | MP checkout falla | Token TEST invalido o webhook | Revisar credenciales y URL webhook |
 | 502 en dominio | Servicio dormido (plan free Railway) | Upgrade plan o healthcheck |

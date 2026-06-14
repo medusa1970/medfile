@@ -5,6 +5,9 @@ export default defineNuxtConfig({
   build: {
     transpile: ['@medfile/types'],
   },
+  nitro: {
+    preset: 'node-server',
+  },
   css: ['@medfile/ui/tokens.css', '@/assets/css/main.css', '@/assets/css/marketing.css', '@/assets/css/auth.css'],
   vite: {
     optimizeDeps: {

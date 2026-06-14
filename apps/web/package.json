@@ -7,6 +7,7 @@
     "prebuild": "npm run build --workspace @medfile/types",
     "dev": "nuxt dev --host 0.0.0.0 --port 3100",
     "build": "nuxt build",
+    "start": "node .output/server/index.mjs",
     "preview": "nuxt preview",
     "typecheck": "nuxt typecheck"
   },
