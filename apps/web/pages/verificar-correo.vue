@@ -175,19 +175,36 @@ async function resend() {
   success.value = ''
   resending.value = true
 
+  const targetEmail = email.value.trim()
+  console.info('[Medfile verify] reenvio solicitado para', targetEmail)
+
   try {
-    if (!email.value.trim()) {
+    if (!targetEmail) {
       throw new Error('missing_email')
     }
 
     const config = useRuntimeConfig()
-    const response = await $fetch<VerificationResponse>(
-      `${config.public.apiUrl}/api/auth/resend-verification-public`,
-      {
+    const url = `${config.public.apiUrl}/api/auth/resend-verification-public`
+    const controller = new AbortController()
+    const timeoutId = window.setTimeout(() => {
+      console.warn('[Medfile verify] timeout esperando respuesta del API (20s)')
+      controller.abort()
+    }, 20_000)
+
+    console.info('[Medfile verify] POST', url)
+
+    let response: VerificationResponse
+    try {
+      response = await $fetch<VerificationResponse>(url, {
         method: 'POST',
-        body: { email: email.value.trim() },
-      },
-    )
+        body: { email: targetEmail },
+        signal: controller.signal,
+      })
+    } finally {
+      window.clearTimeout(timeoutId)
+    }
+
+    console.info('[Medfile verify] respuesta API', response)
 
     if (response.verification?.email) {
       email.value = response.verification.email
@@ -200,10 +217,18 @@ async function resend() {
     }
 
     success.value = 'Te enviamos un código nuevo. Revisa tu bandeja y spam.'
-  } catch {
+  } catch (err) {
+    console.error('[Medfile verify] error reenvio', err)
+
+    if (err instanceof DOMException && err.name === 'AbortError') {
+      error.value = 'El servidor tardó demasiado. Revisa Railway Logs (SMTP) e inténtalo otra vez.'
+      return
+    }
+
     error.value = 'No pudimos reenviar el código. Inicia sesión e inténtalo de nuevo.'
   } finally {
     resending.value = false
+    console.info('[Medfile verify] reenvio finalizado')
   }
 }
 

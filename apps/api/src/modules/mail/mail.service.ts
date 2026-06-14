@@ -82,14 +82,20 @@ export class MailService {
     const transporter = this.getTransporter();
     const from = this.config.get<string>('SMTP_FROM', 'Medfile <noreply@medfile.my>');
 
+    this.logger.log(`SMTP enviando a ${input.to}: ${input.subject}`);
+
     try {
-      await transporter.sendMail({
-        from,
-        to: input.to,
-        subject: input.subject,
-        text: input.text,
-        html: input.html,
-      });
+      await this.withTimeout(
+        transporter.sendMail({
+          from,
+          to: input.to,
+          subject: input.subject,
+          text: input.text,
+          html: input.html,
+        }),
+        20_000,
+        `SMTP hacia ${input.to}`,
+      );
     } catch (error) {
       const message = error instanceof Error ? error.message : String(error);
       this.logger.error(`Fallo SMTP hacia ${input.to}: ${message}`);
@@ -97,6 +103,22 @@ export class MailService {
     }
 
     this.logger.log(`Correo enviado a ${input.to}: ${input.subject}`);
+  }
+
+  private async withTimeout<T>(promise: Promise<T>, timeoutMs: number, label: string) {
+    let timeoutId: NodeJS.Timeout | undefined;
+
+    const timeoutPromise = new Promise<never>((_, reject) => {
+      timeoutId = setTimeout(() => {
+        reject(new Error(`${label} excedio ${timeoutMs}ms`));
+      }, timeoutMs);
+    });
+
+    try {
+      return await Promise.race([promise, timeoutPromise]);
+    } finally {
+      if (timeoutId) clearTimeout(timeoutId);
+    }
   }
 
   private getTransporter() {

@@ -71,7 +71,7 @@ export class AuthService {
     await this.tenantsService.assignOwner(tenant.id, user.id);
     await this.subscriptionsService.createFreeForTenant(tenant.id);
 
-    await this.deliverVerificationCode(input.email, verification.code);
+    this.queueVerificationCode(input.email, verification.code, 'register');
 
     const session = await this.buildSessionResponse({
       userId: user.id,
@@ -167,7 +167,7 @@ export class AuthService {
       verification.expiresAt,
     );
 
-    await this.deliverVerificationCode(user.email, verification.code);
+    this.queueVerificationCode(user.email, verification.code, 'resend-auth');
 
     return {
       sent: true,
@@ -177,9 +177,15 @@ export class AuthService {
   }
 
   async resendVerificationPublic(body: ResendVerificationDto) {
-    const user = await this.usersService.findByEmail(body.email);
+    const normalizedEmail = body.email.trim().toLowerCase();
+    this.logger.log(`Reenvio OTP publico solicitado para ${normalizedEmail}`);
+
+    const user = await this.usersService.findByEmail(normalizedEmail);
 
     if (!user || this.isEmailVerified(user.emailVerified)) {
+      this.logger.warn(
+        `Reenvio OTP omitido (sin usuario o ya verificado): ${normalizedEmail}`,
+      );
       return { sent: true };
     }
 
@@ -190,7 +196,8 @@ export class AuthService {
       verification.expiresAt,
     );
 
-    await this.deliverVerificationCode(user.email, verification.code);
+    this.queueVerificationCode(user.email, verification.code, 'resend-public');
+    this.logger.log(`Reenvio OTP encolado para ${user.email}`);
 
     return {
       sent: true,
@@ -215,7 +222,7 @@ export class AuthService {
       expiresAt,
     );
 
-    await this.deliverPasswordReset(user.email, token);
+    this.queuePasswordReset(user.email, token);
 
     return {
       sent: true,
@@ -422,6 +429,30 @@ export class AuthService {
 
   private hashResetToken(token: string) {
     return createHash('sha256').update(token.trim()).digest('hex');
+  }
+
+  private queueVerificationCode(email: string, code: string, context: string) {
+    this.logger.log(`Encolando OTP (${context}) para ${email}`);
+    void this.deliverVerificationCode(email, code)
+      .then(() => this.logger.log(`OTP entregado (${context}) a ${email}`))
+      .catch((error) =>
+        this.logger.error(
+          `OTP fallo (${context}) a ${email}`,
+          error instanceof Error ? error.stack : String(error),
+        ),
+      );
+  }
+
+  private queuePasswordReset(email: string, token: string) {
+    this.logger.log(`Encolando reset de contraseña para ${email}`);
+    void this.deliverPasswordReset(email, token)
+      .then(() => this.logger.log(`Reset encolado enviado a ${email}`))
+      .catch((error) =>
+        this.logger.error(
+          `Reset fallo para ${email}`,
+          error instanceof Error ? error.stack : String(error),
+        ),
+      );
   }
 
   private async deliverVerificationCode(email: string, code: string) {
