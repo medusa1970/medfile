@@ -8,6 +8,7 @@ import { ClinicalSharesModule } from './modules/clinical-shares/clinical-shares.
 import { DocumentsModule } from './modules/documents/documents.module';
 import { EncountersModule } from './modules/encounters/encounters.module';
 import { HealthModule } from './modules/health/health.module';
+import { SecurityModule } from './modules/security/security.module';
 import { PaymentsModule } from './modules/payments/payments.module';
 import { PatientsModule } from './modules/patients/patients.module';
 import { SubscriptionsModule } from './modules/subscriptions/subscriptions.module';
@@ -30,6 +31,7 @@ import { SubscriptionsModule } from './modules/subscriptions/subscriptions.modul
       }),
     }),
     AuthModule,
+    SecurityModule,
     TenantsModule,
     HealthModule,
     PatientsModule,

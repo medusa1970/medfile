@@ -1,9 +1,10 @@
-import { Module } from '@nestjs/common';
+import { Global, Module } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { JwtModule } from '@nestjs/jwt';
 import { UsersModule } from '../users/users.module';
 import { TenantAuthGuard } from './tenant-auth.guard';
 
+@Global()
 @Module({
   imports: [
     UsersModule,
@@ -15,6 +16,6 @@ import { TenantAuthGuard } from './tenant-auth.guard';
     }),
   ],
   providers: [TenantAuthGuard],
-  exports: [TenantAuthGuard, JwtModule],
+  exports: [TenantAuthGuard, JwtModule, UsersModule],
 })
 export class SecurityModule {}
