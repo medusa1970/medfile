@@ -3,7 +3,7 @@ import { ConfigService } from '@nestjs/config';
 import { Resend } from 'resend';
 import { createTransport, type Transporter } from 'nodemailer';
 
-type MailProvider = 'resend' | 'smtp';
+type MailProvider = 'brevo' | 'resend' | 'smtp';
 
 @Injectable()
 export class MailService implements OnModuleInit {
@@ -15,17 +15,24 @@ export class MailService implements OnModuleInit {
 
   onModuleInit() {
     const provider = this.getActiveProvider();
+    if (provider === 'brevo') {
+      this.logger.log('Correo: provider Brevo API (HTTPS, compatible Railway Hobby)');
+      return;
+    }
+
     if (provider === 'resend') {
-      this.logger.log('Correo: provider Resend API (recomendado en Railway Hobby)');
+      this.logger.log('Correo: provider Resend API');
       return;
     }
 
     if (provider === 'smtp') {
-      this.logger.log('Correo: provider SMTP (requiere Railway Pro para Hostinger)');
+      this.logger.log('Correo: provider SMTP directo');
       return;
     }
 
-    this.logger.warn('Correo no configurado (RESEND_API_KEY o SMTP_HOST/SMTP_USER/SMTP_PASS)');
+    this.logger.warn(
+      'Correo no configurado (BREVO_API_KEY, RESEND_API_KEY o SMTP_HOST/SMTP_USER/SMTP_PASS)',
+    );
   }
 
   isConfigured() {
@@ -90,33 +97,84 @@ export class MailService implements OnModuleInit {
   }
 
   private getActiveProvider(): MailProvider | null {
-    if (this.config.get<string>('RESEND_API_KEY')?.trim()) {
+    if (this.shouldUseBrevoApi()) {
+      return 'brevo';
+    }
+
+    if (this.getConfig('RESEND_API_KEY')) {
       return 'resend';
     }
 
-    if (
-      this.config.get<string>('SMTP_HOST') &&
-      this.config.get<string>('SMTP_USER') &&
-      this.config.get<string>('SMTP_PASS')
-    ) {
+    if (this.getConfig('SMTP_HOST', 'EMAIL_HOST') && this.getSmtpAuth()) {
       return 'smtp';
     }
 
     return null;
   }
 
+  private shouldUseBrevoApi() {
+    return Boolean(this.getBrevoApiKey());
+  }
+
+  private isBrevoHost(host?: string) {
+    const value = (host ?? this.getConfig('SMTP_HOST', 'EMAIL_HOST') ?? '').toLowerCase();
+    return value.includes('brevo') || value.includes('sendinblue');
+  }
+
+  private getBrevoApiKey() {
+    const explicit = this.getConfig('BREVO_API_KEY');
+    if (explicit) return explicit;
+
+    if (this.isBrevoHost()) {
+      return this.getConfig('SMTP_PASS', 'EMAIL_PASSWORD');
+    }
+
+    return undefined;
+  }
+
+  private getSmtpAuth() {
+    const user = this.getConfig('SMTP_USER', 'EMAIL_USER');
+    const pass = this.getConfig('SMTP_PASS', 'EMAIL_PASSWORD');
+    return user && pass ? { user, pass } : null;
+  }
+
   private getFromAddress() {
     return (
-      this.config.get<string>('RESEND_FROM')?.trim() ||
-      this.config.get<string>('SMTP_FROM')?.trim() ||
+      this.getConfig('EMAIL_FROM', 'RESEND_FROM', 'SMTP_FROM') ||
       'Medfile <onboarding@resend.dev>'
     );
+  }
+
+  private getFromEmailPlain() {
+    const from = this.getFromAddress();
+    const match = from.match(/<([^>]+)>/);
+    return (match?.[1] ?? from).trim();
+  }
+
+  private getFromName() {
+    const from = this.getFromAddress();
+    const match = from.match(/^(.+?)\s*</);
+    return match?.[1]?.trim() || 'Medfile';
+  }
+
+  private getConfig(...keys: string[]) {
+    for (const key of keys) {
+      const value = this.config.get<string>(key)?.trim();
+      if (value) return value;
+    }
+
+    return undefined;
   }
 
   private async send(input: { to: string; subject: string; text: string; html: string }) {
     const provider = this.getActiveProvider();
     if (!provider) {
-      throw new Error('Correo no configurado (RESEND_API_KEY o SMTP).');
+      throw new Error('Correo no configurado (BREVO_API_KEY, RESEND_API_KEY o SMTP).');
+    }
+
+    if (provider === 'brevo') {
+      await this.sendViaBrevo(input);
+      return;
     }
 
     if (provider === 'resend') {
@@ -125,6 +183,46 @@ export class MailService implements OnModuleInit {
     }
 
     await this.sendViaSmtp(input);
+  }
+
+  private async sendViaBrevo(input: { to: string; subject: string; text: string; html: string }) {
+    const apiKey = this.getBrevoApiKey();
+    if (!apiKey) {
+      throw new Error('BREVO_API_KEY no configurado.');
+    }
+
+    const senderEmail = this.getFromEmailPlain();
+    this.logger.log(`Brevo API enviando a ${input.to} desde ${senderEmail}`);
+
+    const response = await fetch('https://api.brevo.com/v3/smtp/email', {
+      method: 'POST',
+      headers: {
+        'api-key': apiKey,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        sender: {
+          email: senderEmail,
+          name: this.getFromName(),
+        },
+        to: [{ email: input.to }],
+        subject: input.subject,
+        htmlContent: input.html,
+        textContent: input.text,
+      }),
+      signal: AbortSignal.timeout(30_000),
+    });
+
+    if (!response.ok) {
+      const body = await response.text();
+      this.logger.error(`Fallo Brevo hacia ${input.to}: ${response.status} ${body}`);
+      throw new Error(`Brevo API ${response.status}: ${body}`);
+    }
+
+    const payload = (await response.json()) as { messageId?: string };
+    this.logger.log(
+      `Correo enviado via Brevo a ${input.to}: ${input.subject} (messageId=${payload.messageId ?? 'n/a'})`,
+    );
   }
 
   private async sendViaResend(input: { to: string; subject: string; text: string; html: string }) {
@@ -151,10 +249,10 @@ export class MailService implements OnModuleInit {
   private async sendViaSmtp(input: { to: string; subject: string; text: string; html: string }) {
     const transporter = this.getTransporter();
     const from = this.getFromAddress();
+    const host = this.getConfig('SMTP_HOST', 'EMAIL_HOST');
+    const port = this.getConfig('SMTP_PORT', 'EMAIL_PORT') ?? '465';
 
-    this.logger.log(
-      `SMTP enviando a ${input.to} via ${this.config.get<string>('SMTP_HOST')}:${this.config.get<string>('SMTP_PORT', '465')}`,
-    );
+    this.logger.log(`SMTP enviando a ${input.to} via ${host}:${port}`);
 
     try {
       await this.withTimeout(
@@ -180,7 +278,7 @@ export class MailService implements OnModuleInit {
   private getResendClient() {
     if (this.resend) return this.resend;
 
-    const apiKey = this.config.get<string>('RESEND_API_KEY')?.trim();
+    const apiKey = this.getConfig('RESEND_API_KEY');
     if (!apiKey) {
       throw new Error('RESEND_API_KEY no configurado.');
     }
@@ -208,22 +306,29 @@ export class MailService implements OnModuleInit {
   private getTransporter() {
     if (this.transporter) return this.transporter;
 
-    const port = Number(this.config.get<string>('SMTP_PORT', '465'));
+    const auth = this.getSmtpAuth();
+    if (!auth) {
+      throw new Error('Credenciales SMTP incompletas.');
+    }
+
+    const port = Number(this.getConfig('SMTP_PORT', 'EMAIL_PORT') ?? '465');
     const secure =
-      this.config.get<string>('SMTP_SECURE', port === 465 ? 'true' : 'false') === 'true';
+      this.getConfig('SMTP_SECURE') === 'true' ||
+      (this.getConfig('SMTP_SECURE') !== 'false' && port === 465);
+    const isBrevo = this.isBrevoHost();
 
     this.transporter = createTransport({
-      host: this.config.get<string>('SMTP_HOST'),
+      host: this.getConfig('SMTP_HOST', 'EMAIL_HOST'),
       port,
       secure,
-      auth: {
-        user: this.config.get<string>('SMTP_USER'),
-        pass: this.config.get<string>('SMTP_PASS'),
-      },
+      auth,
       connectionTimeout: 15_000,
       greetingTimeout: 15_000,
       socketTimeout: 20_000,
-      ...(port === 587 ? { requireTLS: true } : {}),
+      requireTLS: port === 587,
+      tls: {
+        rejectUnauthorized: !(isBrevo || secure === false),
+      },
     });
 
     return this.transporter;

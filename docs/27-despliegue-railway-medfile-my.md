@@ -139,15 +139,11 @@ JWT_ACCESS_TTL_SECONDS=3600
 WEB_ORIGIN=https://medfile.my,https://www.medfile.my
 APP_PUBLIC_URL=https://medfile.my
 PAYMENTS_PROVIDER=mock
-# Email — Resend API (obligatorio en Railway Hobby; SMTP bloqueado):
-RESEND_API_KEY=re_...
-RESEND_FROM=Medfile <noreply@medfile.my>
-# SMTP Hostinger solo funciona en Railway Pro o desarrollo local:
-# SMTP_HOST=smtp.hostinger.com
-# SMTP_PORT=587
-# SMTP_SECURE=false
-# SMTP_USER=noreply@medfile.my
-# SMTP_PASS=...
+BREVO_API_KEY=xkeysib-...
+EMAIL_FROM=noreply@medfile.my
+# o Resend:
+# RESEND_API_KEY=re_...
+# RESEND_FROM=Medfile <noreply@medfile.my>
 # Storage R2 (opcional):
 # S3_ENDPOINT=https://....r2.cloudflarestorage.com
 # S3_REGION=auto
@@ -221,7 +217,34 @@ El segundo debe responder `401` (sin token) — eso confirma que el API esta viv
 
 > **Railway Hobby bloquea SMTP** (puertos 465/587). Los logs muestran `Connection timeout` con Hostinger SMTP. Usa **Resend** (API HTTPS) o sube a **Railway Pro**.
 
-### 5.1 Crear cuenta Resend
+### 5.1 Opcion recomendada: Brevo (como tu app Siipi)
+
+Si ya tienes Brevo funcionando en otro proyecto Railway, reutiliza el mismo patron:
+
+1. [brevo.com](https://www.brevo.com) → **SMTP & API** → **API Keys** → crea clave `xkeysib-...`
+2. **Senders** → verifica `noreply@medfile.my` (dominio `medfile.my`)
+3. Railway API:
+
+```env
+BREVO_API_KEY=xkeysib-tu_clave
+EMAIL_FROM=noreply@medfile.my
+```
+
+El codigo usa **API HTTPS** (no SMTP saliente), igual que `my-backApp` cuando `EMAIL_HOST` es Brevo.
+
+Variables alias compatibles con tu otra app:
+
+```env
+EMAIL_HOST=smtp-relay.brevo.com
+EMAIL_PORT=587
+EMAIL_USER=tu_id@smtp-brevo.com
+EMAIL_PASSWORD=xkeysib-tu_clave
+EMAIL_FROM=noreply@medfile.my
+```
+
+Si `EMAIL_HOST` contiene `brevo`, Medfile envia por API aunque Railway bloquee SMTP.
+
+### 5.2 Alternativa: Resend
 
 1. [resend.com](https://resend.com) → registro gratis
 2. **API Keys** → **Create API Key** → copia `re_...`
