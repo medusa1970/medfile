@@ -92,7 +92,12 @@ onMounted(async () => {
   }
 
   if (!hasSession()) {
-    await router.replace('/registro')
+    if (email.value) {
+      pageReady.value = true
+      return
+    }
+
+    await router.replace('/login')
     return
   }
 
@@ -104,7 +109,12 @@ onMounted(async () => {
       return
     }
   } catch {
-    await router.replace('/registro')
+    if (email.value) {
+      pageReady.value = true
+      return
+    }
+
+    await router.replace('/login?expired=1')
     return
   }
 
@@ -141,6 +151,11 @@ async function submit() {
     success.value = 'Correo verificado. Redirigiendo…'
     await router.push('/onboarding')
   } catch (err) {
+    if (typeof err === 'object' && err && 'status' in err && (err as { status?: number }).status === 401) {
+      error.value = 'Tu sesión expiró. Inicia sesión e ingresa el código de nuevo.'
+      return
+    }
+
     error.value = getErrorMessage(err)
   } finally {
     loading.value = false
@@ -153,32 +168,18 @@ async function resend() {
   resending.value = true
 
   try {
-    let response: VerificationResponse | null = null
-
-    if (hasSession()) {
-      try {
-        response = await apiFetch<VerificationResponse>('/api/auth/resend-verification', {
-          method: 'POST',
-        })
-      } catch {
-        response = null
-      }
+    if (!email.value.trim()) {
+      throw new Error('missing_email')
     }
 
-    if (!response && email.value) {
-      const config = useRuntimeConfig()
-      response = await $fetch<VerificationResponse>(
-        `${config.public.apiUrl}/api/auth/resend-verification-public`,
-        {
-          method: 'POST',
-          body: { email: email.value.trim() },
-        },
-      )
-    }
-
-    if (!response) {
-      throw new Error('resend_failed')
-    }
+    const config = useRuntimeConfig()
+    const response = await $fetch<VerificationResponse>(
+      `${config.public.apiUrl}/api/auth/resend-verification-public`,
+      {
+        method: 'POST',
+        body: { email: email.value.trim() },
+      },
+    )
 
     if (response.verification?.email) {
       email.value = response.verification.email
@@ -190,9 +191,9 @@ async function resend() {
       storeVerificationPreview(email.value, response.verification.devCode)
     }
 
-    success.value = 'Te enviamos un código nuevo.'
+    success.value = 'Te enviamos un código nuevo. Revisa tu bandeja y spam.'
   } catch {
-    error.value = 'No pudimos reenviar el código. Intenta nuevamente.'
+    error.value = 'No pudimos reenviar el código. Inicia sesión e inténtalo de nuevo.'
   } finally {
     resending.value = false
   }

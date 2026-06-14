@@ -16,7 +16,8 @@
     "build:web": "npm run build:types && npm run build --workspace @medfile/web",
     "build": "npm run build:types && npm run build --workspaces --if-present",
     "lint": "npm run lint --workspaces --if-present",
-    "typecheck": "npm run typecheck --workspaces --if-present"
+    "typecheck": "npm run typecheck --workspaces --if-present",
+    "delete-account": "node scripts/delete-account-by-email.mjs"
   },
   "devDependencies": {
     "@types/nodemailer": "^6.4.24"

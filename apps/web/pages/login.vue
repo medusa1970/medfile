@@ -63,7 +63,7 @@ const loading = ref(false)
 const error = ref('')
 
 const form = reactive({
-  email: '',
+  email: String(route.query.email || ''),
   password: '',
 })
 

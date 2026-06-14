@@ -417,6 +417,7 @@ Semana 5+ — WhatsApp API
 | Web muestra **Upgrade Required** | Railway arranca `dev` en vez de produccion | Start: `npm run start --workspace @medfile/web` |
 | API **Application failed to respond** / **502** | `nest start` en prod, MongoDB caído, puerto distinto | Start: `node apps/api/dist/main.js`, `PORT=8080`, URI Mongo correcta |
 | OTP no llega | SMTP no configurado en prod | Configurar Hostinger SMTP |
+| Registro **409** / cuenta atascada | Intento previo creo usuario pero fallo el correo | Borrar en Atlas (ver abajo) o `scripts/delete-account-by-email.mjs` |
 | MP checkout falla | Token TEST invalido o webhook | Revisar credenciales y URL webhook |
 | 502 en dominio | Servicio dormido (plan free Railway) | Upgrade plan o healthcheck |
 
@@ -455,6 +456,39 @@ NODE_ENV=production
 NUXT_PUBLIC_APP_NAME=medfile
 NUXT_PUBLIC_API_URL=https://api.medfile.my
 ```
+
+---
+
+## Borrar cuenta de prueba en MongoDB Atlas
+
+Si el registro fallo con **500** pero el correo ya existe (**409**), elimina el usuario y su tenant:
+
+1. [MongoDB Atlas](https://cloud.mongodb.com) → cluster → **Browse Collections** → base `medfile_prod`.
+2. Coleccion **`users`** → busca `email: jaimewvf@gmail.com` → anota el campo **`tenantId`**.
+3. Elimina en este orden:
+   - `subscriptions` donde `tenantId` = ese id
+   - `users` donde `email` = ese correo
+   - `tenants` donde `_id` = ese `tenantId`
+4. Vuelve a registrar en `https://medfile.my/registro`.
+
+**Alternativa (mongosh en Atlas → Connect → Shell):**
+
+```javascript
+use medfile_prod
+const email = "jaimewvf@gmail.com";
+const user = db.users.findOne({ email });
+if (user) {
+  const tid = user.tenantId;
+  db.subscriptions.deleteMany({ tenantId: tid });
+  db.users.deleteMany({ tenantId: tid });
+  db.tenants.deleteOne({ _id: ObjectId(tid) });
+  print("Eliminado tenant " + tid);
+} else {
+  print("Usuario no encontrado");
+}
+```
+
+Script local: `MONGODB_URI=... node scripts/delete-account-by-email.mjs email@ejemplo.com`
 
 ---
 
