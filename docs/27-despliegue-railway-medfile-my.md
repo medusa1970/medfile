@@ -137,16 +137,15 @@ MONGODB_URI=mongodb+srv://...
 JWT_ACCESS_SECRET=genera-un-secreto-largo-aleatorio-min-32-chars
 JWT_ACCESS_TTL_SECONDS=3600
 WEB_ORIGIN=https://medfile.my,https://www.medfile.my
+APP_PUBLIC_URL=https://medfile.my
 PAYMENTS_PROVIDER=mock
-# Cuando tengas MP:
-# PAYMENTS_PROVIDER=mercadopago
-# MERCADOPAGO_ACCESS_TOKEN=TEST-... o APP_USR-...
-# Email Hostinger (cuando implementemos SMTP en codigo):
-# SMTP_HOST=smtp.hostinger.com
-# SMTP_PORT=465
-# SMTP_USER=noreply@medfile.my
-# SMTP_PASS=...
-# SMTP_FROM="Medfile <noreply@medfile.my>"
+# Email Hostinger (MailModule + nodemailer):
+SMTP_HOST=smtp.hostinger.com
+SMTP_PORT=465
+SMTP_SECURE=true
+SMTP_USER=noreply@medfile.my
+SMTP_PASS=...
+SMTP_FROM=Medfile <noreply@medfile.my>
 # Storage R2 (opcional):
 # S3_ENDPOINT=https://....r2.cloudflarestorage.com
 # S3_REGION=auto
@@ -235,12 +234,19 @@ El segundo debe responder `401` (sin token) — eso confirma que el API esta viv
 
 ### 5.3 Estado en codigo
 
-Hoy el API en desarrollo **imprime el OTP en consola**. Para produccion hay que conectar SMTP (variables arriba) y enviar:
+El API usa **`MailModule`** (`apps/api/src/modules/mail/mail.service.ts`) con **nodemailer** e integracion en `AuthService`:
 
-- Codigo de verificacion al registrarse
-- Enlace/token de recuperacion de contraseña
+- Codigo OTP al registrarse o reenviar verificacion
+- Enlace de recuperacion: `https://medfile.my/restablecer-contrasena?token=...&email=...`
 
-**Prueba sin SMTP (staging):** sigue funcionando con `devCode` solo si `NODE_ENV !== production`. En produccion necesitas SMTP activo.
+**Desarrollo:** sin SMTP, OTP/token en consola del API + `devCode`/`reset.token` en JSON.
+
+**Produccion:** configura las variables SMTP en Railway; no expone codigos en la respuesta.
+
+**Prueba rapida tras deploy:**
+
+1. Registro en `https://medfile.my/registro` → revisa bandeja de `noreply@medfile.my`.
+2. `/olvide-contrasena` → correo con enlace de reset.
 
 ---
 

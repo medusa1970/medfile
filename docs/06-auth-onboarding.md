@@ -65,7 +65,10 @@ Middleware Nuxt: `middleware/auth.global.ts` aplica sesion, verificacion de corr
 | `POST /api/auth/resend-verification` | Bearer | Reenviar con sesion |
 | `POST /api/auth/resend-verification-public` | email | Reenviar sin sesion |
 
-- TTL OTP: **30 min**. En dev: consola API + `verification.devCode` + `sessionStorage`.
+- TTL OTP: **30 min**.
+- **Desarrollo** (`NODE_ENV !== production`): consola API + `verification.devCode` en respuesta + `sessionStorage`.
+- **Produccion** con SMTP configurado: correo real via `MailService` (`apps/api/src/modules/mail/`). Sin `devCode` ni token en JSON.
+- Variables: `SMTP_HOST`, `SMTP_PORT`, `SMTP_USER`, `SMTP_PASS`, `SMTP_FROM`; enlaces de reset usan `APP_PUBLIC_URL` o el primer origen de `WEB_ORIGIN`.
 - Orden de validacion: expiracion antes que codigo incorrecto.
 - `TenantAuthGuard` bloquea API clinica si `emailVerified === false`.
 
@@ -75,7 +78,7 @@ Cuentas legacy sin campo `emailVerified` se tratan como verificadas (`!== false`
 
 | Endpoint | Descripcion |
 |----------|-------------|
-| `POST /api/auth/forgot-password` | Genera token (60 min). Respuesta generica `{ sent: true }`. En dev: `reset.token` en respuesta y consola |
+| `POST /api/auth/forgot-password` | Genera token (60 min). Respuesta generica `{ sent: true }`. En dev: `reset.token` en respuesta y consola. En prod: enlace por correo SMTP |
 | `POST /api/auth/reset-password` | `{ email, token, password }` — invalida token tras uso |
 
 Pantallas: `/olvide-contrasena`, `/restablecer-contrasena?email=&token=`.

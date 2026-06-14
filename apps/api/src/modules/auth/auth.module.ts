@@ -1,6 +1,7 @@
 import { Module } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { JwtModule } from '@nestjs/jwt';
+import { MailModule } from '../mail/mail.module';
 import { SubscriptionsModule } from '../subscriptions/subscriptions.module';
 import { TenantsModule } from '../tenants/tenants.module';
 import { UsersModule } from '../users/users.module';
@@ -21,6 +22,7 @@ import { AuthService } from './auth.service';
     TenantsModule,
     UsersModule,
     SubscriptionsModule,
+    MailModule,
   ],
   controllers: [AuthController],
   providers: [AuthService],

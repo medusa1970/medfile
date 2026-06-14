@@ -3,12 +3,15 @@ import {
   ConflictException,
   ForbiddenException,
   Injectable,
+  Logger,
   UnauthorizedException,
 } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
 import { compare, hash } from 'bcryptjs';
 import { createHash, randomBytes } from 'crypto';
 import { verifyAccessToken } from '../../common/verify-access-token';
+import { MailService } from '../mail/mail.service';
 import { SubscriptionsService } from '../subscriptions/subscriptions.service';
 import { TenantsService } from '../tenants/tenants.service';
 import { UsersService } from '../users/users.service';
@@ -34,11 +37,15 @@ const PASSWORD_RESET_TTL_MINUTES = 60;
 
 @Injectable()
 export class AuthService {
+  private readonly logger = new Logger(AuthService.name);
+
   constructor(
     private readonly usersService: UsersService,
     private readonly tenantsService: TenantsService,
     private readonly subscriptionsService: SubscriptionsService,
     private readonly jwtService: JwtService,
+    private readonly mailService: MailService,
+    private readonly config: ConfigService,
   ) {}
 
   async register(input: RegisterDto) {
@@ -64,7 +71,7 @@ export class AuthService {
     await this.tenantsService.assignOwner(tenant.id, user.id);
     await this.subscriptionsService.createFreeForTenant(tenant.id);
 
-    this.logVerificationDelivery(input.email, verification.code);
+    await this.deliverVerificationCode(input.email, verification.code);
 
     const session = await this.buildSessionResponse({
       userId: user.id,
@@ -160,7 +167,7 @@ export class AuthService {
       verification.expiresAt,
     );
 
-    this.logVerificationDelivery(user.email, verification.code);
+    await this.deliverVerificationCode(user.email, verification.code);
 
     return {
       sent: true,
@@ -183,7 +190,7 @@ export class AuthService {
       verification.expiresAt,
     );
 
-    this.logVerificationDelivery(user.email, verification.code);
+    await this.deliverVerificationCode(user.email, verification.code);
 
     return {
       sent: true,
@@ -208,7 +215,7 @@ export class AuthService {
       expiresAt,
     );
 
-    this.logPasswordResetDelivery(user.email, token);
+    await this.deliverPasswordReset(user.email, token);
 
     return {
       sent: true,
@@ -417,16 +424,55 @@ export class AuthService {
     return createHash('sha256').update(token.trim()).digest('hex');
   }
 
-  private logVerificationDelivery(email: string, code: string) {
-    if (!this.isDevEnvironment()) return;
+  private async deliverVerificationCode(email: string, code: string) {
+    if (this.mailService.isConfigured()) {
+      await this.mailService.sendVerificationCode({
+        to: email,
+        code,
+        expiresInMinutes: VERIFICATION_TTL_MINUTES,
+      });
+      return;
+    }
 
-    console.info(`[Medfile] Codigo de verificacion para ${email}: ${code}`);
+    if (this.isDevEnvironment()) {
+      console.info(`[Medfile] Codigo de verificacion para ${email}: ${code}`);
+      return;
+    }
+
+    this.logger.warn(`SMTP no configurado; no se envio OTP a ${email}`);
   }
 
-  private logPasswordResetDelivery(email: string, token: string) {
-    if (!this.isDevEnvironment()) return;
+  private async deliverPasswordReset(email: string, token: string) {
+    if (this.mailService.isConfigured()) {
+      const resetUrl = `${this.getPublicWebUrl()}/restablecer-contrasena?token=${encodeURIComponent(token)}&email=${encodeURIComponent(email)}`;
+      await this.mailService.sendPasswordResetLink({
+        to: email,
+        resetUrl,
+        expiresInMinutes: PASSWORD_RESET_TTL_MINUTES,
+      });
+      return;
+    }
 
-    console.info(`[Medfile] Token de restablecimiento para ${email}: ${token}`);
+    if (this.isDevEnvironment()) {
+      console.info(`[Medfile] Token de restablecimiento para ${email}: ${token}`);
+      return;
+    }
+
+    this.logger.warn(`SMTP no configurado; no se envio reset a ${email}`);
+  }
+
+  private getPublicWebUrl() {
+    const explicit = this.config.get<string>('APP_PUBLIC_URL')?.trim();
+    if (explicit) {
+      return explicit.replace(/\/$/, '');
+    }
+
+    const firstOrigin = (this.config.get<string>('WEB_ORIGIN') ?? '')
+      .split(',')
+      .map((value) => value.trim())
+      .find(Boolean);
+
+    return firstOrigin?.replace(/\/$/, '') ?? 'http://localhost:3100';
   }
 
   private isVerificationExpired(value?: Date | string) {

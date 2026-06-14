@@ -51,15 +51,19 @@
   gap: 28px;
   align-items: center;
   min-height: var(--landing-nav-height);
+  padding-block: 5px 0;
 }
 
 .marketing-nav .nav-brand {
   flex-shrink: 0;
+  margin-bottom: -3px;
 }
 
 .marketing-nav .nav-brand .brand {
   width: 148px;
-  min-height: 48px;
+  min-height: 0;
+  line-height: 0;
+  transform: translateY(1px);
 }
 
 .marketing-nav .nav-links {
@@ -1185,14 +1189,15 @@
 
   .marketing-nav .nav-brand .brand {
     width: 128px;
-    min-height: 44px;
+    min-height: 0;
   }
 
   .marketing-nav .nav-inner {
     display: flex;
     justify-content: space-between;
     gap: 12px;
-    min-height: 64px;
+    min-height: var(--landing-nav-height);
+    padding-block: 5px 0;
   }
 
   .marketing-nav .nav-mobile-menu {
