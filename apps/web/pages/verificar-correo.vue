@@ -45,12 +45,14 @@
     <div class="auth-switch">
       ¿Correo incorrecto?
       <NuxtLink to="/registro">Crear otra cuenta</NuxtLink>
+      ·
+      <NuxtLink :to="{ path: '/login', query: email ? { email } : undefined }">Iniciar sesión</NuxtLink>
     </div>
   </AuthShell>
 </template>
 
 <script setup lang="ts">
-definePageMeta({ ssr: false, requiresSession: true })
+definePageMeta({ ssr: false })
 
 import {
   clearVerificationPreview,
@@ -68,7 +70,7 @@ interface VerificationResponse {
 
 const route = useRoute()
 const router = useRouter()
-const { apiFetch, hasSession } = useMedfileApi()
+const { apiFetch, clearSession } = useMedfileApi()
 
 const code = ref('')
 const loading = ref(false)
@@ -91,36 +93,37 @@ onMounted(async () => {
     }
   }
 
-  if (!hasSession()) {
-    if (email.value) {
-      pageReady.value = true
-      return
-    }
-
-    await router.replace('/login')
-    return
+  if (!email.value && route.query.email) {
+    email.value = String(route.query.email)
   }
 
-  try {
-    const me = await apiFetch<{ user: { email: string; emailVerified: boolean } }>('/api/auth/me')
-    email.value = me.user.email
-    if (me.user.emailVerified) {
-      await router.replace('/onboarding')
-      return
-    }
-  } catch {
-    if (email.value) {
-      pageReady.value = true
-      return
-    }
+  const config = useRuntimeConfig()
+  const token = import.meta.client ? localStorage.getItem('medfile_access_token') : null
 
-    await router.replace('/login?expired=1')
+  if (token) {
+    try {
+      const me = await $fetch<{ user: { email: string; emailVerified: boolean } }>(
+        `${config.public.apiUrl}/api/auth/me`,
+        { headers: { Authorization: `Bearer ${token}` } },
+      )
+      email.value = me.user.email
+      if (me.user.emailVerified) {
+        await router.replace('/onboarding')
+        return
+      }
+    } catch {
+      clearSession()
+    }
+  }
+
+  if (!email.value.trim()) {
+    await router.replace('/login')
     return
   }
 
   pageReady.value = true
 
-  if (code.value.length === 6) {
+  if (code.value.length === 6 && token) {
     await submit()
   }
 })
@@ -136,6 +139,11 @@ async function submit() {
 
   if (code.value.trim().length !== 6) {
     error.value = 'Ingresa el código de 6 dígitos.'
+    return
+  }
+
+  if (import.meta.client && !localStorage.getItem('medfile_access_token')) {
+    error.value = 'Inicia sesión antes de confirmar el código.'
     return
   }
 

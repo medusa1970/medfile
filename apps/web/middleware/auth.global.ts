@@ -35,11 +35,15 @@ export default defineNuxtRouteMiddleware(async (to) => {
   }
 
   if (needsSession && !token) {
-    if (to.path === '/verificar-correo' && typeof to.query.email === 'string' && to.query.email.trim()) {
+    if (to.path === '/verificar-correo') {
       return
     }
 
     return navigateTo('/login')
+  }
+
+  if (to.path === '/verificar-correo') {
+    return
   }
 
   if (!token || (!needsVerified && !needsOnboarding)) return
