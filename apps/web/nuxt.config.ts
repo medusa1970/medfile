@@ -42,6 +42,7 @@ export default defineNuxtConfig({
     public: {
       appName: process.env.NUXT_PUBLIC_APP_NAME || 'medfile',
       apiUrl: process.env.NUXT_PUBLIC_API_URL || 'http://localhost:4000',
+      buildRevision: process.env.RAILWAY_GIT_COMMIT_SHA?.slice(0, 7) || 'local',
     },
   },
 })

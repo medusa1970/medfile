@@ -22,7 +22,8 @@ async function bootstrap() {
   );
 
   await app.listen(port, '0.0.0.0');
-  console.log(`Medfile API listening on 0.0.0.0:${port}`);
+  const revision = process.env.RAILWAY_GIT_COMMIT_SHA ?? 'local';
+  console.log(`Medfile API listening on 0.0.0.0:${port} (rev ${revision.slice(0, 7)})`);
 }
 
 void bootstrap();
