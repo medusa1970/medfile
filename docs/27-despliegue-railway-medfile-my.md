@@ -409,7 +409,7 @@ Semana 5+ — WhatsApp API
 | API no responde | Build fallo o `MONGODB_URI` mal | Logs en Railway → servicio API |
 | Web muestra localhost en fetch | `NUXT_PUBLIC_API_URL` incorrecto | Rebuild Web con URL correcta |
 | Web muestra **Upgrade Required** | Railway arranca `dev` en vez de produccion | Start: `npm run start --workspace @medfile/web` |
-| API **Application failed to respond** | `start` en vez de `start:prod`, sin MongoDB, sin `0.0.0.0` | Start: `start:prod`, `MONGODB_URI`, redeploy API |
+| API **Application failed to respond** / **502** | `nest start` en prod, MongoDB caído, puerto distinto | Start: `node apps/api/dist/main.js`, `PORT=8080`, URI Mongo correcta |
 | OTP no llega | SMTP no configurado en prod | Configurar Hostinger SMTP |
 | MP checkout falla | Token TEST invalido o webhook | Revisar credenciales y URL webhook |
 | 502 en dominio | Servicio dormido (plan free Railway) | Upgrade plan o healthcheck |
