@@ -68,7 +68,7 @@ Middleware Nuxt: `middleware/auth.global.ts` aplica sesion, verificacion de corr
 - TTL OTP: **30 min**.
 - **Desarrollo** (`NODE_ENV !== production`): consola API + `verification.devCode` en respuesta + `sessionStorage`.
 - **Produccion** con SMTP configurado: correo real via `MailService` (`apps/api/src/modules/mail/`). Sin `devCode` ni token en JSON.
-- Variables: `SMTP_HOST`, `SMTP_PORT`, `SMTP_USER`, `SMTP_PASS`, `SMTP_FROM`; enlaces de reset usan `APP_PUBLIC_URL` o el primer origen de `WEB_ORIGIN`.
+- Variables: `RESEND_API_KEY`, `RESEND_FROM` (produccion Railway Hobby); SMTP opcional en local/Pro.
 - Orden de validacion: expiracion antes que codigo incorrecto.
 - `TenantAuthGuard` bloquea API clinica si `emailVerified === false`.
 

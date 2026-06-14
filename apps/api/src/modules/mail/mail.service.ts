@@ -1,20 +1,35 @@
-import { Injectable, Logger } from '@nestjs/common';
+import { Injectable, Logger, OnModuleInit } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
+import { Resend } from 'resend';
 import { createTransport, type Transporter } from 'nodemailer';
 
+type MailProvider = 'resend' | 'smtp';
+
 @Injectable()
-export class MailService {
+export class MailService implements OnModuleInit {
   private readonly logger = new Logger(MailService.name);
   private transporter: Transporter | null = null;
+  private resend: Resend | null = null;
 
   constructor(private readonly config: ConfigService) {}
 
+  onModuleInit() {
+    const provider = this.getActiveProvider();
+    if (provider === 'resend') {
+      this.logger.log('Correo: provider Resend API (recomendado en Railway Hobby)');
+      return;
+    }
+
+    if (provider === 'smtp') {
+      this.logger.log('Correo: provider SMTP (requiere Railway Pro para Hostinger)');
+      return;
+    }
+
+    this.logger.warn('Correo no configurado (RESEND_API_KEY o SMTP_HOST/SMTP_USER/SMTP_PASS)');
+  }
+
   isConfigured() {
-    return Boolean(
-      this.config.get<string>('SMTP_HOST') &&
-        this.config.get<string>('SMTP_USER') &&
-        this.config.get<string>('SMTP_PASS'),
-    );
+    return this.getActiveProvider() !== null;
   }
 
   async sendVerificationCode(input: { to: string; code: string; expiresInMinutes: number }) {
@@ -74,13 +89,68 @@ export class MailService {
     await this.send({ to: input.to, subject, text, html });
   }
 
-  private async send(input: { to: string; subject: string; text: string; html: string }) {
-    if (!this.isConfigured()) {
-      throw new Error('SMTP no configurado (SMTP_HOST, SMTP_USER, SMTP_PASS).');
+  private getActiveProvider(): MailProvider | null {
+    if (this.config.get<string>('RESEND_API_KEY')?.trim()) {
+      return 'resend';
     }
 
+    if (
+      this.config.get<string>('SMTP_HOST') &&
+      this.config.get<string>('SMTP_USER') &&
+      this.config.get<string>('SMTP_PASS')
+    ) {
+      return 'smtp';
+    }
+
+    return null;
+  }
+
+  private getFromAddress() {
+    return (
+      this.config.get<string>('RESEND_FROM')?.trim() ||
+      this.config.get<string>('SMTP_FROM')?.trim() ||
+      'Medfile <onboarding@resend.dev>'
+    );
+  }
+
+  private async send(input: { to: string; subject: string; text: string; html: string }) {
+    const provider = this.getActiveProvider();
+    if (!provider) {
+      throw new Error('Correo no configurado (RESEND_API_KEY o SMTP).');
+    }
+
+    if (provider === 'resend') {
+      await this.sendViaResend(input);
+      return;
+    }
+
+    await this.sendViaSmtp(input);
+  }
+
+  private async sendViaResend(input: { to: string; subject: string; text: string; html: string }) {
+    const from = this.getFromAddress();
+    this.logger.log(`Resend enviando a ${input.to} desde ${from}`);
+
+    const client = this.getResendClient();
+    const { error } = await client.emails.send({
+      from,
+      to: input.to,
+      subject: input.subject,
+      text: input.text,
+      html: input.html,
+    });
+
+    if (error) {
+      this.logger.error(`Fallo Resend hacia ${input.to}: ${error.message}`);
+      throw new Error(error.message);
+    }
+
+    this.logger.log(`Correo enviado via Resend a ${input.to}: ${input.subject}`);
+  }
+
+  private async sendViaSmtp(input: { to: string; subject: string; text: string; html: string }) {
     const transporter = this.getTransporter();
-    const from = this.config.get<string>('SMTP_FROM', 'Medfile <noreply@medfile.my>');
+    const from = this.getFromAddress();
 
     this.logger.log(
       `SMTP enviando a ${input.to} via ${this.config.get<string>('SMTP_HOST')}:${this.config.get<string>('SMTP_PORT', '465')}`,
@@ -104,7 +174,19 @@ export class MailService {
       throw error;
     }
 
-    this.logger.log(`Correo enviado a ${input.to}: ${input.subject}`);
+    this.logger.log(`Correo enviado via SMTP a ${input.to}: ${input.subject}`);
+  }
+
+  private getResendClient() {
+    if (this.resend) return this.resend;
+
+    const apiKey = this.config.get<string>('RESEND_API_KEY')?.trim();
+    if (!apiKey) {
+      throw new Error('RESEND_API_KEY no configurado.');
+    }
+
+    this.resend = new Resend(apiKey);
+    return this.resend;
   }
 
   private async withTimeout<T>(promise: Promise<T>, timeoutMs: number, label: string) {

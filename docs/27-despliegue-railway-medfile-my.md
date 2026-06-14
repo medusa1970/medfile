@@ -139,13 +139,15 @@ JWT_ACCESS_TTL_SECONDS=3600
 WEB_ORIGIN=https://medfile.my,https://www.medfile.my
 APP_PUBLIC_URL=https://medfile.my
 PAYMENTS_PROVIDER=mock
-# Email Hostinger (MailModule + nodemailer):
-SMTP_HOST=smtp.hostinger.com
-SMTP_PORT=465
-SMTP_SECURE=true
-SMTP_USER=noreply@medfile.my
-SMTP_PASS=...
-SMTP_FROM=Medfile <noreply@medfile.my>
+# Email — Resend API (obligatorio en Railway Hobby; SMTP bloqueado):
+RESEND_API_KEY=re_...
+RESEND_FROM=Medfile <noreply@medfile.my>
+# SMTP Hostinger solo funciona en Railway Pro o desarrollo local:
+# SMTP_HOST=smtp.hostinger.com
+# SMTP_PORT=587
+# SMTP_SECURE=false
+# SMTP_USER=noreply@medfile.my
+# SMTP_PASS=...
 # Storage R2 (opcional):
 # S3_ENDPOINT=https://....r2.cloudflarestorage.com
 # S3_REGION=auto
@@ -215,38 +217,49 @@ El segundo debe responder `401` (sin token) — eso confirma que el API esta viv
 
 ---
 
-## Fase 5 — Correo Hostinger (auth en produccion)
+## Fase 5 — Correo en produccion (Resend)
 
-### 5.1 Crear buzon
+> **Railway Hobby bloquea SMTP** (puertos 465/587). Los logs muestran `Connection timeout` con Hostinger SMTP. Usa **Resend** (API HTTPS) o sube a **Railway Pro**.
 
-1. hPanel → **Emails** → **Create email account**.
-2. Sugerido: `noreply@medfile.my` (verificacion OTP, reset contraseña).
-3. Opcional: `soporte@medfile.my` para respuestas humanas.
+### 5.1 Crear cuenta Resend
 
-### 5.2 Datos SMTP Hostinger (tipicos)
+1. [resend.com](https://resend.com) → registro gratis
+2. **API Keys** → **Create API Key** → copia `re_...`
 
-| Campo | Valor |
-|-------|-------|
-| Servidor | `smtp.hostinger.com` |
-| Puerto | `465` (SSL) o `587` (TLS) |
-| Usuario | `noreply@medfile.my` |
-| Contrasena | La del buzon |
+### 5.2 Verificar dominio `medfile.my`
 
-### 5.3 Estado en codigo
+1. Resend → **Domains** → **Add Domain** → `medfile.my`
+2. Resend te da registros DNS (SPF, DKIM)
+3. Hostinger → DNS → agrega esos registros
+4. Espera verificacion verde en Resend
 
-El API usa **`MailModule`** (`apps/api/src/modules/mail/mail.service.ts`) con **nodemailer** e integracion en `AuthService`:
+### 5.3 Variables en Railway (API)
 
-- Codigo OTP al registrarse o reenviar verificacion
-- Enlace de recuperacion: `https://medfile.my/restablecer-contrasena?token=...&email=...`
+```env
+RESEND_API_KEY=re_tu_clave_aqui
+RESEND_FROM=Medfile <noreply@medfile.my>
+```
 
-**Desarrollo:** sin SMTP, OTP/token en consola del API + `devCode`/`reset.token` en JSON.
+Prioridad en codigo: si existe `RESEND_API_KEY`, usa Resend; si no, intenta SMTP (solo Railway Pro).
 
-**Produccion:** configura las variables SMTP en Railway; no expone codigos en la respuesta.
+### 5.4 Prueba rapida (sin dominio verificado)
 
-**Prueba rapida tras deploy:**
+Resend permite enviar desde `onboarding@resend.dev` **solo al email de tu cuenta Resend** (prueba inicial):
 
-1. Registro en `https://medfile.my/registro` → revisa bandeja de `noreply@medfile.my`.
-2. `/olvide-contrasena` → correo con enlace de reset.
+```env
+RESEND_FROM=Medfile <onboarding@resend.dev>
+```
+
+### 5.5 Estado en codigo
+
+`MailModule` (`apps/api/src/modules/mail/mail.service.ts`) soporta **Resend API** y SMTP (nodemailer). Logs al arrancar:
+
+- `Correo: provider Resend API` → OK para Hobby
+- `Fallo SMTP ... Connection timeout` → SMTP bloqueado; usa Resend
+
+### 5.6 Hostinger SMTP (opcional)
+
+El buzon `noreply@medfile.my` en Hostinger sirve para webmail humano. Para la app en Railway Hobby, **no uses SMTP**; usa Resend con el mismo remitente una vez verificado el dominio.
 
 ---
 
@@ -416,8 +429,8 @@ Semana 5+ — WhatsApp API
 | Web muestra localhost en fetch | `NUXT_PUBLIC_API_URL` incorrecto | Rebuild Web con URL correcta |
 | Web muestra **Upgrade Required** | Railway arranca `dev` en vez de produccion | Start: `npm run start --workspace @medfile/web` |
 | API **Application failed to respond** / **502** | `nest start` en prod, MongoDB caído, puerto distinto | Start: `node apps/api/dist/main.js`, `PORT=8080`, URI Mongo correcta |
-| OTP no llega | SMTP no configurado en prod | Configurar Hostinger SMTP |
-| OTP `Connection timeout` en logs | Puerto 465 bloqueado desde Railway | Usar `SMTP_PORT=587` y `SMTP_SECURE=false` |
+| OTP no llega | SMTP no configurado en prod | Configurar Resend (`RESEND_API_KEY`) |
+| OTP `Connection timeout` en logs | Railway Hobby bloquea SMTP | Usar Resend API o Railway Pro |
 | Registro **409** / cuenta atascada | Intento previo creo usuario pero fallo el correo | Borrar en Atlas (ver abajo) o `scripts/delete-account-by-email.mjs` |
 | MP checkout falla | Token TEST invalido o webhook | Revisar credenciales y URL webhook |
 | 502 en dominio | Servicio dormido (plan free Railway) | Upgrade plan o healthcheck |
@@ -438,11 +451,8 @@ JWT_ACCESS_TTL_SECONDS=3600
 WEB_ORIGIN=https://medfile.my,https://www.medfile.my
 PAYMENTS_PROVIDER=mock
 MERCADOPAGO_ACCESS_TOKEN=
-SMTP_HOST=smtp.hostinger.com
-SMTP_PORT=465
-SMTP_USER=noreply@medfile.my
-SMTP_PASS=
-SMTP_FROM=Medfile <noreply@medfile.my>
+RESEND_API_KEY=
+RESEND_FROM=Medfile <noreply@medfile.my>
 S3_ENDPOINT=
 S3_BUCKET=
 S3_ACCESS_KEY_ID=
