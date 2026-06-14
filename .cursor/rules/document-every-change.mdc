@@ -1,0 +1,16 @@
+---
+description: Document every product or technical change in Medfile
+alwaysApply: true
+---
+
+# Documentation First
+
+For Medfile, every meaningful product, architecture, backend, frontend, data model, design-system, payment, upload, or security change must be documented.
+
+- Update an existing file in `docs/` when the change expands a documented area.
+- Create a new `docs/*.md` file when the change introduces a new domain or decision.
+- Keep `README.md` current when setup, scripts, workspace structure, or entry points change.
+- For UI changes, mention reusable components or tokens affected.
+- For backend changes, mention modules, schemas, endpoints, tenancy, security, and assumptions.
+- Do not leave implementation-only changes without a short documentation trail.
+

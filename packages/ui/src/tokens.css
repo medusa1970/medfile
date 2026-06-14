@@ -1,0 +1,66 @@
+:root {
+  color-scheme: light;
+
+  /* Tipografia: cuerpo legible + titulos profesionales */
+  --mf-font-sans: "Source Sans 3", Inter, ui-sans-serif, system-ui, -apple-system,
+    BlinkMacSystemFont, "Segoe UI", sans-serif;
+  --mf-font-display: "Plus Jakarta Sans", var(--mf-font-sans);
+
+  /* Marca MedFile (colores del logotipo) */
+  --mf-navy-900: #001f5c;
+  --mf-navy-800: #002855;
+  --mf-brand-500: #0077c8;
+  --mf-brand-600: #0066ad;
+  --mf-teal-400: #00b5e2;
+  --mf-teal-500: #00a9ce;
+  --mf-teal-600: #0093b5;
+  --mf-neutral-500: #75787b;
+
+  /* Alias de marca para compatibilidad con componentes existentes */
+  --mf-brand-50: #eef8fc;
+  --mf-brand-100: #d6f0f8;
+  --mf-brand-700: var(--mf-navy-900);
+
+  --mf-cyan-400: var(--mf-teal-400);
+  --mf-emerald-500: #10b981;
+  --mf-amber-500: #f59e0b;
+  --mf-red-500: #ef4444;
+
+  --mf-slate-0: #ffffff;
+  --mf-slate-25: #f8fafc;
+  --mf-slate-50: #f4f7fb;
+  --mf-slate-100: #eef2f7;
+  --mf-slate-200: #dde4ed;
+  --mf-slate-300: #c5ced9;
+  --mf-slate-400: #94a3b8;
+  --mf-slate-500: #64748b;
+  --mf-slate-600: #475569;
+  --mf-slate-700: #334155;
+  --mf-slate-800: #1e293b;
+  --mf-slate-900: var(--mf-navy-900);
+
+  --mf-radius-xs: 8px;
+  --mf-radius-sm: 12px;
+  --mf-radius-md: 18px;
+  --mf-radius-lg: 26px;
+  --mf-radius-xl: 34px;
+
+  --mf-space-1: 4px;
+  --mf-space-2: 8px;
+  --mf-space-3: 12px;
+  --mf-space-4: 16px;
+  --mf-space-5: 20px;
+  --mf-space-6: 24px;
+  --mf-space-8: 32px;
+  --mf-space-10: 40px;
+  --mf-space-12: 48px;
+  --mf-space-16: 64px;
+
+  --mf-shadow-sm: 0 1px 2px rgb(0 31 92 / 0.06);
+  --mf-shadow-md: 0 14px 40px rgb(0 31 92 / 0.10);
+  --mf-shadow-lg: 0 24px 80px rgb(0 31 92 / 0.14);
+  --mf-shadow-brand: 0 16px 40px rgb(0 169 206 / 0.28);
+
+  --mf-border: 1px solid rgb(221 228 237 / 0.95);
+  --mf-focus: 0 0 0 4px rgb(0 169 206 / 0.18);
+}

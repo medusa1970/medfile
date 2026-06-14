@@ -1,0 +1,21 @@
+{
+  "npm.exclude": [
+    "**/node_modules/**",
+    "**/packages/ui/**",
+    "**/packages/config/**",
+    "**/packages/types/**"
+  ],
+  "terminal.integrated.profiles.windows": {
+    "Medfile Backend (API)": {
+      "path": "powershell.exe",
+      "cwd": "${workspaceFolder}",
+      "icon": "server-process"
+    },
+    "Medfile Frontend (Nuxt)": {
+      "path": "powershell.exe",
+      "cwd": "${workspaceFolder}",
+      "icon": "globe"
+    }
+  },
+  "terminal.integrated.defaultProfile.windows": "Medfile Frontend (Nuxt)"
+}

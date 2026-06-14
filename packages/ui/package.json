@@ -1,0 +1,10 @@
+{
+  "name": "@medfile/ui",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {},
+  "exports": {
+    "./tokens.css": "./src/tokens.css"
+  }
+}
