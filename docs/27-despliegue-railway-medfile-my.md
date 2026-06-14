@@ -123,7 +123,9 @@ Guardala como `MONGODB_URI` en Railway (servicio API).
 | **Root Directory** | `/` (raiz del monorepo) |
 | **Build Command** | `npm ci && npm run build:types && npm run build --workspace @medfile/api` |
 | **Start Command** | `npm run start:prod --workspace @medfile/api` |
-| **Watch Paths** | `apps/api`, `packages/types` |
+| **Watch Paths** | `apps/api/**`, `packages/types/**`, `package.json` |
+
+> Si el deploy aparece **SKIPPED / No changes to watched files**, amplia Watch Paths o haz **Redeploy** manual. El fix del monorepo suele tocar `packages/types/` fuera de `apps/api/` solo.
 
 Railway asigna `PORT` automaticamente; el API ya lo lee.
 
