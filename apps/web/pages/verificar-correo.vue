@@ -68,9 +68,15 @@ interface VerificationResponse {
   }
 }
 
+interface VerifyEmailResponse {
+  verified?: boolean
+  accessToken?: string
+  email?: string
+}
+
 const route = useRoute()
 const router = useRouter()
-const { apiFetch, clearSession } = useMedfileApi()
+const { clearSession } = useMedfileApi()
 
 const code = ref('')
 const loading = ref(false)
@@ -142,31 +148,39 @@ async function submit() {
     return
   }
 
-  if (import.meta.client && !localStorage.getItem('medfile_access_token')) {
-    error.value = 'Inicia sesión antes de confirmar el código.'
+  const targetEmail = email.value.trim()
+  if (!targetEmail) {
+    error.value = 'No encontramos tu correo. Inicia sesión e inténtalo de nuevo.'
     return
   }
 
   loading.value = true
 
   try {
-    await apiFetch('/api/auth/verify-email', {
-      method: 'POST',
-      body: { code: code.value.trim() },
-    })
+    const config = useRuntimeConfig()
+    await verifyWithPublicEndpoint(config.public.apiUrl, targetEmail)
 
     clearVerificationPreview()
     success.value = 'Correo verificado. Redirigiendo…'
     await router.push('/onboarding')
   } catch (err) {
-    if (typeof err === 'object' && err && 'status' in err && (err as { status?: number }).status === 401) {
-      error.value = 'Tu sesión expiró. Inicia sesión e ingresa el código de nuevo.'
-      return
-    }
-
     error.value = getErrorMessage(err)
   } finally {
     loading.value = false
+  }
+}
+
+async function verifyWithPublicEndpoint(apiUrl: string, targetEmail: string) {
+  const response = await $fetch<VerifyEmailResponse>(`${apiUrl}/api/auth/verify-email-public`, {
+    method: 'POST',
+    body: {
+      email: targetEmail,
+      code: code.value.trim(),
+    },
+  })
+
+  if (response.accessToken && import.meta.client) {
+    localStorage.setItem('medfile_access_token', response.accessToken)
   }
 }
 

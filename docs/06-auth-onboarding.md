@@ -61,7 +61,8 @@ Middleware Nuxt: `middleware/auth.global.ts` aplica sesion, verificacion de corr
 
 | Endpoint | Auth | Uso |
 |----------|------|-----|
-| `POST /api/auth/verify-email` | Bearer + codigo 6 digitos | Confirmar OTP |
+| `POST /api/auth/verify-email` | Bearer + codigo 6 digitos | Confirmar OTP con sesion activa |
+| `POST /api/auth/verify-email-public` | email + codigo 6 digitos | Confirmar OTP sin sesion (devuelve JWT nuevo) |
 | `POST /api/auth/resend-verification` | Bearer | Reenviar con sesion |
 | `POST /api/auth/resend-verification-public` | email | Reenviar sin sesion |
 
@@ -128,6 +129,7 @@ Objeto JSON con datos profesionales del onboarding.
 - `POST /api/auth/register`
 - `POST /api/auth/login`
 - `POST /api/auth/verify-email`
+- `POST /api/auth/verify-email-public`
 - `POST /api/auth/resend-verification`
 - `POST /api/auth/resend-verification-public`
 - `POST /api/auth/forgot-password`

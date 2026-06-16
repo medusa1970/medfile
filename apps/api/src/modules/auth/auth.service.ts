@@ -24,6 +24,7 @@ import { ResendVerificationDto } from './dto/resend-verification.dto';
 import { ResetPasswordDto } from './dto/reset-password.dto';
 import { UpdateProfileDto } from './dto/update-profile.dto';
 import { VerifyEmailDto } from './dto/verify-email.dto';
+import { VerifyEmailPublicDto } from './dto/verify-email-public.dto';
 
 interface AccessTokenPayload {
   sub: string;
@@ -131,21 +132,28 @@ export class AuthService {
       return { verified: true, email: user.email };
     }
 
-    if (!user.emailVerificationCode) {
-      throw new BadRequestException('No hay codigo activo. Solicita uno nuevo.');
-    }
-
-    if (this.isVerificationExpired(user.emailVerificationExpiresAt)) {
-      throw new BadRequestException('El codigo expiro. Solicita uno nuevo.');
-    }
-
-    if (user.emailVerificationCode !== body.code.trim()) {
-      throw new BadRequestException('Codigo invalido. Revisa el correo e intenta nuevamente.');
-    }
-
+    await this.assertVerificationCode(user, body.code);
     await this.usersService.markEmailVerified(userId);
 
     return { verified: true, email: user.email };
+  }
+
+  async verifyEmailPublic(body: VerifyEmailPublicDto) {
+    const normalizedEmail = body.email.trim().toLowerCase();
+    const user = await this.usersService.findByEmail(normalizedEmail);
+
+    if (!user) {
+      throw new BadRequestException('Codigo invalido. Revisa el correo e intenta nuevamente.');
+    }
+
+    if (this.isEmailVerified(user.emailVerified)) {
+      return this.buildVerifiedSessionResponse(user);
+    }
+
+    await this.assertVerificationCode(user, body.code);
+    await this.usersService.markEmailVerified(String(user._id));
+
+    return this.buildVerifiedSessionResponse(user);
   }
 
   async resendVerification(authorizationHeader: string | undefined) {
@@ -527,6 +535,50 @@ export class AuthService {
 
     const expiresAt = value instanceof Date ? value : new Date(value);
     return Number.isNaN(expiresAt.getTime()) || expiresAt.getTime() < Date.now();
+  }
+
+  private async assertVerificationCode(
+    user: {
+      emailVerificationCode?: string | null;
+      emailVerificationExpiresAt?: Date | string | null;
+    },
+    code: string,
+  ) {
+    if (!user.emailVerificationCode) {
+      throw new BadRequestException('No hay codigo activo. Solicita uno nuevo.');
+    }
+
+    if (this.isVerificationExpired(user.emailVerificationExpiresAt ?? undefined)) {
+      throw new BadRequestException('El codigo expiro. Solicita uno nuevo.');
+    }
+
+    if (user.emailVerificationCode !== code.trim()) {
+      throw new BadRequestException('Codigo invalido. Revisa el correo e intenta nuevamente.');
+    }
+  }
+
+  private async buildVerifiedSessionResponse(user: {
+    _id: unknown;
+    tenantId: string;
+    email: string;
+    fullName: string;
+    role: string;
+    onboardingCompletedAt?: Date | string;
+  }) {
+    const tenant = await this.tenantsService.findById(user.tenantId);
+
+    return this.buildSessionResponse({
+      userId: String(user._id),
+      tenantId: user.tenantId,
+      email: user.email,
+      fullName: user.fullName,
+      role: user.role,
+      tenantName: tenant?.name as string | undefined,
+      tenantSlug: tenant?.slug as string | undefined,
+      medfileCode: tenant?.medfileCode as string | undefined,
+      emailVerified: true,
+      onboardingCompleted: this.isOnboardingCompleted(user.onboardingCompletedAt),
+    });
   }
 
   private isEmailVerified(value?: boolean) {

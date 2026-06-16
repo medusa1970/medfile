@@ -9,6 +9,7 @@ import { ResendVerificationDto } from './dto/resend-verification.dto';
 import { ResetPasswordDto } from './dto/reset-password.dto';
 import { UpdateProfileDto } from './dto/update-profile.dto';
 import { VerifyEmailDto } from './dto/verify-email.dto';
+import { VerifyEmailPublicDto } from './dto/verify-email-public.dto';
 
 @Controller('auth')
 export class AuthController {
@@ -27,6 +28,11 @@ export class AuthController {
   @Post('verify-email')
   verifyEmail(@Headers('authorization') authorizationHeader: string | undefined, @Body() body: VerifyEmailDto) {
     return this.authService.verifyEmail(authorizationHeader, body);
+  }
+
+  @Post('verify-email-public')
+  verifyEmailPublic(@Body() body: VerifyEmailPublicDto) {
+    return this.authService.verifyEmailPublic(body);
   }
 
   @Post('resend-verification')
