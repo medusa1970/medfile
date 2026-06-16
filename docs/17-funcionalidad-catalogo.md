@@ -46,7 +46,7 @@ Base local: `http://localhost:3100`
 
 | Ruta | Estado | Descripcion | Doc |
 |------|--------|-------------|-----|
-| `/dashboard` | ✅ | Resumen: metricas, pacientes recientes, accesos rapidos | [02-modulos-y-flujos.md](./02-modulos-y-flujos.md) |
+| `/dashboard` | ✅ | Resumen compacto: metricas 2x2 movil, pacientes prioritarios, bandeja | [03-sistema-diseno.md](./03-sistema-diseno.md) |
 | `/pacientes` | ✅ | Listado y busqueda de pacientes | [07-pacientes-historia-clinica.md](./07-pacientes-historia-clinica.md) |
 | `/pacientes/nuevo` | ✅ | Registro de paciente | [07-pacientes-historia-clinica.md](./07-pacientes-historia-clinica.md) |
 | `/pacientes/[id]` | 🟡 | Perfil clinico: datos, antecedentes, consultas, documentos, solicitud de subida | [08-perfil-paciente-consultas.md](./08-perfil-paciente-consultas.md) |

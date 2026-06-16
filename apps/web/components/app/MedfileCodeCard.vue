@@ -1,5 +1,5 @@
 <template>
-  <div class="medfile-code-card">
+  <div :class="['medfile-code-card', { 'medfile-code-card--compact': compact }]">
     <div class="medfile-code-card__header">
       <span class="medfile-code-card__label">Código Medfile</span>
       <span class="medfile-code-card__hint">Tu identificador en la plataforma</span>
@@ -19,6 +19,7 @@
 <script setup lang="ts">
 const props = defineProps<{
   code?: string | null
+  compact?: boolean
 }>()
 
 const copied = ref(false)
@@ -83,5 +84,33 @@ async function copyCode() {
   font-size: 13px;
   line-height: 1.5;
   color: var(--mf-slate-700);
+}
+
+.medfile-code-card--compact {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px 14px;
+  padding: 12px 14px;
+}
+
+.medfile-code-card--compact .medfile-code-card__header {
+  flex: 1 1 140px;
+  margin-bottom: 0;
+}
+
+.medfile-code-card--compact .medfile-code-card__body {
+  flex: 0 1 auto;
+}
+
+.medfile-code-card--compact .medfile-code-card__code {
+  font-size: 18px;
+}
+
+.medfile-code-card--compact .medfile-code-card__help {
+  flex: 1 1 100%;
+  margin: 0;
+  font-size: 12px;
+  line-height: 1.4;
 }
 </style>

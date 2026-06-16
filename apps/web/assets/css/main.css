@@ -267,7 +267,7 @@ select {
   letter-spacing: -0.02em;
 }
 
-.trust-card span {
+.trust-card-body span {
   display: block;
   margin-top: 4px;
   color: var(--mf-slate-500);
@@ -280,7 +280,7 @@ select {
   line-height: 1.2;
 }
 
-.trust-card--icon span {
+.trust-card--icon .trust-card-body span {
   margin-top: 2px;
   font-size: 12px;
   line-height: 1.3;
@@ -732,6 +732,136 @@ a.patient-row:hover {
   grid-template-columns: repeat(4, 1fr);
   gap: 14px;
   margin-bottom: 20px;
+}
+
+/* Dashboard app — layout compacto (preview landing) */
+.dashboard-page {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  max-width: 1180px;
+}
+
+.dashboard-topbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px 16px;
+  padding: 14px 16px;
+  border: var(--mf-border);
+  border-radius: var(--mf-radius-lg);
+  background: rgb(255 255 255 / 0.92);
+  box-shadow: var(--mf-shadow-sm);
+}
+
+.dashboard-topbar__title {
+  margin: 4px 0 0;
+  color: var(--mf-navy-900);
+  font-family: var(--mf-font-display);
+  font-size: clamp(18px, 2.4vw, 24px);
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  line-height: 1.2;
+}
+
+.dashboard-topbar__lead {
+  margin: 4px 0 0;
+  color: var(--mf-slate-600);
+  font-size: 14px;
+  line-height: 1.45;
+}
+
+.search-input--dashboard {
+  width: min(280px, 100%);
+  min-height: 40px;
+  font-size: 14px;
+}
+
+.metric-grid--dashboard {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.metric-grid--dashboard .metric-card {
+  padding: 10px 12px;
+  border-radius: 12px;
+}
+
+.metric-grid--dashboard .metric-card small {
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+}
+
+.metric-grid--dashboard .metric-card strong {
+  margin-top: 4px;
+  font-size: clamp(17px, 3.6vw, 22px);
+  letter-spacing: -0.03em;
+}
+
+.metric-grid--dashboard .metric-card .status-badge {
+  margin-top: 6px;
+  font-size: 10px;
+}
+
+.dashboard-grid--compact {
+  gap: 14px;
+}
+
+.dashboard-grid--compact .panel-header {
+  padding: 14px 16px;
+}
+
+.dashboard-grid--compact .panel-header h2 {
+  font-size: 16px;
+}
+
+.dashboard-grid--compact .panel-description {
+  margin-top: 4px;
+  font-size: 13px;
+}
+
+.dashboard-grid--compact .panel-body {
+  padding: 0;
+}
+
+.dashboard-grid--compact .panel-empty {
+  padding: 14px 16px;
+  font-size: 14px;
+}
+
+.dashboard-panel-heading {
+  min-width: 0;
+}
+
+.upload-zone--compact {
+  min-height: 0;
+  padding: 16px;
+}
+
+.upload-zone--compact strong {
+  margin-top: 8px;
+  font-size: 16px;
+}
+
+.upload-zone--compact p {
+  max-width: 36ch;
+  margin: 6px auto 0;
+  font-size: 13px;
+  line-height: 1.5;
+}
+
+.upload-zone--compact .feature-icon {
+  width: 40px;
+  height: 40px;
+  font-size: 12px;
+}
+
+.dashboard-page .patient-row {
+  padding: 10px 14px;
 }
 
 .upload-zone {
@@ -1652,6 +1782,19 @@ a.patient-row:hover {
     grid-template-columns: repeat(2, 1fr);
   }
 
+  .metric-grid--dashboard {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .dashboard-topbar {
+    padding: 12px 14px;
+  }
+
+  .dashboard-grid--compact .panel-header {
+    flex-wrap: wrap;
+    align-items: flex-start;
+  }
+
   .patient-documents-grid {
     grid-template-columns: 1fr;
   }
@@ -1707,6 +1850,19 @@ a.patient-row:hover {
   .feature-grid,
   .clinical-summary {
     grid-template-columns: 1fr;
+  }
+
+  .metric-grid--dashboard {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 8px;
+  }
+
+  .dashboard-topbar__lead {
+    display: none;
+  }
+
+  .medfile-code-card--compact .medfile-code-card__help {
+    display: none;
   }
 
   /* Landing: métricas siempre en fila de 3 */

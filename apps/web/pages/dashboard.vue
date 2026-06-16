@@ -1,93 +1,99 @@
 <template>
   <DoctorShell>
-    <header class="app-header">
-      <div>
-        <EyebrowPill>{{ planLabel }}</EyebrowPill>
-        <h1>{{ greeting }}</h1>
-        <p>Resumen clinico de {{ clinicName }}. Empieza registrando pacientes y recibiendo documentos.</p>
-      </div>
-      <input class="search-input" type="search" placeholder="Buscar paciente, documento o diagnostico" />
-    </header>
-
-    <MedfileCodeCard
-      v-if="medfileCode"
-      :code="medfileCode"
-      class="dashboard-code-card"
-    />
-
-    <div v-if="usageWarnings.length" class="plan-usage-warnings" role="status">
-      <article v-for="warning in usageWarnings" :key="warning.resource" class="plan-usage-warning">
-        <strong>{{ warningTitle(warning.resource) }}</strong>
-        <p>{{ warning.message }}</p>
-        <MfButton v-if="warning.upgradePlanCode" variant="secondary" to="/suscripcion">
-          Ver planes
-        </MfButton>
-      </article>
-    </div>
-
-    <section class="clinical-summary" aria-label="Indicadores clinicos">
-      <MetricCard
-        v-for="metric in metrics"
-        :key="metric.label"
-        :label="metric.label"
-        :value="metric.value"
-        :note="metric.note"
-        :tone="metric.tone"
-      />
-    </section>
-
-    <section class="dashboard-grid">
-      <PanelCard
-        title="Pacientes que requieren atencion"
-        description="Priorizado por riesgo, documentos recibidos y seguimiento pendiente."
-      >
-        <template #header>
-          <div>
-            <h2>Pacientes que requieren atencion</h2>
-            <p class="panel-description">
-              Priorizado por riesgo, documentos recibidos y seguimiento pendiente.
-            </p>
-          </div>
-          <MfButton to="/pacientes/nuevo">Nuevo paciente</MfButton>
-        </template>
-
-        <p v-if="isLoading" class="panel-empty">Cargando tu panel...</p>
-
-        <p v-else-if="loadError" class="form-error dashboard-notice">
-          No pudimos cargar tus datos. Inicia sesion nuevamente o verifica que el API este activo.
-        </p>
-
-        <p v-else-if="priorityPatients.length === 0" class="panel-empty">
-          Aun no tienes pacientes registrados. Crea el primero para empezar a usar Medfile.
-        </p>
-
-        <PatientRow
-          v-for="patient in priorityPatients"
-          :key="patient.id"
-          :initials="patient.initials"
-          :name="patient.name"
-          :detail="patient.detail"
-          :status="patient.status"
-          :tone="patient.tone"
-          :to="`/pacientes/${patient.id}`"
+    <div class="dashboard-page">
+      <header class="dashboard-topbar">
+        <div class="dashboard-topbar__main">
+          <EyebrowPill>{{ planLabel }}</EyebrowPill>
+          <h1 class="dashboard-topbar__title">{{ greeting }}</h1>
+          <p class="dashboard-topbar__lead">
+            Resumen clínico de {{ clinicName }}.
+          </p>
+        </div>
+        <input
+          class="search-input search-input--dashboard"
+          type="search"
+          placeholder="Buscar paciente o documento"
         />
-      </PanelCard>
+      </header>
 
-      <PanelCard
-        title="Bandeja de archivos"
-        :badge="pendingDocumentsLabel"
-        badge-tone="warning"
-        padded
-      >
-        <UploadZone
-          icon="DOC"
-          title="Documentos recibidos"
-          description="Revisa archivos enviados por pacientes, clasificalos y adjuntalos a la historia clinica correcta."
+      <MedfileCodeCard
+        v-if="medfileCode"
+        :code="medfileCode"
+        compact
+      />
+
+      <div v-if="usageWarnings.length" class="plan-usage-warnings" role="status">
+        <article v-for="warning in usageWarnings" :key="warning.resource" class="plan-usage-warning">
+          <strong>{{ warningTitle(warning.resource) }}</strong>
+          <p>{{ warning.message }}</p>
+          <MfButton v-if="warning.upgradePlanCode" variant="secondary" to="/suscripcion">
+            Ver planes
+          </MfButton>
+        </article>
+      </div>
+
+      <section class="metric-grid metric-grid--dashboard" aria-label="Indicadores clínicos">
+        <MetricCard
+          v-for="metric in metrics"
+          :key="metric.label"
+          :label="metric.label"
+          :value="metric.value"
+          :note="metric.note"
+          :tone="metric.tone"
+        />
+      </section>
+
+      <section class="dashboard-grid dashboard-grid--compact">
+        <PanelCard padded>
+          <template #header>
+            <div class="dashboard-panel-heading">
+              <h2>Pacientes que requieren atención</h2>
+              <p class="panel-description">
+                Priorizados por riesgo y documentos pendientes.
+              </p>
+            </div>
+            <MfButton to="/pacientes/nuevo">Nuevo paciente</MfButton>
+          </template>
+
+          <p v-if="isLoading" class="panel-empty">Cargando tu panel…</p>
+
+          <p v-else-if="loadError" class="form-error dashboard-notice">
+            No pudimos cargar tus datos. Inicia sesión nuevamente o verifica que el API esté activo.
+          </p>
+
+          <p v-else-if="priorityPatients.length === 0" class="panel-empty">
+            Aún no tienes pacientes. Crea el primero para empezar.
+          </p>
+
+          <PatientRow
+            v-for="patient in priorityPatients"
+            :key="patient.id"
+            :initials="patient.initials"
+            :name="patient.name"
+            :detail="patient.detail"
+            :status="patient.status"
+            :tone="patient.tone"
+            :to="`/pacientes/${patient.id}`"
+          />
+        </PanelCard>
+
+        <PanelCard
+          title="Bandeja de archivos"
+          :badge="pendingDocumentsLabel"
+          badge-tone="warning"
+          padded
         >
-          <MfButton variant="secondary" to="/documentos">Ver bandeja</MfButton>
-        </UploadZone>
-      </PanelCard>
-    </section>
+          <UploadZone
+            compact
+            icon="DOC"
+            title="Documentos recibidos"
+            description="Revisa archivos enviados por pacientes y adjúntalos a la historia clínica."
+          >
+            <MfButton variant="secondary" to="/documentos">Ver bandeja</MfButton>
+          </UploadZone>
+        </PanelCard>
+      </section>
+    </div>
   </DoctorShell>
 </template>
 
@@ -326,18 +332,13 @@ function getStatusTone(status: PatientStatus): BadgeTone {
 </script>
 
 <style scoped>
-.dashboard-code-card {
-  margin-bottom: 20px;
-}
-
 .plan-usage-warnings {
   display: grid;
-  gap: 12px;
-  margin-bottom: 20px;
+  gap: 10px;
 }
 
 .plan-usage-warning {
-  padding: 14px 16px;
+  padding: 12px 14px;
   border-radius: 12px;
   border: 1px solid rgb(245 158 11 / 0.35);
   background: rgb(245 158 11 / 0.1);
@@ -346,12 +347,13 @@ function getStatusTone(status: PatientStatus): BadgeTone {
 
 .plan-usage-warning strong {
   display: block;
-  margin-bottom: 6px;
+  margin-bottom: 4px;
+  font-size: 14px;
 }
 
 .plan-usage-warning p {
-  margin: 0 0 12px;
-  font-size: 14px;
-  line-height: 1.5;
+  margin: 0 0 10px;
+  font-size: 13px;
+  line-height: 1.45;
 }
 </style>

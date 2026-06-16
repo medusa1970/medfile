@@ -1,5 +1,9 @@
 <template>
-  <component :is="asLabel ? 'label' : 'div'" class="upload-zone" :for="forId">
+  <component
+    :is="asLabel ? 'label' : 'div'"
+    :class="['upload-zone', { 'upload-zone--compact': compact }]"
+    :for="forId"
+  >
     <span class="feature-icon">{{ icon }}</span>
     <strong>{{ title }}</strong>
     <p>{{ description }}</p>
@@ -15,11 +19,13 @@ withDefaults(
     icon?: string
     asLabel?: boolean
     forId?: string
+    compact?: boolean
   }>(),
   {
     icon: 'UP',
     asLabel: false,
     forId: undefined,
+    compact: false,
   },
 )
 </script>

@@ -54,6 +54,8 @@ Footer marketing (`MarketingFooter`): fondo navy con logo en pastilla blanca, ta
 
 Panel medico (`DoctorShell`): en movil el sidebar pasa a drawer lateral; la barra superior fija incluye icono **Inicio** (dashboard), titulo de seccion activa y menu hamburguesa.
 
+Dashboard (`/dashboard`, clase `dashboard-page`): layout compacto alineado con el **preview de la landing** (`product-preview--compact` en `index.vue`). Cabecera tipo tarjeta (`dashboard-topbar`) con plan, saludo breve y busqueda; metricas en `metric-grid metric-grid--dashboard` (4 columnas escritorio, 2x2 en movil — no apilar en una sola columna); `MedfileCodeCard` con prop `compact`; paneles con `dashboard-grid--compact` y `UploadZone compact`. Estilos en `main.css` (`.dashboard-page`, `.metric-grid--dashboard`, `.upload-zone--compact`). Reutiliza `MetricCard`, `PanelCard` y `PatientRow` sin duplicar markup de marketing.
+
 ## Capas recomendadas
 
 ### 1. Tokens
