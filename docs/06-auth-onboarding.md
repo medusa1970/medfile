@@ -66,6 +66,7 @@ Middleware Nuxt: `middleware/auth.global.ts` aplica sesion, verificacion de corr
 | `POST /api/auth/resend-verification` | Bearer | Reenviar con sesion |
 | `POST /api/auth/resend-verification-public` | email | Reenviar sin sesion |
 
+- La web guarda el `accessToken` de `verify-email-public` antes de redirigir a `/onboarding`.
 - TTL OTP: **30 min**.
 - **Desarrollo** (`NODE_ENV !== production`): consola API + `verification.devCode` en respuesta + `sessionStorage`.
 - **Produccion** con SMTP configurado: correo real via `MailService` (`apps/api/src/modules/mail/`). Sin `devCode` ni token en JSON.

@@ -76,7 +76,7 @@ interface VerifyEmailResponse {
 
 const route = useRoute()
 const router = useRouter()
-const { clearSession } = useMedfileApi()
+const { clearSession, storeSession } = useMedfileApi()
 
 const code = ref('')
 const loading = ref(false)
@@ -129,7 +129,7 @@ onMounted(async () => {
 
   pageReady.value = true
 
-  if (code.value.length === 6 && token) {
+  if (code.value.length === 6) {
     await submit()
   }
 })
@@ -158,12 +158,21 @@ async function submit() {
 
   try {
     const config = useRuntimeConfig()
-    await verifyWithPublicEndpoint(config.public.apiUrl, targetEmail)
+    const accessToken = await verifyWithPublicEndpoint(config.public.apiUrl, targetEmail)
+
+    if (!storeSession(accessToken)) {
+      throw new Error('missing_access_token')
+    }
 
     clearVerificationPreview()
     success.value = 'Correo verificado. Redirigiendo…'
-    await router.push('/onboarding')
+    await router.replace('/onboarding')
   } catch (err) {
+    if (err instanceof Error && err.message === 'missing_access_token') {
+      error.value = 'Verificamos tu correo pero no pudimos iniciar sesión. Inicia sesión e inténtalo de nuevo.'
+      return
+    }
+
     error.value = getErrorMessage(err)
   } finally {
     loading.value = false
@@ -171,6 +180,8 @@ async function submit() {
 }
 
 async function verifyWithPublicEndpoint(apiUrl: string, targetEmail: string) {
+  console.info('[Medfile verify] POST', `${apiUrl}/api/auth/verify-email-public`)
+
   const response = await $fetch<VerifyEmailResponse>(`${apiUrl}/api/auth/verify-email-public`, {
     method: 'POST',
     body: {
@@ -179,9 +190,16 @@ async function verifyWithPublicEndpoint(apiUrl: string, targetEmail: string) {
     },
   })
 
-  if (response.accessToken && import.meta.client) {
-    localStorage.setItem('medfile_access_token', response.accessToken)
+  console.info('[Medfile verify] respuesta verify-email-public', {
+    email: response.email,
+    hasAccessToken: Boolean(response.accessToken),
+  })
+
+  if (!response.accessToken?.trim()) {
+    throw new Error('missing_access_token')
   }
+
+  return response.accessToken.trim()
 }
 
 async function resend() {

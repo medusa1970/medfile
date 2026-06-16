@@ -1,6 +1,7 @@
 import { Module } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { JwtModule } from '@nestjs/jwt';
+import { getJwtModuleOptions } from '../../config/jwt-options';
 import { MailModule } from '../mail/mail.module';
 import { SubscriptionsModule } from '../subscriptions/subscriptions.module';
 import { TenantsModule } from '../tenants/tenants.module';
@@ -12,12 +13,7 @@ import { AuthService } from './auth.service';
   imports: [
     JwtModule.registerAsync({
       inject: [ConfigService],
-      useFactory: (config: ConfigService) => ({
-        secret: config.get<string>('JWT_ACCESS_SECRET', 'dev-only-change-me'),
-        signOptions: {
-          expiresIn: config.get<number>('JWT_ACCESS_TTL_SECONDS', 60 * 60),
-        },
-      }),
+      useFactory: (config: ConfigService) => getJwtModuleOptions(config),
     }),
     TenantsModule,
     UsersModule,

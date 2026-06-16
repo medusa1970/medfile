@@ -1,6 +1,7 @@
 type MedfileFetchOptions = NonNullable<Parameters<typeof $fetch>[1]>;
 
 const ACCESS_TOKEN_KEY = 'medfile_access_token';
+const AUTH_FLOW_PATHS = new Set(['/verificar-correo', '/onboarding']);
 
 export function useMedfileApi() {
   const config = useRuntimeConfig();
@@ -37,7 +38,8 @@ export function useMedfileApi() {
 
         if (import.meta.client) {
           const route = useRoute()
-          if (route.path !== '/login' && route.path !== '/registro') {
+          const stayOnPage = AUTH_FLOW_PATHS.has(route.path)
+          if (!stayOnPage && route.path !== '/login' && route.path !== '/registro') {
             await navigateTo('/login?expired=1')
           }
         }
@@ -52,6 +54,12 @@ export function useMedfileApi() {
     return localStorage.getItem(ACCESS_TOKEN_KEY) ?? '';
   }
 
+  function storeSession(accessToken: string) {
+    if (!import.meta.client || !accessToken.trim()) return false;
+    localStorage.setItem(ACCESS_TOKEN_KEY, accessToken.trim());
+    return true;
+  }
+
   function hasSession() {
     return Boolean(getAccessToken());
   }
@@ -64,6 +72,7 @@ export function useMedfileApi() {
   return {
     apiFetch,
     getAccessToken,
+    storeSession,
     hasSession,
     clearSession,
   };

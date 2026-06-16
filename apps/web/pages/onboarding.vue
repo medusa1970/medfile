@@ -62,7 +62,7 @@
 definePageMeta({ ssr: false, requiresSession: true, requiresVerified: true })
 
 const router = useRouter()
-const { apiFetch } = useMedfileApi()
+const { apiFetch, getAccessToken } = useMedfileApi()
 const loading = ref(false)
 const saved = ref(false)
 const error = ref('')
@@ -100,6 +100,13 @@ onMounted(async () => {
 
 async function submit() {
   error.value = ''
+
+  if (!getAccessToken()) {
+    error.value = 'Tu sesión expiró. Inicia sesión e inténtalo de nuevo.'
+    await router.push('/login?expired=1')
+    return
+  }
+
   loading.value = true
 
   try {
@@ -115,7 +122,13 @@ async function submit() {
 
     saved.value = true
     await router.push('/dashboard')
-  } catch {
+  } catch (err) {
+    if (typeof err === 'object' && err && 'status' in err && (err as { status?: number }).status === 401) {
+      error.value = 'Tu sesión expiró. Inicia sesión e inténtalo de nuevo.'
+      await router.push('/login?expired=1')
+      return
+    }
+
     error.value = 'No pudimos guardar tu perfil. Intenta nuevamente.'
   } finally {
     loading.value = false

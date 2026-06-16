@@ -1,6 +1,7 @@
 import { Global, Module } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { JwtModule } from '@nestjs/jwt';
+import { getJwtModuleOptions } from '../../config/jwt-options';
 import { UsersModule } from '../users/users.module';
 import { TenantAuthGuard } from './tenant-auth.guard';
 
@@ -10,9 +11,7 @@ import { TenantAuthGuard } from './tenant-auth.guard';
     UsersModule,
     JwtModule.registerAsync({
       inject: [ConfigService],
-      useFactory: (config: ConfigService) => ({
-        secret: config.get<string>('JWT_ACCESS_SECRET', 'dev-only-change-me'),
-      }),
+      useFactory: (config: ConfigService) => getJwtModuleOptions(config),
     }),
   ],
   providers: [TenantAuthGuard],
