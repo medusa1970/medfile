@@ -1,79 +1,190 @@
 <template>
   <DoctorShell>
-    <header class="app-header">
-      <div>
-        <EyebrowPill>Nuevo archivo medico</EyebrowPill>
-        <h1>Registrar paciente</h1>
-        <p>Filiacion inicial del paciente. Los antecedentes y atenciones se completan en el perfil.</p>
-      </div>
-      <MfButton variant="secondary" to="/pacientes">Volver al listado</MfButton>
-    </header>
+    <div class="dashboard-page">
+      <header class="dashboard-topbar">
+        <div class="dashboard-topbar__main">
+          <EyebrowPill>Nuevo paciente</EyebrowPill>
+          <h1 class="dashboard-topbar__title">Registrar paciente</h1>
+          <p class="dashboard-topbar__lead">Filiación inicial; el perfil clínico se completa después.</p>
+        </div>
+        <MfButton variant="secondary" to="/pacientes">Volver al listado</MfButton>
+      </header>
 
-    <PanelCard title="Datos del paciente" padded>
-      <form class="auth-form patient-form" @submit.prevent="submit">
-        <div class="form-section">
-          <h3>Filiacion</h3>
-          <div class="form-grid-2">
-            <FormField v-model="form.fullName" label="Nombre completo" autocomplete="name" />
-            <FormField v-model="form.documentId" label="Documento / CI" />
-            <label class="form-field">
-              <span>Sexo</span>
-              <select v-model="form.sex">
-                <option value="">Seleccionar</option>
-                <option value="female">Femenino</option>
-                <option value="male">Masculino</option>
-                <option value="other">Otro</option>
-              </select>
-            </label>
-            <FormField v-model="form.birthDate" label="Fecha de nacimiento" type="date" />
-            <FormField v-model="form.guardianName" label="Padre o tutor" />
+      <PanelCard title="Datos del paciente" padded class="dashboard-panel">
+        <form class="auth-form patient-form patient-form--inset" @submit.prevent="submit">
+          <div class="form-section">
+            <h3>Filiación</h3>
+            <div class="form-grid-2">
+              <FormField
+                v-model="form.fullName"
+                inset-label
+                icon="user"
+                label="Nombre completo"
+                autocomplete="name"
+                required
+              />
+              <FormField
+                v-model="form.documentId"
+                inset-label
+                optional
+                icon="file"
+                label="Documento / CI"
+              />
+              <FormSelectField
+                v-model="form.sex"
+                inset-label
+                optional
+                icon="users"
+                label="Sexo"
+                placeholder-option="Seleccionar"
+                :options="sexOptions"
+              />
+              <FormField
+                v-model="form.birthDate"
+                inset-label
+                optional
+                icon="calendar"
+                label="Fecha de nacimiento"
+                type="date"
+              />
+              <FormField
+                v-model="form.guardianName"
+                inset-label
+                optional
+                icon="user"
+                label="Padre o tutor"
+              />
+            </div>
           </div>
-        </div>
 
-        <div class="form-section">
-          <h3>Domicilio</h3>
-          <div class="form-grid-2">
-            <FormField v-model="form.address.department" label="Departamento" />
-            <FormField v-model="form.address.province" label="Provincia" />
-            <FormField v-model="form.address.district" label="Distrito" />
-            <FormField v-model="form.address.locality" label="Localidad" />
-            <FormField v-model="form.address.streetAddress" label="Direccion" />
-            <FormField v-model="form.phone" label="Telefono" type="tel" autocomplete="tel" />
-            <FormField v-model="form.email" label="Correo" type="email" autocomplete="email" />
+          <div class="form-section">
+            <h3>Domicilio</h3>
+            <div class="form-grid-2">
+              <FormField
+                v-model="form.address.department"
+                inset-label
+                optional
+                icon="clinic"
+                label="Departamento"
+              />
+              <FormField
+                v-model="form.address.province"
+                inset-label
+                optional
+                icon="clinic"
+                label="Provincia"
+              />
+              <FormField
+                v-model="form.address.district"
+                inset-label
+                optional
+                icon="clinic"
+                label="Distrito"
+              />
+              <FormField
+                v-model="form.address.locality"
+                inset-label
+                optional
+                icon="home"
+                label="Localidad"
+              />
+              <FormField
+                v-model="form.address.streetAddress"
+                inset-label
+                optional
+                icon="home"
+                label="Dirección"
+                class="form-wide"
+              />
+              <FormField
+                v-model="form.phone"
+                inset-label
+                optional
+                icon="mobile"
+                label="Teléfono"
+                type="tel"
+                autocomplete="tel"
+              />
+              <FormField
+                v-model="form.email"
+                inset-label
+                optional
+                icon="mail"
+                label="Correo"
+                type="email"
+                autocomplete="email"
+              />
+            </div>
           </div>
-        </div>
 
-        <div class="form-section">
-          <h3>Contacto y seguro</h3>
-          <div class="form-grid-2">
-            <label class="form-field">
-              <span>Estado inicial</span>
-              <select v-model="form.status">
-                <option value="active">Activo</option>
-                <option value="follow_up">Seguimiento</option>
-                <option value="critical">Critico</option>
-              </select>
-            </label>
-            <FormField v-model="form.emergencyContactName" label="Contacto de emergencia" />
-            <FormField v-model="form.emergencyContactPhone" label="Telefono emergencia" type="tel" />
-            <FormField v-model="form.insuranceName" label="Seguro medico" />
-            <FormField v-model="form.policyNumber" label="No. poliza" />
+          <div class="form-section">
+            <h3>Contacto y seguro</h3>
+            <div class="form-grid-2">
+              <FormSelectField
+                v-model="form.status"
+                inset-label
+                icon="alert"
+                label="Estado inicial"
+                :options="statusOptions"
+              />
+              <FormField
+                v-model="form.emergencyContactName"
+                inset-label
+                optional
+                icon="user"
+                label="Contacto de emergencia"
+              />
+              <FormField
+                v-model="form.emergencyContactPhone"
+                inset-label
+                optional
+                icon="mobile"
+                label="Teléfono emergencia"
+                type="tel"
+              />
+              <FormField
+                v-model="form.insuranceName"
+                inset-label
+                optional
+                icon="shield"
+                label="Seguro médico"
+              />
+              <FormField
+                v-model="form.policyNumber"
+                inset-label
+                optional
+                icon="file"
+                label="No. póliza"
+              />
+            </div>
           </div>
-        </div>
 
-        <div v-if="error" class="form-error form-wide">{{ error }}</div>
-        <div v-if="saved" class="form-success form-wide">Paciente registrado correctamente.</div>
+          <div v-if="error" class="form-error form-wide">{{ error }}</div>
+          <div v-if="saved" class="form-success form-wide">Paciente registrado correctamente.</div>
 
-        <div class="form-actions form-wide">
-          <MfButton variant="secondary" to="/pacientes">Cancelar</MfButton>
-          <MfButton type="submit">{{ loading ? 'Guardando...' : 'Guardar paciente' }}</MfButton>
-        </div>
-      </form>
-    </PanelCard>
+          <div class="form-actions form-wide">
+            <MfButton variant="secondary" to="/pacientes">Cancelar</MfButton>
+            <MfButton type="submit">{{ loading ? 'Guardando…' : 'Guardar paciente' }}</MfButton>
+          </div>
+        </form>
+      </PanelCard>
+    </div>
   </DoctorShell>
 </template>
 
 <script setup lang="ts">
+const sexOptions = [
+  { value: 'female', label: 'Femenino' },
+  { value: 'male', label: 'Masculino' },
+  { value: 'other', label: 'Otro' },
+]
+
+const statusOptions = [
+  { value: 'active', label: 'Activo' },
+  { value: 'follow_up', label: 'Seguimiento' },
+  { value: 'critical', label: 'Crítico' },
+]
+
 const { apiFetch } = useMedfileApi()
 const router = useRouter()
 const loading = ref(false)
@@ -160,3 +271,13 @@ function getErrorMessage(err: unknown) {
   return 'No pudimos registrar al paciente. Verifica los datos e intenta nuevamente.'
 }
 </script>
+
+<style scoped>
+.dashboard-panel :deep(.panel-body) {
+  padding-top: 4px;
+}
+
+.form-wide {
+  grid-column: 1 / -1;
+}
+</style>

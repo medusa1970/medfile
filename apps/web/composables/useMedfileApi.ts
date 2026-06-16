@@ -1,3 +1,5 @@
+import { resolvePublicApiUrl } from '~/utils/public-api-url'
+
 type MedfileFetchOptions = NonNullable<Parameters<typeof $fetch>[1]>;
 
 const ACCESS_TOKEN_KEY = 'medfile_access_token';
@@ -17,7 +19,8 @@ export function useMedfileApi() {
     }
 
     try {
-      return await $fetch<T>(`${config.public.apiUrl}${path}`, {
+      const apiBaseUrl = resolvePublicApiUrl(config.public.apiUrl as string)
+      return await $fetch<T>(`${apiBaseUrl}${path}`, {
         ...options,
         headers,
       });

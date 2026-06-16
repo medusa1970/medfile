@@ -729,9 +729,32 @@ a.patient-row:hover {
 
 .clinical-summary {
   display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: 14px;
-  margin-bottom: 20px;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 8px;
+  margin-bottom: 12px;
+}
+
+.clinical-summary .metric-card {
+  padding: 10px 12px;
+  border-radius: 12px;
+}
+
+.clinical-summary .metric-card small {
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+}
+
+.clinical-summary .metric-card strong {
+  margin-top: 4px;
+  font-size: clamp(17px, 3.6vw, 22px);
+  letter-spacing: -0.03em;
+}
+
+.clinical-summary .metric-card .status-badge {
+  margin-top: 6px;
+  font-size: 10px;
 }
 
 /* Dashboard app — layout compacto (preview landing) */
@@ -1193,6 +1216,176 @@ a.patient-row:hover {
   padding-right: 28px;
 }
 
+/* Etiqueta flotante dentro del control (icono + label inset) */
+.form-field--inset {
+  gap: 0;
+}
+
+.form-field--inset .form-field-control {
+  position: relative;
+}
+
+.form-field--inset input:not([type='checkbox']):not([type='radio']),
+.form-field--inset textarea,
+.form-field--inset select {
+  min-height: 52px;
+  padding: 22px 14px 8px;
+  border-radius: 14px;
+  font-size: 15px;
+}
+
+.form-field--inset .form-field-control--icon input:not([type='checkbox']):not([type='radio']),
+.form-field--inset .form-field-control--icon textarea,
+.form-field--inset .form-field-control--icon select {
+  padding-left: 44px;
+}
+
+.form-field--inset .form-field-control--select select {
+  padding-right: 36px;
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%2375787B' stroke-width='2'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 12px center;
+}
+
+.form-field--inset .form-field-label {
+  position: absolute;
+  left: 14px;
+  top: 50%;
+  z-index: 1;
+  max-width: calc(100% - 28px);
+  overflow: hidden;
+  color: var(--mf-neutral-500);
+  font-size: 15px;
+  font-weight: 600;
+  line-height: 1.2;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  pointer-events: none;
+  transform: translateY(-50%);
+  transition:
+    top 160ms ease,
+    transform 160ms ease,
+    font-size 160ms ease,
+    color 160ms ease;
+}
+
+.form-field--inset .form-field-control--icon .form-field-label {
+  left: 44px;
+  max-width: calc(100% - 56px);
+}
+
+.form-field--inset:focus-within .form-field-label,
+.form-field--inset.form-field--filled .form-field-label {
+  top: 10px;
+  color: var(--mf-teal-600);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  transform: translateY(0);
+}
+
+.form-field--inset input::placeholder,
+.form-field--inset textarea::placeholder {
+  color: transparent;
+}
+
+.form-field--inset input[type='date'],
+.form-field--inset input[type='datetime-local'],
+.form-field--inset input[type='time'] {
+  min-height: 52px;
+}
+
+/* Fecha: etiqueta siempre arriba; ocultar máscara nativa hasta foco o valor */
+.form-field--inset.form-field--date .form-field-label {
+  top: 10px;
+  color: var(--mf-neutral-500);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  transform: translateY(0);
+}
+
+.form-field--inset.form-field--date:focus-within .form-field-label,
+.form-field--inset.form-field--date.form-field--filled .form-field-label {
+  color: var(--mf-teal-600);
+}
+
+.form-field--inset.form-field--date input[type='date'] {
+  padding-right: 40px;
+}
+
+.form-field--inset.form-field--date:not(.form-field--filled):not(:focus-within) input[type='date'] {
+  color: transparent;
+}
+
+.form-field--inset.form-field--date:not(.form-field--filled):not(:focus-within) input[type='date']::-webkit-datetime-edit,
+.form-field--inset.form-field--date:not(.form-field--filled):not(:focus-within) input[type='date']::-webkit-datetime-edit-fields-wrapper,
+.form-field--inset.form-field--date:not(.form-field--filled):not(:focus-within) input[type='date']::-webkit-datetime-edit-text,
+.form-field--inset.form-field--date:not(.form-field--filled):not(:focus-within) input[type='date']::-webkit-datetime-edit-month-field,
+.form-field--inset.form-field--date:not(.form-field--filled):not(:focus-within) input[type='date']::-webkit-datetime-edit-day-field,
+.form-field--inset.form-field--date:not(.form-field--filled):not(:focus-within) input[type='date']::-webkit-datetime-edit-year-field {
+  opacity: 0;
+  color: transparent;
+}
+
+.form-field--inset.form-field--date.form-field--filled input[type='date'],
+.form-field--inset.form-field--date:focus-within input[type='date'] {
+  color: var(--mf-slate-900);
+}
+
+.form-field--inset.form-field--date input[type='date']::-webkit-calendar-picker-indicator {
+  opacity: 0.55;
+  cursor: pointer;
+}
+
+.form-field-label-optional {
+  color: var(--mf-neutral-400);
+  font-weight: 500;
+}
+
+.form-field--inset:focus-within .form-field-label-optional,
+.form-field--inset.form-field--filled .form-field-label-optional,
+.form-field--inset.form-field--date .form-field-label-optional {
+  color: var(--mf-neutral-400);
+  font-size: inherit;
+}
+
+.form-field--inset textarea {
+  min-height: 88px;
+  padding-top: 26px;
+}
+
+.form-field--inset .form-field-label--textarea {
+  top: 18px;
+  transform: translateY(0);
+}
+
+.form-field--inset:focus-within .form-field-label--textarea,
+.form-field--inset.form-field--filled .form-field-label--textarea {
+  top: 10px;
+}
+
+.form-field--inset.form-field--compact input:not([type='checkbox']):not([type='radio']),
+.form-field--inset.form-field--compact textarea,
+.form-field--inset.form-field--compact select {
+  min-height: 46px;
+  padding-top: 20px;
+  font-size: 14px;
+}
+
+.patient-form--inset {
+  gap: 12px;
+}
+
+.patient-form--inset .form-section {
+  gap: 10px;
+}
+
+.patient-form--inset .form-grid-2 {
+  gap: 10px;
+}
+
 .emergency-form {
   display: grid;
   gap: 14px;
@@ -1370,6 +1563,116 @@ a.patient-row:hover {
 .auth-switch a {
   color: var(--mf-brand-700);
   font-weight: 900;
+}
+
+.document-viewer {
+  position: fixed;
+  inset: 0;
+  z-index: 1200;
+  display: grid;
+  place-items: center;
+  padding: 16px;
+  background: rgb(0 18 48 / 72%);
+  backdrop-filter: blur(4px);
+}
+
+.document-viewer__panel {
+  display: flex;
+  flex-direction: column;
+  width: min(100%, 1080px);
+  max-height: calc(100vh - 32px);
+  border: 1px solid var(--mf-slate-200);
+  border-radius: 18px;
+  background: #fff;
+  box-shadow: 0 24px 60px rgb(0 31 92 / 24%);
+  overflow: hidden;
+}
+
+.document-viewer__header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 16px 18px;
+  border-bottom: 1px solid var(--mf-slate-100);
+}
+
+.document-viewer__title-wrap {
+  min-width: 0;
+}
+
+.document-viewer__title {
+  margin: 8px 0 0;
+  overflow: hidden;
+  color: var(--mf-navy-900);
+  font-size: clamp(18px, 2.4vw, 22px);
+  font-weight: 800;
+  line-height: 1.2;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.document-viewer__actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 8px;
+}
+
+.document-viewer__close {
+  display: grid;
+  place-items: center;
+  width: 40px;
+  height: 40px;
+  border: 1px solid var(--mf-slate-200);
+  border-radius: 12px;
+  background: #fff;
+  color: var(--mf-slate-700);
+  font-size: 24px;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.document-viewer__body {
+  display: grid;
+  place-items: center;
+  min-height: 280px;
+  padding: 16px;
+  background: var(--mf-slate-50);
+  overflow: auto;
+}
+
+.document-viewer__status {
+  margin: 0;
+  padding: 24px;
+  text-align: center;
+}
+
+.document-viewer__image {
+  display: block;
+  width: auto;
+  max-width: 100%;
+  max-height: calc(100vh - 180px);
+  margin: 0 auto;
+  border-radius: 12px;
+  box-shadow: 0 8px 24px rgb(0 31 92 / 12%);
+}
+
+.document-viewer__frame {
+  width: 100%;
+  min-height: min(72vh, 760px);
+  border: 0;
+  border-radius: 12px;
+  background: #fff;
+}
+
+.document-viewer__fallback {
+  display: grid;
+  gap: 12px;
+  justify-items: center;
+  padding: 24px;
+  text-align: center;
 }
 
 .patient-list-notice {
@@ -1779,10 +2082,11 @@ a.patient-row:hover {
 
   .feature-grid,
   .clinical-summary {
-    grid-template-columns: repeat(2, 1fr);
+    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
-  .metric-grid--dashboard {
+  .metric-grid--dashboard,
+  .clinical-summary {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
@@ -1847,14 +2151,23 @@ a.patient-row:hover {
   }
 
   .trust-row,
-  .feature-grid,
-  .clinical-summary {
+  .feature-grid {
     grid-template-columns: 1fr;
   }
 
-  .metric-grid--dashboard {
+  .metric-grid--dashboard,
+  .clinical-summary {
     grid-template-columns: repeat(2, minmax(0, 1fr));
     gap: 8px;
+  }
+
+  .dashboard-topbar {
+    align-items: center;
+  }
+
+  .dashboard-topbar .btn,
+  .dashboard-topbar .mf-button {
+    width: 100%;
   }
 
   .dashboard-topbar__lead {

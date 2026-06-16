@@ -364,7 +364,7 @@
   font-size: 15px;
 }
 
-.landing-page .trust-card--icon span {
+.landing-page .trust-card--icon .trust-card-body span {
   font-size: 11px;
 }
 

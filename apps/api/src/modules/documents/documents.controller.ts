@@ -17,6 +17,12 @@ export class DocumentsController {
     return this.documentsService.findInboxForTenant(auth.tenantId);
   }
 
+  @Get(':id/download-url')
+  @UseGuards(TenantAuthGuard)
+  downloadUrl(@CurrentTenant() auth: AuthContext, @Param('id') id: string) {
+    return this.documentsService.createDownloadUrlForDocument(auth.tenantId, id);
+  }
+
   @Get()
   @UseGuards(TenantAuthGuard)
   findForPatient(

@@ -1,4 +1,4 @@
-import { PutObjectCommand, S3Client } from '@aws-sdk/client-s3';
+import { PutObjectCommand, GetObjectCommand, S3Client } from '@aws-sdk/client-s3';
 import { getSignedUrl } from '@aws-sdk/s3-request-presigner';
 import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
@@ -67,6 +67,48 @@ export class StorageService {
         'Content-Type': input.mimeType,
       },
       expiresInSeconds: 300,
+    };
+  }
+
+  async createDocumentDownloadUrl(storageKey: string, mimeType: string, fileName: string) {
+    if (!this.client) {
+      return {
+        mode: 'mock' as const,
+        available: false,
+        message:
+          'El archivo no esta almacenado en modo local. Configura S3/R2 (variables S3_*) para subir y ver documentos reales.',
+      };
+    }
+
+    const safeFileName = fileName.replace(/[^\w.\-() ]+/g, '_') || 'documento';
+
+    const inlineCommand = new GetObjectCommand({
+      Bucket: this.bucket,
+      Key: storageKey,
+      ResponseContentType: mimeType,
+      ResponseContentDisposition: 'inline',
+    });
+
+    const attachmentCommand = new GetObjectCommand({
+      Bucket: this.bucket,
+      Key: storageKey,
+      ResponseContentType: mimeType,
+      ResponseContentDisposition: `attachment; filename="${safeFileName}"`,
+    });
+
+    const [viewUrl, downloadUrl] = await Promise.all([
+      getSignedUrl(this.client, inlineCommand, { expiresIn: 900 }),
+      getSignedUrl(this.client, attachmentCommand, { expiresIn: 900 }),
+    ]);
+
+    return {
+      mode: 'presigned' as const,
+      available: true,
+      mimeType,
+      fileName: safeFileName,
+      viewUrl,
+      downloadUrl,
+      expiresInSeconds: 900,
     };
   }
 

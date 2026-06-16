@@ -56,7 +56,18 @@ railway variables     # lista vars; copia manualmente a .env.local
 
 No sobrescribas `NUXT_PUBLIC_API_URL` ni `WEB_ORIGIN` con valores de produccion.
 
-**No cambies** estas claves locales (deben apuntar a localhost):
+**Probar enlace de paciente desde el movil (misma WiFi):**
+
+```env
+NUXT_PUBLIC_API_URL=http://192.168.x.x:4000
+WEB_ORIGIN=http://localhost:3100,http://127.0.0.1:3100,http://192.168.x.x:3100
+```
+
+Sustituye `192.168.x.x` por la IP de tu PC. Nuxt ya escucha en `0.0.0.0:3100`; el API en `0.0.0.0:4000`. Si dejas `localhost` en `NUXT_PUBLIC_API_URL`, la pagina `/paciente/subir` intenta reescribir el host automaticamente cuando el paciente abre el enlace por IP LAN.
+
+**Documentos:** sin `S3_*` en `.env.local`, las subidas quedan en modo mock (solo metadatos). Para ver el archivo real, configura R2/S3 y vuelve a subir.
+
+**Valores base en local** (no uses URLs de produccion):
 
 ```env
 NODE_ENV=development

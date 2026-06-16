@@ -1,45 +1,47 @@
 <template>
   <DoctorShell>
-    <header class="app-header">
-      <div>
-        <EyebrowPill>Modulo clinico</EyebrowPill>
-        <h1>Pacientes</h1>
-        <p>Gestiona el archivo medico de cada paciente de tu consulta.</p>
-      </div>
-      <MfButton to="/pacientes/nuevo">Nuevo paciente</MfButton>
-    </header>
-
-    <section class="clinical-summary" aria-label="Resumen de pacientes">
-      <MetricCard label="Registrados" :value="String(patients.length)" note="tenant actual" />
-      <MetricCard label="Seguimiento" :value="String(followUpCount)" note="revisar" tone="warning" />
-      <MetricCard label="Criticos" :value="String(criticalCount)" note="prioridad" tone="danger" />
-      <MetricCard label="Documentos" value="4" note="pendientes" />
-    </section>
-
-    <PanelCard title="Listado de pacientes" badge="Beta">
-      <template #header>
-        <div>
-          <h2>Listado de pacientes</h2>
-          <p class="panel-description">Datos cargados desde API cuando el backend esta disponible.</p>
+    <div class="dashboard-page">
+      <header class="dashboard-topbar">
+        <div class="dashboard-topbar__main">
+          <EyebrowPill>Módulo clínico</EyebrowPill>
+          <h1 class="dashboard-topbar__title">Pacientes</h1>
+          <p class="dashboard-topbar__lead">Archivo médico de tu consulta.</p>
         </div>
-        <input v-model="query" class="search-input" type="search" placeholder="Buscar por nombre o telefono" />
-      </template>
+        <MfButton to="/pacientes/nuevo">Nuevo paciente</MfButton>
+      </header>
 
-      <div v-if="loadError" class="form-error patient-list-notice">
-        No se pudo conectar al API. Mostrando pacientes de ejemplo para mantener el flujo visual.
-      </div>
+      <section class="metric-grid metric-grid--dashboard" aria-label="Resumen de pacientes">
+        <MetricCard label="Registrados" :value="String(patients.length)" note="tenant actual" />
+        <MetricCard label="Seguimiento" :value="String(followUpCount)" note="revisar" tone="warning" />
+        <MetricCard label="Críticos" :value="String(criticalCount)" note="prioridad" tone="danger" />
+        <MetricCard label="Documentos" :value="String(pendingDocuments)" note="pendientes" />
+      </section>
 
-      <PatientRow
-        v-for="patient in filteredPatients"
-        :key="patient.id"
-        :initials="getInitials(patient.fullName)"
-        :name="patient.fullName"
-        :detail="getPatientDetail(patient)"
-        :status="getStatusLabel(patient.status)"
-        :tone="getStatusTone(patient.status)"
-        :to="`/pacientes/${patient.id}`"
-      />
-    </PanelCard>
+      <PanelCard badge="Beta" padded class="dashboard-panel">
+        <template #header>
+          <div class="dashboard-panel-heading">
+            <h2>Listado de pacientes</h2>
+            <p class="panel-description">Busca por nombre o teléfono.</p>
+          </div>
+          <input v-model="query" class="search-input search-input--dashboard" type="search" placeholder="Buscar…" />
+        </template>
+
+        <div v-if="loadError" class="form-error patient-list-notice">
+          No se pudo conectar al API. Mostrando pacientes de ejemplo.
+        </div>
+
+        <PatientRow
+          v-for="patient in filteredPatients"
+          :key="patient.id"
+          :initials="getInitials(patient.fullName)"
+          :name="patient.fullName"
+          :detail="getPatientDetail(patient)"
+          :status="getStatusLabel(patient.status)"
+          :tone="getStatusTone(patient.status)"
+          :to="`/pacientes/${patient.id}`"
+        />
+      </PanelCard>
+    </div>
   </DoctorShell>
 </template>
 
@@ -60,6 +62,7 @@ interface PatientListItem {
 const { apiFetch } = useMedfileApi()
 const query = ref('')
 const loadError = ref(false)
+const pendingDocuments = ref(0)
 
 const fallbackPatients: PatientListItem[] = [
   {
@@ -86,9 +89,15 @@ const fallbackPatients: PatientListItem[] = [
 
 const { data } = await useAsyncData('patients', async () => {
   try {
-    return await apiFetch<PatientListItem[]>('/api/patients')
+    const [patients, documents] = await Promise.all([
+      apiFetch<PatientListItem[]>('/api/patients'),
+      apiFetch<{ status: string }[]>('/api/documents/inbox').catch(() => []),
+    ])
+    pendingDocuments.value = documents.filter((doc) => doc.status === 'pending_review').length
+    return patients
   } catch {
     loadError.value = true
+    pendingDocuments.value = 4
     return fallbackPatients
   }
 }, { server: false })
@@ -146,3 +155,22 @@ function getStatusTone(status: PatientStatus): BadgeTone {
   return ''
 }
 </script>
+
+<style scoped>
+.patient-list-notice {
+  margin: 0 14px 8px;
+  font-size: 13px;
+}
+
+.dashboard-panel :deep(.panel-header) {
+  padding: 14px 16px;
+}
+
+.dashboard-panel :deep(.panel-header h2) {
+  font-size: 16px;
+}
+
+.dashboard-panel :deep(.patient-row) {
+  padding: 10px 14px;
+}
+</style>

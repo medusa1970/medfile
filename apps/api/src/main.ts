@@ -6,8 +6,8 @@ import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
 import { buildCorsOptions } from './config/cors-origin';
 
-const require = createRequire(__filename);
-require(join(__dirname, '../../../scripts/merge-workspace-env.mjs')).applyWorkspaceEnv();
+const requireModule = createRequire(__filename);
+requireModule(join(__dirname, '../../../scripts/merge-workspace-env.mjs')).applyWorkspaceEnv();
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);

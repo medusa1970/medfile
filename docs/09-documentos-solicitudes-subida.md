@@ -80,14 +80,21 @@ Frontend:
 - `/paciente/subir?token=...`: UI minima del paciente; titulo de pagina "Subir documento".
 - Enlaces en nav y documentos usan etiquetas del medico ("Enlace pacientes", "Vista demo del enlace"), no "Portal paciente".
 
-Limitacion actual:
+Limitacion en desarrollo local:
 
-- Todavia no se sube binario real. La integracion real debe usar S3/R2 con URL firmada.
+- Si `NUXT_PUBLIC_API_URL` apunta a `localhost` y el paciente abre el enlace desde el movil (IP LAN), la subida fallaba: la web reescribe el host al de la pagina (`utils/public-api-url.ts`).
+- Sin variables `S3_*`, el modo **mock** guarda solo metadatos en MongoDB; el binario no se almacena y **Ver archivo** avisa que falta storage.
+
+## Ver / descargar documento
+
+- `GET /api/documents/:id/download-url` (medico autenticado): devuelve `viewUrl` (inline) y `downloadUrl` (attachment) firmadas en R2/S2, o mensaje en modo mock.
+- `DocumentList`: botones **Ver pantalla completa** y **Descargar**.
+- `DocumentViewerModal`: visor a pantalla completa para imagenes y PDF; acciones Descargar y Nueva pestaña.
+- En local, `useMedfileApi` y `/paciente/subir` reescriben `localhost` en la URL del API al host LAN de la pagina (evita bloqueo de acceso a red local del navegador).
 
 ## Siguientes extensiones
 
-- URLs firmadas S3/R2.
-- Previsualizacion de imagen/PDF.
+- Previsualizacion embebida imagen/PDF en modal (sin abrir pestaña).
 - Clasificacion por tipo de documento.
 - Asociar documento a consulta.
 - Antivirus/escaneo.

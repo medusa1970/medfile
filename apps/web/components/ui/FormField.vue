@@ -1,6 +1,18 @@
 <template>
-  <label :class="['form-field', { 'form-field--compact': compact }]">
-    <span>{{ label }}</span>
+  <label
+    :class="[
+      'form-field',
+      {
+        'form-field--compact': compact,
+        'form-field--inset': insetLabel,
+        'form-field--filled': insetLabel && Boolean(displayValue),
+        'form-field--date': insetLabel && type === 'date',
+      },
+    ]"
+  >
+    <span v-if="!insetLabel">
+      {{ label }}<span v-if="optional" class="form-field-label-optional"> (opcional)</span>
+    </span>
 
     <div
       v-if="!textarea"
@@ -17,7 +29,7 @@
       <input
         :value="displayValue"
         :type="resolvedType"
-        :placeholder="placeholder"
+        :placeholder="insetLabel ? ' ' : placeholder"
         :autocomplete="autocomplete"
         :required="required"
         :maxlength="maxlength"
@@ -25,6 +37,10 @@
         :disabled="disabled"
         @input="onInput"
       />
+
+      <span v-if="insetLabel" class="form-field-label">
+        {{ label }}<span v-if="optional" class="form-field-label-optional"> · opcional</span>
+      </span>
 
       <button
         v-if="togglePassword"
@@ -38,14 +54,23 @@
       </button>
     </div>
 
-    <textarea
-      v-else
-      :value="displayValue"
-      :placeholder="placeholder"
-      :required="required"
-      :rows="textareaRows"
-      @input="emit('update:modelValue', ($event.target as HTMLTextAreaElement).value)"
-    ></textarea>
+    <div v-else class="form-field-control" :class="{ 'form-field-control--icon': Boolean(icon) }">
+      <span v-if="icon" class="form-field-icon form-field-icon--textarea" aria-hidden="true">
+        <MedIcon :name="icon" size="sm" />
+      </span>
+
+      <textarea
+        :value="displayValue"
+        :placeholder="insetLabel ? ' ' : placeholder"
+        :required="required"
+        :rows="textareaRows"
+        @input="emit('update:modelValue', ($event.target as HTMLTextAreaElement).value)"
+      ></textarea>
+
+      <span v-if="insetLabel" class="form-field-label form-field-label--textarea">
+        {{ label }}<span v-if="optional" class="form-field-label-optional"> · opcional</span>
+      </span>
+    </div>
   </label>
 </template>
 
@@ -62,6 +87,8 @@ const props = withDefaults(
     textarea?: boolean
     required?: boolean
     compact?: boolean
+    insetLabel?: boolean
+    optional?: boolean
     rows?: number
     maxlength?: number
     inputmode?: 'text' | 'numeric' | 'email' | 'tel' | 'url' | 'search' | 'none' | 'decimal'
@@ -78,6 +105,8 @@ const props = withDefaults(
     textarea: false,
     required: false,
     compact: false,
+    insetLabel: false,
+    optional: false,
     rows: 4,
     maxlength: undefined,
     inputmode: undefined,

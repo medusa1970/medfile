@@ -19,17 +19,30 @@
               title="Tomar foto o elegir archivo"
               description="JPG, PNG, HEIC o PDF."
               as-label
-              for-id="file-upload"
+              for-id="file-upload-gallery"
             >
               <input
-                id="file-upload"
+                id="file-upload-gallery"
                 type="file"
-                accept="image/*,.pdf"
-                capture="environment"
+                accept="image/jpeg,image/png,image/webp,image/heic,image/heif,.pdf,application/pdf"
                 hidden
                 @change="handleFileChange"
               />
             </UploadZone>
+
+            <div class="patient-upload-actions">
+              <label class="patient-upload-camera-btn" for="file-upload-camera">
+                Tomar foto ahora
+              </label>
+              <input
+                id="file-upload-camera"
+                type="file"
+                accept="image/*"
+                capture="environment"
+                hidden
+                @change="handleFileChange"
+              />
+            </div>
 
             <p v-if="selectedFile" class="selected-file-name">
               Archivo: {{ selectedFile.name }}
@@ -121,6 +134,7 @@
 
 <script setup lang="ts">
 import type { MedIconName } from '~/components/ui/MedIcon.vue'
+import { resolvePublicApiUrl } from '~/utils/public-api-url'
 
 interface UploadRequest {
   token: string
@@ -184,7 +198,7 @@ const { data } = await useAsyncData(`upload-request-${token.value || 'demo'}`, a
 
   try {
     return await $fetch<UploadRequest>(
-      `${config.public.apiUrl}/api/documents/upload-requests/${token.value}`,
+      `${apiBaseUrl.value}/api/documents/upload-requests/${token.value}`,
     )
   } catch {
     return fallbackRequest
@@ -192,6 +206,8 @@ const { data } = await useAsyncData(`upload-request-${token.value || 'demo'}`, a
 })
 
 const uploadRequest = computed(() => data.value ?? fallbackRequest)
+
+const apiBaseUrl = computed(() => resolvePublicApiUrl(config.public.apiUrl as string))
 
 useHead({
   title: isRealPatientLink.value
@@ -219,7 +235,7 @@ async function completeUpload() {
     let storageKey = `demo/${selectedFile.value.name}`
 
     const uploadUrl = await $fetch<UploadUrlResponse>(
-      `${config.public.apiUrl}/api/documents/upload-requests/${token.value}/upload-url`,
+      `${apiBaseUrl.value}/api/documents/upload-requests/${token.value}/upload-url`,
       {
         method: 'POST',
         body: {
@@ -232,32 +248,60 @@ async function completeUpload() {
     storageKey = uploadUrl.storageKey
 
     if (uploadUrl.mode === 'presigned') {
-      await $fetch(uploadUrl.uploadUrl, {
+      const uploadResponse = await fetch(uploadUrl.uploadUrl, {
         method: uploadUrl.method,
         body: selectedFile.value,
         headers: uploadUrl.headers,
       })
+
+      if (!uploadResponse.ok) {
+        throw new Error(`Storage upload failed (${uploadResponse.status})`)
+      }
     }
 
-    await $fetch(`${config.public.apiUrl}/api/documents/upload-requests/${token.value}/complete`, {
+    await $fetch(`${apiBaseUrl.value}/api/documents/upload-requests/${token.value}/complete`, {
       method: 'POST',
       body: {
         fileName: selectedFile.value.name,
         mimeType: selectedFile.value.type || 'application/octet-stream',
+        fileSizeBytes: selectedFile.value.size,
         storageKey,
         documentType: 'Examen',
         notes:
           uploadUrl.mode === 'mock'
-            ? 'Subida registrada en modo mock.'
+            ? 'Subida registrada en modo mock (sin binario en storage).'
             : 'Subida directa a storage completada.',
       },
     })
 
     successMessage.value = 'Documento enviado. Tu médico lo revisará pronto.'
-  } catch {
-    errorMessage.value = 'No pudimos enviar el documento. Intenta nuevamente.'
+  } catch (err) {
+    console.error('[Medfile upload]', err)
+    errorMessage.value =
+      'No pudimos enviar el documento. Revisa tu conexión e intenta de nuevo. Si usas foto, prueba también «Elegir archivo» desde galería.'
   } finally {
     submitting.value = false
   }
 }
 </script>
+
+<style scoped>
+.patient-upload-actions {
+  margin-top: 10px;
+}
+
+.patient-upload-camera-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 44px;
+  padding: 0 16px;
+  border: 1px solid var(--mf-slate-200);
+  border-radius: 12px;
+  background: var(--mf-slate-50);
+  color: var(--mf-navy-700);
+  font-size: 14px;
+  font-weight: 700;
+  cursor: pointer;
+}
+</style>

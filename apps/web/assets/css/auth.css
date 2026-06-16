@@ -68,7 +68,7 @@
   font-size: 14px;
 }
 
-.auth-page .trust-card--icon span {
+.auth-page .trust-card--icon .trust-card-body span {
   font-size: 11px;
 }
 
@@ -300,7 +300,7 @@
     font-size: 13px;
   }
 
-  .auth-page .trust-card--icon span {
+  .auth-page .trust-card--icon .trust-card-body span {
     font-size: 10px;
   }
 

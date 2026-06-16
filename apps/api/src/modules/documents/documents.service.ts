@@ -128,6 +128,22 @@ export class DocumentsService {
     });
   }
 
+  async createDownloadUrlForDocument(tenantId: string, documentId: string) {
+    assertValidObjectId(documentId, 'documentId');
+
+    const document = await this.documentModel.findOne({ _id: documentId, tenantId }).lean().exec();
+
+    if (!document) {
+      throw new NotFoundException('Documento no encontrado.');
+    }
+
+    return this.storageService.createDocumentDownloadUrl(
+      document.storageKey,
+      document.mimeType,
+      document.name,
+    );
+  }
+
   private defaultExpiration() {
     const expiresAt = new Date();
     expiresAt.setDate(expiresAt.getDate() + 7);
