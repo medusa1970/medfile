@@ -68,11 +68,13 @@ Nuxt, NestJS y MongoDB son una base razonable para este producto, siempre que se
 
 ```bash
 npm install
+npm run setup:local    # primera vez: crea .env.local (pegar vars de Railway)
+npm run env:check      # valida .env.local
 npm run dev:web
 npm run dev:api
 ```
 
-Necesitas **dos terminales** en desarrollo: una para la web y otra para el API. Si solo corres `npm run dev`, levanta unicamente Nuxt. Sin el API en `http://localhost:4000`, el registro y login fallaran con un error CORS en el navegador.
+Necesitas **dos terminales** en desarrollo: una para la web y otra para el API. Variables en `.env.local` en la raiz del repo — ver [docs/14-desarrollo-local-terminales.md](docs/14-desarrollo-local-terminales.md).
 
 Forma mas comoda en Cursor/VS Code:
 

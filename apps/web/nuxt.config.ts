@@ -1,3 +1,17 @@
+import { dirname, resolve } from 'node:path'
+import { fileURLToPath } from 'node:url'
+import { loadEnv } from 'vite'
+
+const workspaceRoot = resolve(dirname(fileURLToPath(import.meta.url)), '../..')
+const mode = process.env.NODE_ENV === 'production' ? 'production' : 'development'
+const workspaceEnv = loadEnv(mode, workspaceRoot, '')
+
+for (const [key, value] of Object.entries(workspaceEnv)) {
+  if (process.env[key] === undefined) {
+    process.env[key] = value
+  }
+}
+
 export default defineNuxtConfig({
   compatibilityDate: '2026-05-26',
   devtools: { enabled: true },

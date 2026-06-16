@@ -18,7 +18,7 @@ Medfile es una aplicacion SaaS **para medicos independientes**. Esta carpeta con
 | Que servicios adicionales podemos ofrecer | [19-servicios-adicionales-catalogo.md](./19-servicios-adicionales-catalogo.md) |
 | Colores, tipografia, componentes UI | [03-sistema-diseno.md](./03-sistema-diseno.md) |
 | Modulos planeados y flujos del MVP | [02-modulos-y-flujos.md](./02-modulos-y-flujos.md) |
-| Arrancar el proyecto en local | [14-desarrollo-local-terminales.md](./14-desarrollo-local-terminales.md) |
+| Arrancar el proyecto en local | [14-desarrollo-local-terminales.md](./14-desarrollo-local-terminales.md) (incl. `.env.local` espejo de Railway) |
 
 ## Indice por tema
 
@@ -64,7 +64,7 @@ Medfile es una aplicacion SaaS **para medicos independientes**. Esta carpeta con
 | [10-storage-uploads-firmados.md](./10-storage-uploads-firmados.md) | S3/R2 y URLs firmadas |
 | [12-seguridad-tenant-sesion.md](./12-seguridad-tenant-sesion.md) | JWT, tenant, seguridad |
 | [13-mongodb-local-cloudinary.md](./13-mongodb-local-cloudinary.md) | MongoDB local y storage |
-| [14-desarrollo-local-terminales.md](./14-desarrollo-local-terminales.md) | Terminales y arranque local |
+| [14-desarrollo-local-terminales.md](./14-desarrollo-local-terminales.md) | Terminales, `.env.local`, espejo Railway |
 | [27-despliegue-railway-medfile-my.md](./27-despliegue-railway-medfile-my.md) | Produccion: Railway, GitHub, DNS, email, pagos |
 
 ## Regla para mantener la documentacion al dia
