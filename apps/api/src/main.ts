@@ -1,8 +1,13 @@
+import { createRequire } from 'node:module';
+import { join } from 'node:path';
 import { ValidationPipe } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
 import { buildCorsOptions } from './config/cors-origin';
+
+const require = createRequire(__filename);
+require(join(__dirname, '../../../scripts/merge-workspace-env.mjs')).applyWorkspaceEnv();
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);

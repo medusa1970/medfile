@@ -12,6 +12,7 @@
     "dev:web": "npm run dev --workspace @medfile/web",
     "dev:api": "npm run build:types && npm run start:dev --workspace @medfile/api",
     "setup:local": "node scripts/init-local-env.mjs",
+    "env:sync": "node scripts/sync-local-env.mjs",
     "env:check": "node scripts/check-local-env.mjs",
     "build:types": "npm run build --workspace @medfile/types",
     "build:api": "npm run build:types && npm run build --workspace @medfile/api",

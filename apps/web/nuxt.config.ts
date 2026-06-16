@@ -1,16 +1,9 @@
 import { dirname, resolve } from 'node:path'
-import { fileURLToPath } from 'node:url'
-import { loadEnv } from 'vite'
+import { fileURLToPath, pathToFileURL } from 'node:url'
 
 const workspaceRoot = resolve(dirname(fileURLToPath(import.meta.url)), '../..')
-const mode = process.env.NODE_ENV === 'production' ? 'production' : 'development'
-const workspaceEnv = loadEnv(mode, workspaceRoot, '')
-
-for (const [key, value] of Object.entries(workspaceEnv)) {
-  if (process.env[key] === undefined) {
-    process.env[key] = value
-  }
-}
+const mergeModule = await import(pathToFileURL(resolve(workspaceRoot, 'scripts/merge-workspace-env.mjs')).href)
+mergeModule.applyWorkspaceEnv(workspaceRoot)
 
 export default defineNuxtConfig({
   compatibilityDate: '2026-05-26',

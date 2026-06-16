@@ -21,6 +21,15 @@ npm run setup:local
 
 Eso copia [`.env.local.example`](../.env.local.example) → `.env.local` (gitignored).
 
+**Si ya tienes `.env` con secretos** (y `.env.local` sigue con placeholders de plantilla):
+
+```bash
+npm run env:sync    # opcional: vuelca secretos de .env en .env.local
+npm run env:check   # fusiona .env + .env.local; ignora placeholders
+```
+
+El API y Nuxt cargan ambos archivos fusionados (`scripts/merge-workspace-env.mjs`).
+
 ### 2. Copiar secretos desde Railway
 
 **Opcion A — panel web (recomendada)**

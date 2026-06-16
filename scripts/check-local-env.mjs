@@ -1,36 +1,15 @@
-import { existsSync, readFileSync } from 'node:fs'
-import { dirname, join } from 'node:path'
-import { fileURLToPath } from 'node:url'
+import { mergeWorkspaceEnv, getWorkspaceEnvRoot, isEnvPlaceholder } from './merge-workspace-env.mjs'
+import { existsSync } from 'node:fs'
+import { join } from 'node:path'
 
-const root = join(dirname(fileURLToPath(import.meta.url)), '..')
-const envPath = join(root, '.env.local')
+const root = getWorkspaceEnvRoot()
+const hasEnv = existsSync(join(root, '.env'))
+const hasLocal = existsSync(join(root, '.env.local'))
 
-function parseEnvFile(path) {
-  const values = new Map()
-  if (!existsSync(path)) return values
-
-  for (const line of readFileSync(path, 'utf8').split('\n')) {
-    const trimmed = line.trim()
-    if (!trimmed || trimmed.startsWith('#')) continue
-    const eq = trimmed.indexOf('=')
-    if (eq <= 0) continue
-    const key = trimmed.slice(0, eq).trim()
-    let value = trimmed.slice(eq + 1).trim()
-    if (
-      (value.startsWith('"') && value.endsWith('"')) ||
-      (value.startsWith("'") && value.endsWith("'"))
-    ) {
-      value = value.slice(1, -1)
-    }
-    values.set(key, value)
-  }
-
-  return values
-}
-
-function isPlaceholder(value) {
-  if (!value) return true
-  return /pega|genera|USUARIO|PASSWORD|opcional|^\s*$|xkeysib-pega|change-me/i.test(value)
+if (!hasEnv && !hasLocal) {
+  console.error('No existe .env ni .env.local')
+  console.error('Ejecuta: npm run setup:local')
+  process.exit(1)
 }
 
 const required = [
@@ -45,20 +24,22 @@ const recommended = [
   { key: 'EMAIL_FROM', label: 'Remitente Brevo' },
 ]
 
-if (!existsSync(envPath)) {
-  console.error('No existe .env.local')
-  console.error('Ejecuta: npm run setup:local')
-  process.exit(1)
-}
-
-const env = parseEnvFile(envPath)
+const env = mergeWorkspaceEnv(root)
 let failed = false
 
-console.log('Comprobando .env.local para desarrollo local...\n')
+console.log('Comprobando variables locales (.env + .env.local)...\n')
+
+if (hasEnv && hasLocal) {
+  console.log('  [INFO] Se fusionan .env y .env.local (placeholders en .env.local se ignoran)\n')
+} else if (hasEnv) {
+  console.log('  [INFO] Usando .env\n')
+} else {
+  console.log('  [INFO] Usando .env.local\n')
+}
 
 for (const rule of required) {
   const value = env.get(rule.key) ?? ''
-  if (isPlaceholder(value)) {
+  if (isEnvPlaceholder(value)) {
     console.error(`  [FALTA] ${rule.key} — ${rule.hint ?? 'valor requerido'}`)
     failed = true
     continue
@@ -79,22 +60,22 @@ for (const rule of required) {
 
 for (const rule of recommended) {
   const value = env.get(rule.key) ?? ''
-  if (isPlaceholder(value)) {
+  if (isEnvPlaceholder(value)) {
     console.warn(`  [OPCIONAL] ${rule.key} — ${rule.label} (en dev veras OTP en consola API)`)
   } else {
     console.log(`  [OK] ${rule.key} (${rule.label})`)
   }
 }
 
-const hasBrevo = !isPlaceholder(env.get('BREVO_API_KEY') ?? '')
-const hasResend = !isPlaceholder(env.get('RESEND_API_KEY') ?? '')
+const hasBrevo = !isEnvPlaceholder(env.get('BREVO_API_KEY') ?? '')
+const hasResend = !isEnvPlaceholder(env.get('RESEND_API_KEY') ?? '')
 if (hasBrevo && hasResend) {
   console.warn('  [AVISO] Tienes BREVO y Resend; el API usa Brevo si BREVO_API_KEY esta definido.')
 }
 
 console.log('')
 if (failed) {
-  console.error('Completa .env.local y vuelve a ejecutar npm run env:check')
+  console.error('Completa .env o .env.local y ejecuta npm run env:sync si usas ambos')
   process.exit(1)
 }
 
