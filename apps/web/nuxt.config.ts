@@ -8,6 +8,18 @@ export default defineNuxtConfig({
   nitro: {
     preset: 'node-server',
   },
+  routeRules: {
+    '/_nuxt/**': {
+      headers: {
+        'cache-control': 'public, max-age=31536000, immutable',
+      },
+    },
+    '/**': {
+      headers: {
+        'cache-control': 'no-cache, no-store, must-revalidate',
+      },
+    },
+  },
   css: ['@medfile/ui/tokens.css', '@/assets/css/main.css', '@/assets/css/marketing.css', '@/assets/css/auth.css'],
   vite: {
     optimizeDeps: {

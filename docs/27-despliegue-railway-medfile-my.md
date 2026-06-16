@@ -457,6 +457,7 @@ Semana 5+ — WhatsApp API
 | Registro **409** / cuenta atascada | Intento previo creo usuario pero fallo el correo | Borrar en Atlas (ver abajo) o `scripts/delete-account-by-email.mjs` |
 | MP checkout falla | Token TEST invalido o webhook | Revisar credenciales y URL webhook |
 | 502 en dominio | Servicio dormido (plan free Railway) | Upgrade plan o healthcheck |
+| Consola: MIME `application/json` en `/_nuxt/*.js` | HTML/JS en cache de un deploy anterior; chunks viejos ya no existen | Ctrl+Shift+R o borrar cache de `medfile.my`; tras redeploy la web recarga sola una vez |
 
 ---
 
