@@ -1,5 +1,5 @@
 <template>
-  <DoctorShell>
+  <div class="dashboard-page">
     <header class="app-header">
       <div>
         <EyebrowPill>Lectura compartida</EyebrowPill>
@@ -8,7 +8,6 @@
           De {{ view.share.sourceTenantName }} · vence {{ formatDate(view.share.expiresAt) }}
         </p>
       </div>
-      <MfButton variant="secondary" to="/compartidos">Volver</MfButton>
     </header>
 
     <div v-if="loadError" class="form-error">{{ loadError }}</div>
@@ -44,11 +43,13 @@
         </PanelCard>
       </section>
     </template>
-  </DoctorShell>
+  </div>
 </template>
 
 <script setup lang="ts">
 import type { SharedPatientView } from '@medfile/types'
+
+definePageMeta({ layout: 'doctor', ssr: false })
 
 const route = useRoute()
 const { apiFetch } = useMedfileApi()

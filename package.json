@@ -20,7 +20,9 @@
     "build": "npm run build:types && npm run build --workspaces --if-present",
     "lint": "npm run lint --workspaces --if-present",
     "typecheck": "npm run typecheck --workspaces --if-present",
-    "delete-account": "node scripts/delete-account-by-email.mjs"
+    "delete-account": "node scripts/delete-account-by-email.mjs",
+    "reset:local-clients": "node scripts/reset-local-clients.mjs --yes",
+    "reset:remote-clients": "node scripts/reset-local-clients.mjs --remote --yes"
   },
   "devDependencies": {
     "@types/nodemailer": "^6.4.24"

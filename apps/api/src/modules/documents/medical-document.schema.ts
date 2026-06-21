@@ -2,7 +2,7 @@ import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { HydratedDocument } from 'mongoose';
 
 export type MedicalDocumentRecord = HydratedDocument<MedicalDocument>;
-type MedicalDocumentSource = 'doctor' | 'assistant' | 'patient';
+type MedicalDocumentSource = 'doctor' | 'assistant' | 'patient' | 'nurse';
 type MedicalDocumentStatus =
   | 'received'
   | 'pending_review'
@@ -39,7 +39,7 @@ export class MedicalDocument {
   @Prop({ index: true })
   uploadRequestId?: string;
 
-  @Prop({ required: true, enum: ['doctor', 'assistant', 'patient'] })
+  @Prop({ required: true, enum: ['doctor', 'assistant', 'patient', 'nurse'] })
   source!: MedicalDocumentSource;
 
   @Prop({

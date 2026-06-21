@@ -1,64 +1,110 @@
 <template>
   <main class="page-shell">
-    <!-- Enlace real: solo el paciente sube, sin marketing -->
-    <section v-if="isRealPatientLink" class="patient-upload-only">
-      <div class="patient-upload-header">
-        <BrandLogo />
+    <section v-if="isRealPatientLink" class="patient-upload-page">
+      <header class="patient-upload-page__header">
+        <BrandLogo compact />
         <StatusBadge>Enlace seguro</StatusBadge>
+      </header>
+
+      <div v-if="loadingRequest" class="patient-upload-page__body">
+        <p class="panel-empty">Cargando solicitud…</p>
       </div>
 
-      <div class="mobile-frame mobile-frame--patient">
-        <div class="mobile-screen">
-          <div class="mobile-screen-content">
-            <h1 class="mobile-title">{{ uploadRequest.title }}</h1>
-            <p class="mobile-copy">
-              {{ uploadRequest.instructions || 'Toma una foto o elige un archivo de tu galería.' }}
-            </p>
-
-            <UploadZone
-              title="Tomar foto o elegir archivo"
-              description="JPG, PNG, HEIC o PDF."
-              as-label
-              for-id="file-upload-gallery"
-            >
-              <input
-                id="file-upload-gallery"
-                type="file"
-                accept="image/jpeg,image/png,image/webp,image/heic,image/heif,.pdf,application/pdf"
-                hidden
-                @change="handleFileChange"
-              />
-            </UploadZone>
-
-            <div class="patient-upload-actions">
-              <label class="patient-upload-camera-btn" for="file-upload-camera">
-                Tomar foto ahora
-              </label>
-              <input
-                id="file-upload-camera"
-                type="file"
-                accept="image/*"
-                capture="environment"
-                hidden
-                @change="handleFileChange"
-              />
-            </div>
-
-            <p v-if="selectedFile" class="selected-file-name">
-              Archivo: {{ selectedFile.name }}
-            </p>
-            <div v-if="successMessage" class="form-success mobile-action">{{ successMessage }}</div>
-            <div v-if="errorMessage" class="form-error mobile-action">{{ errorMessage }}</div>
-
-            <MfButton block class="mobile-action" @click="completeUpload">
-              {{ submitting ? 'Enviando…' : 'Enviar documento' }}
-            </MfButton>
-          </div>
+      <div v-else-if="requestError" class="patient-upload-page__body">
+        <div class="patient-upload-alert patient-upload-alert--error">
+          <strong>Enlace no válido</strong>
+          <p>{{ requestError }}</p>
         </div>
+      </div>
+
+      <div v-else-if="uploadRequest.status === 'completed'" class="patient-upload-page__body">
+        <div class="patient-upload-alert patient-upload-alert--success">
+          <strong>Documento enviado</strong>
+          <p>Gracias. Tu médico ya recibió el archivo y lo revisará pronto.</p>
+        </div>
+      </div>
+
+      <div v-else-if="uploadRequest.status !== 'open' || isExpired" class="patient-upload-page__body">
+        <div class="patient-upload-alert patient-upload-alert--error">
+          <strong>Enlace no disponible</strong>
+          <p>
+            {{
+              isExpired
+                ? 'Este enlace expiró. Pide a tu médico que genere uno nuevo.'
+                : 'Esta solicitud ya no acepta archivos.'
+            }}
+          </p>
+        </div>
+      </div>
+
+      <div v-else-if="successMessage" class="patient-upload-page__body">
+        <div class="patient-upload-alert patient-upload-alert--success">
+          <strong>¡Listo!</strong>
+          <p>{{ successMessage }}</p>
+        </div>
+      </div>
+
+      <div v-else class="patient-upload-page__body">
+        <h1 class="patient-upload-page__title">{{ uploadRequest.title }}</h1>
+        <p class="patient-upload-page__copy">
+          {{ uploadRequest.instructions || 'Toma una foto con tu cámara o elige un archivo de tu galería.' }}
+        </p>
+
+        <div class="patient-upload-picker">
+          <label class="patient-upload-picker__option" for="file-upload-camera">
+            <span class="patient-upload-picker__icon" aria-hidden="true">
+              <MedIcon name="mobile" size="sm" />
+            </span>
+            <span class="patient-upload-picker__text">
+              <strong>Tomar foto</strong>
+              <small>Abre la cámara del móvil</small>
+            </span>
+          </label>
+          <input
+            id="file-upload-camera"
+            type="file"
+            accept="image/*"
+            capture="environment"
+            hidden
+            @change="handleFileChange"
+          />
+
+          <label class="patient-upload-picker__option" for="file-upload-gallery">
+            <span class="patient-upload-picker__icon patient-upload-picker__icon--muted" aria-hidden="true">
+              <MedIcon name="folder" size="sm" />
+            </span>
+            <span class="patient-upload-picker__text">
+              <strong>Elegir archivo</strong>
+              <small>Fotos (JPG, PNG, HEIC) o PDF</small>
+            </span>
+          </label>
+          <input
+            id="file-upload-gallery"
+            type="file"
+            accept="image/jpeg,image/png,image/webp,image/heic,image/heif,image/*,application/pdf,.pdf"
+            hidden
+            @change="handleFileChange"
+          />
+        </div>
+
+        <figure v-if="previewUrl" class="patient-upload-preview">
+          <img :src="previewUrl" alt="Vista previa del archivo seleccionado" />
+        </figure>
+
+        <p v-if="selectedFile" class="selected-file-name">
+          {{ selectedFile.name }} · {{ formatFileSize(selectedFile.size) }}
+        </p>
+
+        <div v-if="errorMessage" class="form-error patient-upload-page__feedback">{{ errorMessage }}</div>
+
+        <MfButton block class="patient-upload-page__submit" :disabled="!selectedFile || submitting" @click="completeUpload">
+          {{ submitting ? 'Enviando…' : 'Enviar documento' }}
+        </MfButton>
+
+        <p v-if="expiresLabel" class="patient-upload-page__meta">{{ expiresLabel }}</p>
       </div>
     </section>
 
-    <!-- Demo / sin token: explica la función al médico -->
     <div v-else class="doctor-upload-demo">
       <MarketingNav />
 
@@ -111,10 +157,14 @@
                 <StatusBadge>Solicitud de Dra. Rivas</StatusBadge>
                 <h2 class="mobile-title">Subir exámenes</h2>
                 <p class="mobile-copy">Foto o archivo PDF desde el teléfono.</p>
-                <UploadZone
-                  title="Tomar foto o elegir archivo"
-                  description="JPG, PNG, HEIC o PDF."
-                />
+                <div class="patient-upload-picker patient-upload-picker--demo">
+                  <div class="patient-upload-picker__option">
+                    <strong>Tomar foto</strong>
+                  </div>
+                  <div class="patient-upload-picker__option">
+                    <strong>Elegir archivo</strong>
+                  </div>
+                </div>
                 <MfButton block class="mobile-action mobile-action--demo" disabled>
                   Enviar documento
                 </MfButton>
@@ -141,6 +191,7 @@ interface UploadRequest {
   title: string
   instructions?: string
   status: 'open' | 'completed' | 'expired' | 'cancelled'
+  expiresAt?: string
 }
 
 interface UploadUrlResponse {
@@ -161,6 +212,9 @@ const submitting = ref(false)
 const successMessage = ref('')
 const errorMessage = ref('')
 const selectedFile = ref<File | null>(null)
+const previewUrl = ref('')
+const requestError = ref('')
+const loadingRequest = ref(false)
 
 const doctorSteps: { icon: MedIconName; title: string; detail: string }[] = [
   {
@@ -186,28 +240,28 @@ const doctorTrustItems: { icon: MedIconName; value: string; label: string }[] = 
   { icon: 'shield', value: 'A tu consultorio', label: 'no a un chat genérico' },
 ]
 
-const fallbackRequest: UploadRequest = {
-  token: 'demo-token',
-  title: 'Subir exámenes',
-  instructions: 'Puedes tomar una foto o seleccionar un archivo guardado.',
+const uploadRequest = ref<UploadRequest>({
+  token: '',
+  title: 'Subir documento',
+  instructions: '',
   status: 'open',
-}
-
-const { data } = await useAsyncData(`upload-request-${token.value || 'demo'}`, async () => {
-  if (!isRealPatientLink.value) return fallbackRequest
-
-  try {
-    return await $fetch<UploadRequest>(
-      `${apiBaseUrl.value}/api/documents/upload-requests/${token.value}`,
-    )
-  } catch {
-    return fallbackRequest
-  }
 })
 
-const uploadRequest = computed(() => data.value ?? fallbackRequest)
-
 const apiBaseUrl = computed(() => resolvePublicApiUrl(config.public.apiUrl as string))
+
+const isExpired = computed(() => {
+  if (!uploadRequest.value.expiresAt) return false
+  return new Date() > new Date(uploadRequest.value.expiresAt)
+})
+
+const expiresLabel = computed(() => {
+  if (!uploadRequest.value.expiresAt) return ''
+  return `Válido hasta ${new Date(uploadRequest.value.expiresAt).toLocaleDateString('es-ES', {
+    day: '2-digit',
+    month: 'short',
+    year: 'numeric',
+  })}`
+})
 
 useHead({
   title: isRealPatientLink.value
@@ -215,9 +269,86 @@ useHead({
     : 'Exámenes por enlace | Medfile para médicos',
 })
 
+onMounted(() => {
+  if (isRealPatientLink.value) loadUploadRequest()
+})
+
+watch(token, () => {
+  if (isRealPatientLink.value) loadUploadRequest()
+})
+
+onBeforeUnmount(() => {
+  revokePreview()
+})
+
+async function loadUploadRequest() {
+  loadingRequest.value = true
+  requestError.value = ''
+  successMessage.value = ''
+  clearSelectedFile()
+
+  try {
+    uploadRequest.value = await $fetch<UploadRequest>(
+      `${apiBaseUrl.value}/api/documents/upload-requests/${token.value}`,
+    )
+  } catch {
+    requestError.value = 'No encontramos esta solicitud. Verifica que el enlace esté completo.'
+    uploadRequest.value = {
+      token: token.value,
+      title: 'Subir documento',
+      status: 'expired',
+    }
+  } finally {
+    loadingRequest.value = false
+  }
+}
+
 function handleFileChange(event: Event) {
   const input = event.target as HTMLInputElement
-  selectedFile.value = input.files?.[0] ?? null
+  const file = input.files?.[0] ?? null
+  setSelectedFile(file)
+  input.value = ''
+}
+
+function setSelectedFile(file: File | null) {
+  revokePreview()
+  selectedFile.value = file
+  errorMessage.value = ''
+
+  if (file?.type.startsWith('image/')) {
+    previewUrl.value = URL.createObjectURL(file)
+  }
+}
+
+function clearSelectedFile() {
+  setSelectedFile(null)
+}
+
+function revokePreview() {
+  if (previewUrl.value) {
+    URL.revokeObjectURL(previewUrl.value)
+    previewUrl.value = ''
+  }
+}
+
+function formatFileSize(bytes: number) {
+  if (bytes < 1024) return `${bytes} B`
+  if (bytes < 1024 * 1024) return `${Math.round(bytes / 1024)} KB`
+  return `${(bytes / (1024 * 1024)).toFixed(1)} MB`
+}
+
+function getApiErrorMessage(err: unknown, fallback: string) {
+  if (err && typeof err === 'object') {
+    if ('data' in err) {
+      const data = (err as { data?: { message?: string | string[] } }).data
+      if (Array.isArray(data?.message)) return data.message.join(', ')
+      if (typeof data?.message === 'string') return data.message
+    }
+    if ('statusMessage' in err && typeof (err as { statusMessage?: string }).statusMessage === 'string') {
+      return (err as { statusMessage: string }).statusMessage
+    }
+  }
+  return fallback
 }
 
 async function completeUpload() {
@@ -274,34 +405,17 @@ async function completeUpload() {
       },
     })
 
+    clearSelectedFile()
     successMessage.value = 'Documento enviado. Tu médico lo revisará pronto.'
+    uploadRequest.value = { ...uploadRequest.value, status: 'completed' }
   } catch (err) {
     console.error('[Medfile upload]', err)
-    errorMessage.value =
-      'No pudimos enviar el documento. Revisa tu conexión e intenta de nuevo. Si usas foto, prueba también «Elegir archivo» desde galería.'
+    errorMessage.value = getApiErrorMessage(
+      err,
+      'No pudimos enviar el documento. Revisa tu conexión e intenta de nuevo.',
+    )
   } finally {
     submitting.value = false
   }
 }
 </script>
-
-<style scoped>
-.patient-upload-actions {
-  margin-top: 10px;
-}
-
-.patient-upload-camera-btn {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  min-height: 44px;
-  padding: 0 16px;
-  border: 1px solid var(--mf-slate-200);
-  border-radius: 12px;
-  background: var(--mf-slate-50);
-  color: var(--mf-navy-700);
-  font-size: 14px;
-  font-weight: 700;
-  cursor: pointer;
-}
-</style>

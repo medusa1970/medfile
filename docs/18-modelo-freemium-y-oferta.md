@@ -219,11 +219,12 @@ Varios usuarios (asistente, recepcion), multi-consultorio — **fuera del MVP**.
 | Email recordatorios automaticos | ❌ | ✅ | ✅ |
 | WhatsApp plantillas API | ❌ | ✅ **100/mes incl.** | ✅ **600/mes incl.** |
 | Compartir historial colega Medfile | ❌ | ❌ | ✅ |
-| Asistente / multi-usuario | ❌ | ❌ | ❌ |
-| Reportes / auditoria avanzada | ❌ | ❌ | ✅ |
-| Automatizaciones multi-paso | ❌ | ❌ | ✅ |
+| Asistente administrativo | ❌ | ✅ 1 | ✅ hasta 2 slots |
+| Captura clinica (enfermeria delegada) | ❌ | ❌ | ✅ 1 |
+| Auditoria por usuario | ❌ | 🟡 minima | ✅ |
+| Reportes / automatizaciones multi-paso | ❌ | ❌ | ✅ |
 
-> **1 medico** en todos los planes. Asistente = futuro plan Clinica ([24](./24-planes-medico-independiente-bolivia.md)).
+> **1 medico** en Gratis. Basico incluye **1 asistente**; Profesional **compartir colega** + **captura clinica** + auditoria. Especificacion: [29-equipo-colaboradores-y-acceso-delegado.md](./29-equipo-colaboradores-y-acceso-delegado.md).
 
 ---
 

@@ -1,6 +1,8 @@
 import { Body, Controller, Get, Param, Post, UseGuards } from '@nestjs/common';
 import { AuthContext } from '../security/auth-context';
 import { CurrentTenant } from '../security/current-tenant.decorator';
+import { RequireRoles } from '../security/roles.decorator';
+import { RolesGuard } from '../security/roles.guard';
 import { TenantAuthGuard } from '../security/tenant-auth.guard';
 import { ClinicalSharesService } from './clinical-shares.service';
 import { CreateClinicalShareDto } from './dto/create-clinical-share.dto';
@@ -11,6 +13,8 @@ export class ClinicalSharesController {
   constructor(private readonly clinicalSharesService: ClinicalSharesService) {}
 
   @Post()
+  @UseGuards(RolesGuard)
+  @RequireRoles('owner', 'doctor')
   create(@CurrentTenant() auth: AuthContext, @Body() body: CreateClinicalShareDto) {
     return this.clinicalSharesService.createForTenant(auth.tenantId, auth.userId, body);
   }
@@ -26,6 +30,8 @@ export class ClinicalSharesController {
   }
 
   @Post(':id/accept')
+  @UseGuards(RolesGuard)
+  @RequireRoles('owner', 'doctor')
   accept(@CurrentTenant() auth: AuthContext, @Param('id') shareId: string) {
     return this.clinicalSharesService.acceptShare(auth.tenantId, auth.userId, shareId);
   }
@@ -36,6 +42,8 @@ export class ClinicalSharesController {
   }
 
   @Post(':id/revoke')
+  @UseGuards(RolesGuard)
+  @RequireRoles('owner', 'doctor')
   revoke(@CurrentTenant() auth: AuthContext, @Param('id') shareId: string) {
     return this.clinicalSharesService.revokeShare(auth.tenantId, auth.userId, shareId);
   }

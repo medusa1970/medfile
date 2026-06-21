@@ -106,6 +106,19 @@ Con uso medio (60 % cupo): margen **~88 %** Basico, **~80 %** Profesional.
 
 ---
 
+## Facturacion anual y WhatsApp
+
+Anual: **paga 10 meses, 12 meses de servicio** (`ANNUAL_BILLING_MONTHS_PAID = 10`). El cupo WhatsApp **sigue siendo mensual** (100 / 600); Medfile paga Meta cada mes del año contratado.
+
+| Plan | Cobro anual | Costo Meta max 12 meses (100 % cupo) | Margen bruto anual ~ |
+|------|-------------|--------------------------------------|----------------------|
+| Basico | $140 / Bs 980 | ~$13,56 | **~82 %** |
+| Profesional | $320 / Bs 2 240 | ~$81,36 | **~67 %** |
+
+Con uso medio (~60 % cupo): **~86 %** Basico, **~78 %** Profesional. El plan anual es viable con WhatsApp incluido.
+
+---
+
 ## Comportamiento cuando se acaba el cupo
 
 | % usado | UX |

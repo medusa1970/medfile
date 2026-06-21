@@ -9,7 +9,7 @@
         <StatusBadge v-if="badge" :tone="badgeTone">{{ badge }}</StatusBadge>
       </slot>
     </header>
-    <div :class="{ 'panel-body': padded }">
+    <div :class="['panel-body', { 'panel-body--flush': !padded }]">
       <slot />
     </div>
   </section>
@@ -29,7 +29,7 @@ withDefaults(
     description: '',
     badge: '',
     badgeTone: '',
-    padded: false,
+    padded: true,
   },
 )
 </script>

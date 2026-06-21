@@ -1,5 +1,5 @@
 <template>
-  <DoctorShell>
+  <div class="dashboard-page">
     <header class="app-header">
       <div>
         <EyebrowPill>Bandeja clinica</EyebrowPill>
@@ -17,7 +17,7 @@
     </section>
 
     <section class="dashboard-grid">
-      <PanelCard title="Bandeja de documentos" :badge="`${documents.length} recibidos`">
+      <PanelCard title="Bandeja de documentos" :badge="`${documents.length} recibidos`" padded>
         <div v-if="loadError" class="form-error patient-list-notice">
           No se pudo conectar al API. Mostrando documentos de ejemplo.
         </div>
@@ -33,17 +33,20 @@
       <PanelCard title="Crear solicitud de subida" padded>
         <UploadRequestForm
           :patients="patients"
+          :doctor-label="doctorLabel"
           :loading="creatingRequest"
           :error="requestError"
           :created-link="createdLink"
           @submit="createRequest"
+          @reset="resetRequest"
         />
       </PanelCard>
     </section>
-  </DoctorShell>
+  </div>
 </template>
 
 <script setup lang="ts">
+definePageMeta({ layout: 'doctor', ssr: false })
 import {
   normalizeDocument,
   type MedicalDocumentItem,
@@ -62,6 +65,22 @@ const loadError = ref(false)
 const requestError = ref('')
 const creatingRequest = ref(false)
 const createdLink = ref('')
+const doctorLabel = ref('Tu médico')
+
+onMounted(async () => {
+  try {
+    const session = await apiFetch<{ user: { fullName: string }; tenant: { name: string } }>('/api/auth/me')
+    const doctor = session.user.fullName?.trim() || session.tenant.name || 'Tu médico'
+    doctorLabel.value = doctor.startsWith('Dr') ? doctor : `Dr(a). ${doctor}`
+  } catch {
+    doctorLabel.value = 'Tu médico'
+  }
+})
+
+function resetRequest() {
+  createdLink.value = ''
+  requestError.value = ''
+}
 
 const fallbackDocuments: MedicalDocumentItem[] = [
   {

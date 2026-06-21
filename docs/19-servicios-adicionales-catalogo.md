@@ -156,8 +156,9 @@ Detalle: [07-pacientes-historia-clinica.md](./07-pacientes-historia-clinica.md),
 | Servicio | Que hace | Beneficio | Tipo | Prioridad |
 |----------|----------|-----------|------|-----------|
 | **1 usuario (medico)** | Cuenta propietaria | Plan Gratis | Plan Gratis | P0 |
-| **Asistente / secretaria** | 2–3 usuarios | Delegar carga admin | Plan Basico+ | P1 |
-| **Roles** | Medico vs asistente vs solo lectura | Seguridad | Plan Basico+ | P1 |
+| **Asistente / secretaria** | 2–3 usuarios | Delegar carga admin | Plan Basico+ | P1 — [29](./29-equipo-colaboradores-y-acceso-delegado.md) |
+| **Colaborador clinico (enfermeria)** | Captura vitales en clinicas del medico | Medicos rotativos | Plan Profesional | P2 — doc 29 |
+| **Roles** | Medico vs asistente vs captura clinica | Seguridad | Plan Basico+ | P1 |
 | **Equipo grande (10+)** | Clinica pequena | Escala | Plan Profesional | P2 |
 | **Multi-consultorio** | Varios medicos, un admin | Clinica | Plan Clinica | P3 |
 | **Auditoria por usuario** | Quien cambio que | Compliance | Plan Profesional | P2 |
@@ -206,7 +207,9 @@ Servicios **no software** que Medfile puede vender o incluir en planes altos.
 | **Soporte WhatsApp comercial** | Canal ventas/soporte Medfile→medico | Operacion interna | P1 |
 | **Consultoria flujo consultorio** | Optimizar como usa Medfile en su rutina | Servicio premium | P3 |
 | **Setup WhatsApp Business** | Ayuda a conectar WABA del consultorio | One-shot | P1 |
-| **Compartir historial con colega Medfile** | Solo ver / colaborar temporal / pasar paciente; medico titular controla | Plan Profesional+ | P2 |
+| **Compartir historial con colega Medfile** | Solo ver / colaborar temporal / pasar paciente; medico titular controla | Plan Profesional+ | P2 — [22](./22-intercambio-historiales-entre-medicos.md) |
+
+Distincion **equipo interno** (doc [29](./29-equipo-colaboradores-y-acceso-delegado.md)) vs **compartir colega** (doc 22): no son el mismo producto.
 
 Detalle: [22-intercambio-historiales-entre-medicos.md](./22-intercambio-historiales-entre-medicos.md) — catalogo de 15 escenarios reales y matriz de permisos.
 

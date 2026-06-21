@@ -109,7 +109,7 @@ interface RegisterResponse {
   }
 }
 
-const config = useRuntimeConfig()
+const apiBaseUrl = usePublicApiBaseUrl()
 const router = useRouter()
 const loading = ref(false)
 const error = ref('')
@@ -142,7 +142,7 @@ async function submit() {
   loading.value = true
 
   try {
-    const response = await $fetch<RegisterResponse>(`${config.public.apiUrl}/api/auth/register`, {
+    const response = await $fetch<RegisterResponse>(`${apiBaseUrl}/api/auth/register`, {
       method: 'POST',
       body: {
         fullName: buildRegisterFullName(form.givenNames, form.familyNames),

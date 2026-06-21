@@ -6,13 +6,15 @@ import {
 } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
-import { isValidMedfileCode, normalizeMedfileCode } from '@medfile/types';
+import { getPlanByCode, isValidMedfileCode, normalizeMedfileCode, normalizePlanCode } from '@medfile/types';
 import type { ClinicalSharePermission } from '@medfile/types';
 import { assertValidObjectId } from '../../common/assert-valid-object-id';
 import { serializeDocument, serializeDocuments } from '../../common/serialize-document';
 import { MedicalDocument } from '../documents/medical-document.schema';
 import { Encounter } from '../encounters/encounter.schema';
 import { Patient } from '../patients/patient.schema';
+import { PlanLimitExceededException } from '../subscriptions/plan-limit-exceeded.exception';
+import { SubscriptionsService } from '../subscriptions/subscriptions.service';
 import { TenantsService } from '../tenants/tenants.service';
 import { ClinicalShare, ClinicalShareDocument } from './clinical-share.schema';
 import { CreateClinicalShareDto } from './dto/create-clinical-share.dto';
@@ -35,13 +37,29 @@ export class ClinicalSharesService {
     @InjectModel(MedicalDocument.name)
     private readonly documentModel: Model<MedicalDocument>,
     private readonly tenantsService: TenantsService,
+    private readonly subscriptionsService: SubscriptionsService,
   ) {}
+
+  private async assertCanShareClinicalHistory(tenantId: string) {
+    const subscription = await this.subscriptionsService.findRawByTenantId(tenantId);
+    const plan = getPlanByCode(normalizePlanCode(subscription?.planCode ?? 'free'));
+
+    if (!plan.capabilities.clinicalShare) {
+      throw new PlanLimitExceededException(
+        'users',
+        'Compartir historial con colegas Medfile requiere plan Profesional.',
+        'professional',
+      );
+    }
+  }
 
   async createForTenant(
     sourceTenantId: string,
     userId: string,
     input: CreateClinicalShareDto,
   ) {
+    await this.assertCanShareClinicalHistory(sourceTenantId);
+
     assertValidObjectId(input.patientId);
 
     if (!isValidMedfileCode(input.targetMedfileCode)) {

@@ -79,6 +79,8 @@ Frontend:
 - `/paciente/subir` sin token: demo orientada al medico (nav + footer + CTA registro).
 - `/paciente/subir?token=...`: UI minima del paciente; titulo de pagina "Subir documento".
 - Enlaces en nav y documentos usan etiquetas del medico ("Enlace pacientes", "Vista demo del enlace"), no "Portal paciente".
+- **`UploadRequestForm`**: flujo en 2 pasos (configurar → compartir). Tras crear el enlace muestra **URL absoluta** con **Copiar** (util `copy-to-clipboard.ts` con fallback `execCommand` en HTTP/LAN), **WhatsApp** y **Probar enlace**. `MfButton` reenvía listeners (`@click`) aunque renderice enlace o botón.
+- `/paciente/subir?token=…`: portal del paciente con botones **Tomar foto** (`capture=environment`) y **Elegir archivo** (galeria + PDF), vista previa de imagen y validacion de enlace expirado/usado en backend.
 
 Limitacion en desarrollo local:
 

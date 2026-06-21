@@ -1,5 +1,5 @@
 <template>
-  <DoctorShell>
+  <div class="dashboard-page">
     <header class="app-header">
       <div>
         <EyebrowPill>Cuenta</EyebrowPill>
@@ -40,7 +40,17 @@
 
           <MedfileCodeCard v-if="medfileCode" :code="medfileCode" class="account-code-card" />
 
-          <div v-if="profileError" class="form-error">{{ profileError }}</div>
+      <MfButton
+        v-if="showTeamLink"
+        variant="secondary"
+        block
+        to="/cuenta/equipo"
+        class="account-team-link"
+      >
+        Gestionar equipo
+      </MfButton>
+
+      <div v-if="profileError" class="form-error">{{ profileError }}</div>
           <div v-if="profileSuccess" class="form-success">{{ profileSuccess }}</div>
 
           <MfButton type="submit" :disabled="profileLoading">
@@ -92,11 +102,11 @@
         </form>
       </PanelCard>
     </section>
-  </DoctorShell>
+  </div>
 </template>
 
 <script setup lang="ts">
-definePageMeta({ ssr: false })
+definePageMeta({ layout: 'doctor', ssr: false })
 
 import { normalizeRegisterPhone, validatePasswordPair } from '~/utils/auth-form'
 
@@ -105,12 +115,18 @@ interface MeResponse {
     fullName: string
     email: string
     phone?: string | null
+    role?: string
   }
   tenant: {
     medfileCode?: string
     profile?: Record<string, unknown> | null
   }
+  subscription?: {
+    plan: { capabilities: { assistantUsers: boolean } }
+  }
 }
+
+const showTeamLink = ref(false)
 
 const { apiFetch } = useMedfileApi()
 
@@ -141,6 +157,9 @@ onMounted(async () => {
     profile.email = me.user.email
     profile.phone = me.user.phone ?? ''
     medfileCode.value = me.tenant.medfileCode ?? ''
+    showTeamLink.value =
+      (me.user.role === 'owner' || me.user.role === 'doctor') &&
+      Boolean(me.subscription?.plan.capabilities.assistantUsers)
   } catch {
     profileError.value = 'No pudimos cargar tu perfil.'
   }

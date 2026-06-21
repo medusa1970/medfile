@@ -46,12 +46,30 @@ Base local: `http://localhost:3100`
 
 | Ruta | Estado | Descripcion | Doc |
 |------|--------|-------------|-----|
-| `/dashboard` | ✅ | Resumen compacto: metricas 2x2 movil, pacientes prioritarios, bandeja | [03-sistema-diseno.md](./03-sistema-diseno.md) |
+| `/dashboard` | ✅ | Resumen compacto: accesos rápidos **según plan y rol** (tiles bloqueados → `/suscripcion?upgrade=`), métricas, pacientes prioritarios, bandeja | [28-medico-funcionalidades-y-roadmap.md](./28-medico-funcionalidades-y-roadmap.md) |
 | `/pacientes` | ✅ | Listado y busqueda de pacientes | [07-pacientes-historia-clinica.md](./07-pacientes-historia-clinica.md) |
 | `/pacientes/nuevo` | ✅ | Registro de paciente | [07-pacientes-historia-clinica.md](./07-pacientes-historia-clinica.md) |
-| `/pacientes/[id]` | 🟡 | Perfil clinico: datos, antecedentes, consultas, documentos, solicitud de subida | [08-perfil-paciente-consultas.md](./08-perfil-paciente-consultas.md) |
+| `/pacientes/[id]` | 🟡 | Perfil resumido: alertas, timeline, documentos, vitales enfermería (Pro), agregar a cola | [08-perfil-paciente-consultas.md](./08-perfil-paciente-consultas.md) |
+| `/pacientes/[id]/editar` | ✅ | Editar filiacion y contacto del paciente | [07-pacientes-historia-clinica.md](./07-pacientes-historia-clinica.md) |
+| `/pacientes/[id]/antecedentes` | ✅ | Antecedentes medicos del paciente | [08-perfil-paciente-consultas.md](./08-perfil-paciente-consultas.md) |
+| `/pacientes/[id]/nueva-atencion` | ✅ | Registrar consulta o emergencia | [15-historia-clinica-emergencia.md](./15-historia-clinica-emergencia.md) |
+| `/pacientes/[id]/solicitar-subida` | ✅ | Crear enlace de subida para el paciente | [09-documentos-subida.md](./09-documentos-subida.md) |
+| `/pacientes/[id]/compartir` | ✅ | Compartir historial con colega Medfile (Profesional) | [22-intercambio-historiales-entre-medicos.md](./22-intercambio-historiales-entre-medicos.md) |
+| `/compartidos` | ✅ | Historial compartido **entre medicos** (inter-tenant) | [22-intercambio-historiales-entre-medicos.md](./22-intercambio-historiales-entre-medicos.md) |
+| `/cuenta/equipo` | ✅ | Invitar asistente o captura clínica; clínicas; auditoría (Pro) | [29-equipo-colaboradores-y-acceso-delegado.md](./29-equipo-colaboradores-y-acceso-delegado.md) |
+| `/cola-clinica` | ✅ | Cola del día y captura de signos vitales (rol `clinical_capture` o titular) | [29-equipo-colaboradores-y-acceso-delegado.md](./29-equipo-colaboradores-y-acceso-delegado.md) |
+| `/equipo/aceptar` | ✅ | Aceptar invitacion con token (publico) | [29-equipo-colaboradores-y-acceso-delegado.md](./29-equipo-colaboradores-y-acceso-delegado.md) |
 | `/documentos` | 🟡 | Bandeja de documentos recibidos; crear enlace de subida | [09-documentos-solicitudes-subida.md](./09-documentos-solicitudes-subida.md) |
-| `/suscripcion` | ✅ | Plan actual, uso, comparativa gratis vs. pago (pago real pendiente) | [11-suscripciones-limites.md](./11-suscripciones-limites.md) |
+| `/suscripcion` | ✅ | Plan actual, uso, comparativa gratis vs. pago; precios en **BOB**; Mercado Pago + QR Banco Económico | [11-suscripciones-limites.md](./11-suscripciones-limites.md), [30-banco-economico-qr-bolivia.md](./30-banco-economico-qr-bolivia.md) |
+
+### Panel admin plataforma (🔧 solo `MEDFILE_ADMIN_EMAILS`)
+
+| Ruta | Estado | Descripcion | Doc |
+|------|--------|-------------|-----|
+| `/admin/login` | ✅ | Acceso restringido equipo Medfile | [31-panel-admin-plataforma.md](./31-panel-admin-plataforma.md) |
+| `/admin` | ✅ | Resumen: consultorios, usuarios, suscripciones | [31-panel-admin-plataforma.md](./31-panel-admin-plataforma.md) |
+| `/admin/clientes` | ✅ | Listado médicos/tenants, plan, estado, proveedor pago | [31-panel-admin-plataforma.md](./31-panel-admin-plataforma.md) |
+| `/admin/configuracion` | ✅ | Toggles Mercado Pago / QR Banco Económico | [30-banco-economico-qr-bolivia.md](./30-banco-economico-qr-bolivia.md), [31-panel-admin-plataforma.md](./31-panel-admin-plataforma.md) |
 
 ### Enlace del paciente (👤)
 
@@ -74,6 +92,10 @@ Base local: `http://localhost:3100`
 | Recuperacion de contrasena | ✅ | forgot + reset (dev: token en consola) |
 | Cambio de contrasena en perfil | ✅ | Requiere contrasena actual |
 | Recuperar contrasena | ⬜ | Pendiente |
+| **Usuario asistente** (tenant interno) | ✅ | Plan Basico+ — [29](./29-equipo-colaboradores-y-acceso-delegado.md) |
+| **Colaborador clinico** (enfermeria delegada) | ✅ | Plan Profesional; cola + vitales — doc 29 |
+| **Auditoria de equipo** | ✅ | Plan Profesional; `GET /api/team/audit` |
+| Compartir historial **entre medicos** | ✅ | Distinto de equipo — [22](./22-intercambio-historiales-entre-medicos.md) + doc 29 |
 
 ### 2. Pacientes e historia clinica 🩺
 
@@ -101,8 +123,8 @@ Base local: `http://localhost:3100`
 |---------------|--------|-------|
 | Plan Gratis permanente | ✅ | `free` en backend; registro sin trial |
 | WhatsApp wa.me (compartir enlace) | ✅ | Plan Gratis; `UploadRequestForm` |
-| Planes Basico / Profesional (1 medico) | ✅ | USD 14 / 32 — [24](./24-planes-medico-independiente-bolivia.md) |
-| Pantalla de uso y limites | ✅ | `/suscripcion` comparativa gratis vs pago |
+| Planes Basico / Profesional (1 medico) | ✅ | Precios comerciales en **BOB** (ref. USD) — [24](./24-planes-medico-independiente-bolivia.md) |
+| Pantalla de uso y limites | ✅ | `/suscripcion` comparativa gratis vs pago; montos en Bs |
 | **Enforcement limites en API** | ✅ | Pacientes, subidas, storage — `PlanLimitsService` |
 | Avisos uso >= 80 % | ✅ | Dashboard + `/suscripcion` |
 | Reset contadores mensuales | ✅ | Lazy por `usagePeriodMonth` |
@@ -112,7 +134,9 @@ Base local: `http://localhost:3100`
 | Compartir historial (solo lectura) | ✅ | `ClinicalShare` + `/compartidos` |
 | Colaborar / transferir paciente | ⬜ | Fase 2–3 — [22](./22-intercambio-historiales-entre-medicos.md) |
 | Checkout Mercado Pago | ✅ | Sandbox + mock; [26](./26-mercadopago-bolivia.md) |
+| Checkout QR Banco Económico | ✅ | Live + mock; polling; webhook — [30](./30-banco-economico-qr-bolivia.md) |
 | Webhooks MP | ✅ | `POST /api/webhooks/mercadopago` |
+| Panel admin plataforma | ✅ | `/admin/*`; allowlist email — [31](./31-panel-admin-plataforma.md) |
 
 Detalle comercial: [18-modelo-freemium-y-oferta.md](./18-modelo-freemium-y-oferta.md)
 
@@ -121,7 +145,7 @@ Detalle comercial: [18-modelo-freemium-y-oferta.md](./18-modelo-freemium-y-ofert
 | Funcionalidad | Estado | Notas |
 |---------------|--------|-------|
 | Landing responsive | ✅ | `index.vue`, `marketing.css` |
-| Planes mensual / trimestral / anual en landing | ✅ | Toggle de precios |
+| Planes mensual / trimestral / anual en landing | ✅ | Toggle de precios; montos principales en **BOB** |
 | Nav movil desplegable | ✅ | `MarketingNav` |
 | Footer y CTAs a registro | ✅ | |
 
@@ -169,7 +193,9 @@ Detalle: [11-suscripciones-limites.md](./11-suscripciones-limites.md)
 | `DoctorShell` | Layout app medico (sidebar) |
 | `MarketingNav` / `MarketingFooter` | Landing y demos publicas |
 | `MedIcon` | Iconografia medica SVG |
-| `PanelCard`, `MetricCard`, `InfoCard` | Tarjetas de dashboard y marketing |
+| `PanelCard`, `MetricCard`, `StatStrip`, `KeyValueGrid`, `InfoCard` | Tarjetas y resúmenes compactos |
+| `QuickAccessGrid` | Accesos rapidos del dashboard (iconos compactos, 3 cols movil) |
+| `SearchInput` | Campo busqueda con icono lupa |
 | `PatientRow`, `DocumentList` | Listas clinicas |
 | `UploadZone`, `UploadRequestForm` | Subida y solicitudes |
 
@@ -187,6 +213,10 @@ Base local: `http://localhost:4000`
 | Pacientes | CRUD bajo `/api/patients` | [07-pacientes-historia-clinica.md](./07-pacientes-historia-clinica.md) |
 | Documentos | `/api/documents/*`, upload-requests | [09-documentos-solicitudes-subida.md](./09-documentos-solicitudes-subida.md) |
 | Suscripciones | `/api/subscriptions/*` | [11-suscripciones-limites.md](./11-suscripciones-limites.md) |
+| Pagos | `/api/payments/options`, `/api/payments/checkout`, `/api/payments/checkout/qr`, `/api/payments/checkout/:id/status`, `/api/webhooks/economico` | [26](./26-mercadopago-bolivia.md), [30](./30-banco-economico-qr-bolivia.md) |
+| Equipo / invitaciones | `/api/team/*` (incl. `GET /api/team/audit`) | [29-equipo-colaboradores-y-acceso-delegado.md](./29-equipo-colaboradores-y-acceso-delegado.md) |
+| Captura clínica | `/api/clinical-capture/*` (clínicas, cola, vitales) | [29-equipo-colaboradores-y-acceso-delegado.md](./29-equipo-colaboradores-y-acceso-delegado.md) |
+| Admin plataforma | `/api/auth/admin/login`, `/api/admin/overview`, `/api/admin/clients`, `/api/admin/settings/payments` | [31-panel-admin-plataforma.md](./31-panel-admin-plataforma.md) |
 
 ---
 

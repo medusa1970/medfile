@@ -40,6 +40,7 @@ export class SubscriptionsService {
   async findCurrentForTenant(tenantId: string) {
     await this.planLimitsService.ensureUsagePeriod(tenantId);
     await this.planLimitsService.syncPatientsUsed(tenantId);
+    const usersUsed = await this.planLimitsService.syncUsersUsed(tenantId);
 
     const subscription = await this.subscriptionModel.findOne({ tenantId }).lean().exec();
     const plan = getPlanByCode(subscription?.planCode ?? 'free');
@@ -55,7 +56,7 @@ export class SubscriptionsService {
       whatsappMessagesUsedThisMonth: 0,
     };
 
-    return this.enrichSubscription(subscription ?? fallback);
+    return this.enrichSubscription(subscription ?? fallback, usersUsed);
   }
 
   findPlans() {
@@ -84,7 +85,7 @@ export class SubscriptionsService {
     preapprovalId: string;
     planCode: string;
     billingPeriod: 'monthly' | 'quarterly' | 'annual';
-    provider: 'mock' | 'mercadopago';
+    provider: 'mock' | 'mercadopago' | 'economico_qr';
     status?: 'active' | 'past_due';
   }) {
     const subscription = await this.subscriptionModel
@@ -116,7 +117,7 @@ export class SubscriptionsService {
     planCode: string;
     billingPeriod: 'monthly' | 'quarterly' | 'annual';
     preapprovalId?: string;
-    provider?: 'mock' | 'mercadopago';
+    provider?: 'mock' | 'mercadopago' | 'economico_qr';
   }) {
     const planCode = normalizePlanCode(input.planCode);
     const plan = getPlanByCode(planCode);
@@ -171,7 +172,8 @@ export class SubscriptionsService {
     return this.enrichSubscription(subscription);
   }
 
-  private enrichSubscription(subscription: {
+  private enrichSubscription(
+    subscription: {
     tenantId: string;
     status: string;
     planCode: string;
@@ -181,7 +183,9 @@ export class SubscriptionsService {
     patientsUsed?: number;
     uploadRequestsUsedThisMonth?: number;
     whatsappMessagesUsedThisMonth?: number;
-  }) {
+  },
+    usersUsed = 1,
+  ) {
     const planCode = normalizePlanCode(subscription.planCode);
     const plan = getPlanByCode(planCode);
     const trialEndsAt = subscription.trialEndsAt ? new Date(subscription.trialEndsAt) : null;
@@ -195,7 +199,7 @@ export class SubscriptionsService {
         limit: plan.limits.patients,
       },
       users: {
-        used: 1,
+        used: usersUsed,
         limit: plan.limits.users,
       },
       storage: {

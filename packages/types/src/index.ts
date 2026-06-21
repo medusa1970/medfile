@@ -1,4 +1,24 @@
-export type TenantRole = 'owner' | 'doctor' | 'assistant';
+export type TenantRole = 'owner' | 'doctor' | 'assistant' | 'clinical_capture';
+
+export function canManageTeam(role: TenantRole) {
+  return role === 'owner' || role === 'doctor';
+}
+
+export function canPerformClinicalActions(role: TenantRole) {
+  return role === 'owner' || role === 'doctor';
+}
+
+export function canShareWithColleague(role: TenantRole) {
+  return role === 'owner' || role === 'doctor';
+}
+
+export function isClinicalCaptureRole(role: TenantRole) {
+  return role === 'clinical_capture';
+}
+
+export function canAccessDayQueue(role: TenantRole) {
+  return role === 'owner' || role === 'doctor' || role === 'clinical_capture';
+}
 
 export type SubscriptionStatus =
   | 'trialing'
@@ -16,7 +36,7 @@ export type MedicalDocumentStatus =
   | 'linked'
   | 'archived';
 
-export type MedicalDocumentSource = 'doctor' | 'assistant' | 'patient';
+export type MedicalDocumentSource = 'doctor' | 'assistant' | 'patient' | 'nurse';
 
 export * from './clinical';
 export * from './plans';

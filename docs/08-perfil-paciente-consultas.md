@@ -41,7 +41,26 @@ Ver `docs/15-historia-clinica-emergencia.md` para el mapeo completo del formular
 
 ## Pantalla inicial
 
-- `/pacientes/[id]`: perfil con cabecera fija, resumen en chips horizontales, filiacion en linea, documentos del paciente y formulario de emergencia compacto.
+Jerarquía clínica (uso real en consultorio):
+
+1. **Resumen** — `PatientFiliationCard`: nombre, `StatStrip`, alertas clínicas, `KeyValueGrid` (4 datos clave), aviso de datos faltantes con botón **Completar ahora**, botones **Ver filiación completa** / **Editar datos** (`MfButton` con rutas centralizadas en `utils/patient-routes.ts`).
+2. **Acciones** — botones tipo tarjeta (`patient-action`) con icono, título y subtítulo; navegan a vistas dedicadas.
+3. **Timeline** — entradas compactas, sin espacio vacío extra.
+4. **Documentos** — toolbar con resumen + enlace «Solicitar subida»; filas compactas con badge inline y botones en 2 columnas.
+
+Rutas del paciente:
+
+| Ruta | Uso |
+|------|-----|
+| `/pacientes/[id]` | Perfil resumido y timeline (`pages/pacientes/[id]/index.vue`) |
+| `/pacientes/[id]/filiacion` | Filiación completa en solo lectura + acceso a editar |
+| `/pacientes/[id]/editar` | Filiación, domicilio, contacto, seguro |
+| `/pacientes/[id]/antecedentes` | Antecedentes médicos (formulario completo) |
+| `/pacientes/[id]/nueva-atencion` | Registrar consulta o emergencia |
+| `/pacientes/[id]/solicitar-subida` | Enlace seguro para que el paciente suba archivos |
+| `/pacientes/[id]/compartir` | Interconsulta con colega Medfile (plan Profesional) |
+
+Compartir con colega: presets **Interconsulta** (3 consultas, sin contacto), **Referencia** (10 consultas) o personalizado; consentimiento obligatorio; solo lectura temporal. Ver [22-intercambio-historiales-entre-medicos.md](./22-intercambio-historiales-entre-medicos.md).
 
 ## Implementacion actual
 
@@ -57,6 +76,9 @@ Frontend:
 - `PatientRow` acepta `to` para navegar al perfil.
 - `/pacientes` enlaza cada fila hacia `/pacientes/[id]`.
 - `/pacientes/[id]` carga detalle, consultas y documentos desde API (`GET /api/documents?patientId=...`).
+- Rutas del módulo paciente: helper `patientRoute()` + composable `usePatientPage()`; perfil en `[id]/index.vue` (estructura anidada Nuxt).
+- Tras guardar filiación, antecedentes o nueva atención, `invalidatePatientCaches()` (`utils/patient-cache.ts`) refresca las claves `useAsyncData` del paciente para que el perfil muestre datos actualizados al volver.
+- Enlaces de filiación y acciones usan `MfButton`/`NuxtLink` con rutas explícitas; `app.vue` fuerza remount con `:page-key="route.fullPath"`.
 - La seccion Documentos permite solicitar subida con paciente preseleccionado.
 - La pantalla incluye fallback demo si API/MongoDB no estan disponibles.
 - El formulario de nueva consulta consume `POST /api/encounters`.

@@ -30,6 +30,12 @@ Ver separacion gratis vs. de pago: [20-gratis-vs-pago.md](./20-gratis-vs-pago.md
   → POST /api/auth/login
   → redirige segun estado: verificar | onboarding | dashboard
 
+/admin/login
+  → POST /api/auth/admin/login (solo emails en MEDFILE_ADMIN_EMAILS)
+  → /admin
+
+Ver panel admin: [31-panel-admin-plataforma.md](./31-panel-admin-plataforma.md).
+
 /olvide-contrasena → POST /api/auth/forgot-password
 /restablecer-contrasena → POST /api/auth/reset-password
 
@@ -155,9 +161,11 @@ Objeto JSON con datos profesionales del onboarding.
 
 ## Implementacion frontend
 
-- `AuthShell`, `auth.css`, `FormField` con iconos y toggle contrasena.
+- `AuthShell`, `auth.css`, `FormField` con iconos y toggle contrasena. Escritorio: pilares de confianza bajo el titulo intro (columna izquierda); formulario alineado arriba (columna derecha). Movil (<980px): intro → formulario → pilares para que login/registro queden visibles al cargar.
 - `utils/auth-form.ts` — validacion registro, OTP/reset preview en dev.
 - `utils/auth-routing.ts` — redireccion post-login.
+- `composables/usePublicApiBaseUrl.ts` y `utils/public-api-url.ts` — en desarrollo, si abres la web por IP LAN (`192.168.x.x:3100`) pero `NUXT_PUBLIC_API_URL` apunta a `localhost:4000`, reescriben el host del API al de la pagina (login, registro, olvide/restablecer contrasena, verificar correo, middleware y `useMedfileApi`).
+- `/restablecer-contrasena`: el token del enlace en la URL tiene prioridad sobre `sessionStorage`; cada nueva solicitud en `/olvide-contrasena` invalida el enlace anterior (un solo token activo por cuenta).
 - `middleware/auth.global.ts` — guards de sesion, verificacion y onboarding.
 - `useMedfileApi` — redirige en 401 y 403 `EMAIL_NOT_VERIFIED`.
 

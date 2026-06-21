@@ -61,7 +61,7 @@ import {
   validatePasswordPair,
 } from '~/utils/auth-form'
 
-const config = useRuntimeConfig()
+const apiBaseUrl = usePublicApiBaseUrl()
 const route = useRoute()
 const router = useRouter()
 const loading = ref(false)
@@ -75,8 +75,12 @@ const passwordConfirm = ref('')
 
 onMounted(() => {
   const preview = readPasswordResetPreview()
-  if (preview) {
+  if (!preview) return
+
+  if (!email.value.trim()) {
     email.value = preview.email
+  }
+  if (!token.value.trim()) {
     token.value = preview.token
   }
 })
@@ -99,7 +103,7 @@ async function submit() {
   loading.value = true
 
   try {
-    await $fetch(`${config.public.apiUrl}/api/auth/reset-password`, {
+    await $fetch(`${apiBaseUrl}/api/auth/reset-password`, {
       method: 'POST',
       body: {
         email: email.value.trim(),
@@ -111,8 +115,18 @@ async function submit() {
     clearPasswordResetPreview()
     success.value = 'Contraseña actualizada. Redirigiendo al login…'
     await router.push('/login')
-  } catch {
-    error.value = 'No pudimos restablecer la contraseña. Solicita un enlace nuevo.'
+  } catch (err) {
+    const apiMessage =
+      typeof err === 'object' &&
+      err &&
+      'data' in err &&
+      typeof (err as { data?: { message?: unknown } }).data?.message === 'string'
+        ? (err as { data: { message: string } }).data.message
+        : ''
+
+    error.value =
+      apiMessage ||
+      'No pudimos restablecer la contraseña. Solicita un enlace nuevo.'
   } finally {
     loading.value = false
   }

@@ -21,6 +21,12 @@ const tenantCollections = [
   'uploadrequests',
   'medicaldocuments',
   'paymentevents',
+  'qrpayments',
+  'clinicsites',
+  'dayqueueentries',
+  'nursingcaptures',
+  'teaminvitations',
+  'auditlogs',
 ];
 
 const client = new MongoClient(uri);

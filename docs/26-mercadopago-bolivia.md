@@ -16,6 +16,8 @@ Integracion de cobro recurrente para planes **Basico** y **Profesional** en Boli
 
 Stripe queda como alternativa futura si Medfile opera merchant fuera de Bolivia.
 
+**Alternativa local:** pago puntual con **QR Banco Económico** — ver [30-banco-economico-qr-bolivia.md](./30-banco-economico-qr-bolivia.md). El médico elige en `/suscripcion` según toggles del panel admin ([31](./31-panel-admin-plataforma.md)).
+
 ---
 
 ## Flujo
@@ -71,10 +73,10 @@ WEB_ORIGIN=http://localhost:3100
 
 Calculados en `packages/types/src/plans.ts` → `calculatePlanChargeBob`:
 
-| Plan | Mensual | Trimestral (-10 %) | Anual (-20 %) |
-|------|---------|-------------------|---------------|
-| Basico | Bs 98 | Bs 264 | Bs 941 |
-| Profesional | Bs 224 | Bs 605 | Bs 2150 |
+| Plan | Mensual | Trimestral (-10 %) | Anual (10 meses · 12 servicio) |
+|------|---------|-------------------|--------------------------------|
+| Basico | Bs 98 | Bs 264 | Bs 980 |
+| Profesional | Bs 224 | Bs 605 | Bs 2240 |
 
 `external_reference` en MP: `medfile:{tenantId}:{planCode}:{billingPeriod}`
 

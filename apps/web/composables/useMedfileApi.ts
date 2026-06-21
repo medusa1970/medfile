@@ -1,3 +1,4 @@
+import { adminLoginRoute, isAdminAppPath } from '~/utils/admin-routes'
 import { resolvePublicApiUrl } from '~/utils/public-api-url'
 
 type MedfileFetchOptions = NonNullable<Parameters<typeof $fetch>[1]>;
@@ -42,8 +43,9 @@ export function useMedfileApi() {
         if (import.meta.client) {
           const route = useRoute()
           const stayOnPage = AUTH_FLOW_PATHS.has(route.path)
+          const adminArea = isAdminAppPath(route.path)
           if (!stayOnPage && route.path !== '/login' && route.path !== '/registro') {
-            await navigateTo('/login?expired=1')
+            await navigateTo(adminArea ? adminLoginRoute({ expired: '1' }) : '/login?expired=1')
           }
         }
       }

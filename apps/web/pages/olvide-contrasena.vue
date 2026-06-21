@@ -49,7 +49,7 @@ interface ForgotPasswordResponse {
   }
 }
 
-const config = useRuntimeConfig()
+const apiBaseUrl = usePublicApiBaseUrl()
 const loading = ref(false)
 const error = ref('')
 const success = ref('')
@@ -73,7 +73,7 @@ async function submit() {
 
   try {
     const response = await $fetch<ForgotPasswordResponse>(
-      `${config.public.apiUrl}/api/auth/forgot-password`,
+      `${apiBaseUrl}/api/auth/forgot-password`,
       {
         method: 'POST',
         body: { email: email.value.trim() },

@@ -2,6 +2,7 @@ import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import { getPlanByCode, isQuotaExceeded, normalizePlanCode, type PlanCode } from '@medfile/types';
+import { User, UserDocument } from '../users/user.schema';
 import { Patient, PatientDocument } from '../patients/patient.schema';
 import { PlanLimitExceededException } from './plan-limit-exceeded.exception';
 import { Subscription, SubscriptionDocument } from './subscription.schema';
@@ -23,6 +24,8 @@ export class PlanLimitsService {
     private readonly subscriptionModel: Model<SubscriptionDocument>,
     @InjectModel(Patient.name)
     private readonly patientModel: Model<PatientDocument>,
+    @InjectModel(User.name)
+    private readonly userModel: Model<UserDocument>,
   ) {}
 
   async assertCanCreatePatient(tenantId: string) {
@@ -124,12 +127,62 @@ export class PlanLimitsService {
       .exec();
   }
 
+  async assertCanInviteTeamMember(tenantId: string, role: 'assistant' | 'clinical_capture' = 'assistant') {
+    const subscription = await this.loadSubscription(tenantId);
+    const plan = getPlanByCode(subscription.planCode);
+
+    if (role === 'clinical_capture') {
+      if (!plan.capabilities.clinicalCaptureUsers) {
+        throw new PlanLimitExceededException(
+          'users',
+          'Invitar captura clinica requiere plan Profesional.',
+          'professional',
+        );
+      }
+      const clinicalUsed = await this.userModel
+        .countDocuments({ tenantId, role: 'clinical_capture', status: { $in: ['active', 'invited'] } })
+        .exec();
+      if (clinicalUsed >= 1) {
+        throw new PlanLimitExceededException(
+          'users',
+          'Tu plan Profesional incluye 1 usuario de captura clinica.',
+          'professional',
+        );
+      }
+    } else if (!plan.capabilities.assistantUsers) {
+      throw new PlanLimitExceededException(
+        'users',
+        'Invitar asistentes requiere plan Basico o Profesional.',
+        'basic',
+      );
+    }
+
+    const used = await this.syncUsersUsed(tenantId);
+    const limit = plan.limits.users;
+
+    if (isQuotaExceeded(used, limit)) {
+      throw new PlanLimitExceededException(
+        'users',
+        `Has alcanzado el limite de ${limit} usuarios de tu plan.`,
+        suggestedUpgrade(normalizePlanCode(subscription.planCode)),
+      );
+    }
+  }
+
   async syncPatientsUsed(tenantId: string) {
     const count = await this.patientModel
       .countDocuments({ tenantId, status: { $ne: 'archived' } })
       .exec();
 
     await this.subscriptionModel.updateOne({ tenantId }, { $set: { patientsUsed: count } }).exec();
+    return count;
+  }
+
+  async syncUsersUsed(tenantId: string) {
+    const count = await this.userModel
+      .countDocuments({ tenantId, status: { $in: ['active', 'invited'] } })
+      .exec();
+
     return count;
   }
 

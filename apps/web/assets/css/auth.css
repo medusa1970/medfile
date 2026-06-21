@@ -16,22 +16,29 @@
 .auth-shell {
   display: grid;
   grid-template-columns: minmax(0, 0.95fr) minmax(360px, 0.72fr);
-  gap: 48px;
-  align-items: center;
+  grid-template-areas: 'intro card';
+  gap: 32px 48px;
+  align-items: start;
   width: min(1120px, calc(100% - 40px));
-  min-height: calc(100vh - 64px);
   margin: 0 auto;
-  padding: 40px 0 56px;
+  padding: 28px 0 48px;
 }
 
 .auth-intro {
   display: grid;
-  gap: 28px;
+  gap: 24px;
+  grid-area: intro;
+  align-content: start;
+}
+
+.auth-intro-copy {
+  display: grid;
+  gap: 0;
 }
 
 .auth-intro h1 {
   max-width: 640px;
-  margin: 18px 0 14px;
+  margin: 14px 0 12px;
   color: var(--mf-navy-900);
   font-size: clamp(30px, 4.5vw, 48px);
   font-weight: 700;
@@ -48,7 +55,7 @@
 }
 
 .auth-trust {
-  margin-top: 4px;
+  margin-top: 0;
   grid-template-columns: repeat(4, minmax(0, 1fr)) !important;
   gap: 10px;
 }
@@ -73,6 +80,8 @@
 }
 
 .auth-card {
+  grid-area: card;
+  align-self: start;
   border: var(--mf-border);
   border-radius: var(--mf-radius-xl);
   background: rgb(255 255 255 / 0.96);
@@ -228,11 +237,30 @@
 }
 
 @media (max-width: 980px) {
+  .auth-intro {
+    display: contents;
+  }
+
+  .auth-intro-copy {
+    grid-area: intro;
+  }
+
+  .auth-trust {
+    grid-area: trust;
+  }
+
   .auth-shell {
     grid-template-columns: 1fr;
+    grid-template-areas:
+      'intro'
+      'card'
+      'trust';
     gap: 28px;
-    min-height: auto;
     padding: 28px 0 40px;
+  }
+
+  .auth-card {
+    align-self: stretch;
   }
 
   .auth-trust {

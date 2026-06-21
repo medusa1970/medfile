@@ -169,7 +169,7 @@ function calculatePlanChargeBob(planCode, billingPeriod = 'monthly') {
     if (billingPeriod === 'quarterly')
         return Math.round(monthlyBob * 3 * 0.9);
     if (billingPeriod === 'annual')
-        return Math.round(monthlyBob * 12 * 0.8);
+        return Math.round(monthlyBob * 10);
     return monthlyBob;
 }
 function getMercadoPagoRecurringConfig(billingPeriod) {

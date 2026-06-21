@@ -9,7 +9,8 @@ El producto debe sentirse simple para consulta diaria, pero suficientemente seri
 ## Usuarios principales
 
 - Medico independiente: propietario de su cuenta, responsable de pacientes, historias clinicas, documentos y suscripcion.
-- Asistente o secretaria: **fuera del MVP de planes** (futuro add-on o plan Clinica). Hoy cada cuenta es **un medico independiente**.
+- Asistente o secretaria: **plan Basico+** (1 usuario delegado administrativo). Especificacion: [29-equipo-colaboradores-y-acceso-delegado.md](./29-equipo-colaboradores-y-acceso-delegado.md).
+- Colaborador clinico (enfermeria en clinicas donde atiende el medico): **plan Profesional** (captura delegada, no EMR de clinica). Mismo doc 29.
 - Paciente: usuario externo o invitado por enlace seguro para enviar fotos, examenes, documentos y datos solicitados por su medico.
 - Administrador de Medfile: equipo interno que gestiona planes, soporte, facturacion, incidencias y configuracion global.
 

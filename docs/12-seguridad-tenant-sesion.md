@@ -62,7 +62,20 @@ En desarrollo local la web puede correr sobre `http://localhost:3100`, por lo qu
 
 En produccion, Medfile debe publicarse exclusivamente por HTTPS. No se deben enviar credenciales, tokens ni documentos clinicos sobre HTTP.
 
-## Intercambio entre medicos (futuro)
+## Roles por tenant (actual y roadmap)
+
+Hoy el JWT incluye `role`: `owner` | `doctor` | `assistant` | `clinical_capture` (`packages/types`, `user.schema.ts`).
+
+| Rol | Estado | Alcance |
+|-----|--------|---------|
+| `owner` | ✅ | Medico titular; comparte con colegas; gestiona tenant |
+| `doctor` | Reservado | Plan Clinica futuro |
+| `assistant` | ✅ Basico+ | Admin delegado — [29](./29-equipo-colaboradores-y-acceso-delegado.md) |
+| `clinical_capture` | ✅ Profesional | Captura clínica / cola del día — [29](./29-equipo-colaboradores-y-acceso-delegado.md) |
+
+Matriz de permisos y convivencia con **compartir inter-tenant**: [29-equipo-colaboradores-y-acceso-delegado.md](./29-equipo-colaboradores-y-acceso-delegado.md) y [22-intercambio-historiales-entre-medicos.md](./22-intercambio-historiales-entre-medicos.md).
+
+## Intercambio entre medicos
 
 Por defecto **no hay acceso cross-tenant**. El **medico titular** puede compartir historial con otro medico Medfile (solo lectura temporal, colaboracion con notas, o transferencia del paciente):
 

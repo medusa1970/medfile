@@ -1,5 +1,5 @@
 <template>
-  <DoctorShell>
+  <div class="dashboard-page">
     <header class="app-header">
       <div>
         <EyebrowPill>Colaboración</EyebrowPill>
@@ -96,10 +96,11 @@
         </div>
       </article>
     </section>
-  </DoctorShell>
+  </div>
 </template>
 
 <script setup lang="ts">
+definePageMeta({ layout: 'doctor', ssr: false })
 import type { ClinicalShareSummary } from '@medfile/types'
 
 const { apiFetch } = useMedfileApi()

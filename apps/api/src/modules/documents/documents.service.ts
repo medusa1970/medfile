@@ -1,6 +1,7 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
+import type { TenantRole } from '@medfile/types';
 import { randomUUID } from 'node:crypto';
 import { assertValidObjectId } from '../../common/assert-valid-object-id';
 import { serializeDocument, serializeDocuments } from '../../common/serialize-document';
@@ -10,6 +11,7 @@ import { CreateUploadRequestDto } from './dto/create-upload-request.dto';
 import { MedicalDocument, MedicalDocumentRecord } from './medical-document.schema';
 import { StorageService } from '../storage/storage.service';
 import { PlanLimitsService } from '../subscriptions/plan-limits.service';
+import { AuditService } from '../team/audit.service';
 import { UploadRequest, UploadRequestDocument } from './upload-request.schema';
 
 @Injectable()
@@ -21,6 +23,7 @@ export class DocumentsService {
     private readonly uploadRequestModel: Model<UploadRequestDocument>,
     private readonly storageService: StorageService,
     private readonly planLimitsService: PlanLimitsService,
+    private readonly auditService: AuditService,
   ) {}
 
   async findInboxForTenant(tenantId: string) {
@@ -47,7 +50,11 @@ export class DocumentsService {
     return serializeDocuments(documents);
   }
 
-  async createUploadRequest(tenantId: string, input: CreateUploadRequestDto) {
+  async createUploadRequest(
+    tenantId: string,
+    input: CreateUploadRequestDto,
+    actor?: { userId: string; role: TenantRole },
+  ) {
     assertValidObjectId(input.patientId, 'patientId');
 
     await this.planLimitsService.assertCanCreateUploadRequest(tenantId);
@@ -65,6 +72,18 @@ export class DocumentsService {
     });
 
     await this.planLimitsService.recordUploadRequestCreated(tenantId);
+
+    if (actor) {
+      await this.auditService.log({
+        tenantId,
+        userId: actor.userId,
+        userRole: actor.role,
+        action: 'document.upload_request',
+        resourceType: 'upload_request',
+        resourceId: String(request._id),
+        metadata: { patientId: input.patientId },
+      });
+    }
 
     return serializeDocument(request.toObject());
   }
@@ -85,6 +104,8 @@ export class DocumentsService {
     if (!request) {
       throw new NotFoundException('Solicitud de subida no encontrada.');
     }
+
+    this.assertUploadRequestOpen(request);
 
     const fileSizeBytes = input.fileSizeBytes ?? 0;
     await this.planLimitsService.assertCanAddStorage(request.tenantId, fileSizeBytes);
@@ -114,11 +135,13 @@ export class DocumentsService {
   }
 
   async createUploadUrl(token: string, input: CreateUploadUrlDto) {
-    const request = await this.uploadRequestModel.findOne({ token }).lean().exec();
+    const request = await this.uploadRequestModel.findOne({ token }).exec();
 
     if (!request) {
       throw new NotFoundException('Solicitud de subida no encontrada.');
     }
+
+    this.assertUploadRequestOpen(request);
 
     return this.storageService.createDocumentUploadUrl({
       tenantId: request.tenantId,
@@ -148,5 +171,15 @@ export class DocumentsService {
     const expiresAt = new Date();
     expiresAt.setDate(expiresAt.getDate() + 7);
     return expiresAt;
+  }
+
+  private assertUploadRequestOpen(request: { status: string; expiresAt: Date }) {
+    if (request.status !== 'open') {
+      throw new BadRequestException('Esta solicitud ya fue utilizada o cancelada.');
+    }
+
+    if (new Date() > new Date(request.expiresAt)) {
+      throw new BadRequestException('Este enlace expiró. Pide a tu médico uno nuevo.');
+    }
   }
 }

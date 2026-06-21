@@ -46,7 +46,7 @@ Por que no email ni slug:
 | Onboarding | Primera vez que el medico ve su codigo |
 | Dashboard | Copiar y compartir |
 | `/compartidos` | Identidad al recibir solicitudes |
-| Ficha paciente → Compartir | Buscar colega por codigo |
+| Ficha paciente → **Compartir con colega** | Abre `/pacientes/[id]/compartir` (vista dedicada) |
 
 ---
 

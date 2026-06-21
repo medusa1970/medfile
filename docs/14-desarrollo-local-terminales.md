@@ -63,7 +63,7 @@ NUXT_PUBLIC_API_URL=http://192.168.x.x:4000
 WEB_ORIGIN=http://localhost:3100,http://127.0.0.1:3100,http://192.168.x.x:3100
 ```
 
-Sustituye `192.168.x.x` por la IP de tu PC. Nuxt ya escucha en `0.0.0.0:3100`; el API en `0.0.0.0:4000`. Si dejas `localhost` en `NUXT_PUBLIC_API_URL`, la pagina `/paciente/subir` intenta reescribir el host automaticamente cuando el paciente abre el enlace por IP LAN.
+Sustituye `192.168.x.x` por la IP de tu PC. Nuxt ya escucha en `0.0.0.0:3100`; el API en `0.0.0.0:4000`. Las pantallas de auth y `useMedfileApi` reescriben `localhost` en la URL del API al host LAN de la pagina cuando abres la web por IP; no hace falta cambiar `NUXT_PUBLIC_API_URL` solo por probar olvide contrasena o login desde el movil (opcionalmente puedes fijar `NUXT_PUBLIC_API_URL=http://192.168.x.x:4000` para evitar la reescritura).
 
 **Documentos:** sin `S3_*` en `.env.local`, las subidas quedan en modo mock (solo metadatos). Para ver el archivo real, configura R2/S3 y vuelve a subir.
 
@@ -105,6 +105,29 @@ Tras editar `.env.local`, reinicia **ambas** terminales (`Ctrl + C` y volver a e
 ### Advertencia: misma MongoDB que produccion
 
 Si pegas la URI de Atlas de produccion, **registros, pacientes y borrados en local afectan datos reales**. Usa cuentas de prueba o un cluster aparte cuando experimentes con scripts destructivos.
+
+### Vaciar todos los clientes (solo local)
+
+Para empezar de cero en pruebas locales (tenants, usuarios, pacientes, documentos, etc.):
+
+```bash
+npm run reset:local-clients
+```
+
+- Usa la misma URI que el API (`MONGODB_URL` → por defecto `mongodb://localhost:27017/medfile_dev`).
+- **Solo permite bases locales** (`localhost` / `127.0.0.1`). Aborta si la URI apunta a Atlas u otro host remoto.
+- Conserva `platformsettings` (config global de pagos del panel admin).
+- Para borrar **una** cuenta por email: `node scripts/delete-account-by-email.mjs email@ejemplo.com`
+
+### Vaciar clientes en Atlas / produccion
+
+Usa la URI remota (`MONGODB_URI`, no `MONGODB_URL` local):
+
+```bash
+npm run reset:remote-clients
+```
+
+Requiere `MEDFILE_ADMIN_EMAILS` y credenciales Atlas en `.env`. **Irreversible** en `medfile_prod`.
 
 ### Atlas: acceso desde tu IP
 

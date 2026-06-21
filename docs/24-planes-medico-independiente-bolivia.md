@@ -12,12 +12,12 @@ Documento maestro de **precios, limites y costos** para calibrar la oferta en Bo
 |-------|---------|
 | **Quien se registra** | Un medico (owner) |
 | **Quien paga** | Ese mismo medico, su tarjeta / cuenta |
-| **Usuarios incluidos** | **1** en todos los planes (el medico) |
+| **Usuarios incluidos** | **1** | **2** (medico + asistente) | **3** (medico + 2 colaboradores) — [29](./29-equipo-colaboradores-y-acceso-delegado.md) |
 | **Tenant** | Aislado; datos no se mezclan |
 | **WhatsApp automatico** | **Incluido** en Basico / Profesional (cupo mensual) |
 | **Tipo de cambio ref.** | 1 USD ≈ 7 BOB (ajustar en UI/checkout) |
 
-**Futuro (fuera MVP):** plan Clinica / asistente como add-on o producto aparte — no incluido hoy.
+**Futuro (fuera MVP):** plan Clinica multi-medico — distinto de asistente/captura clinica en doc [29](./29-equipo-colaboradores-y-acceso-delegado.md).
 
 ---
 
@@ -29,7 +29,7 @@ Documento maestro de **precios, limites y costos** para calibrar la oferta en Bo
 | **Basico** | **14** | **98** | 200 | 8 GB | 150 | **100** | 1 |
 | **Profesional** | **32** | **224** | 800 | 25 GB | 500 | **600** | 1 |
 
-Trimestral −10 %, anual −20 % (misma logica que landing).
+Trimestral −10 %, **anual: paga 10 meses, 12 meses de servicio** (2 meses gratis). Misma logica en `calculatePlanChargeBob()` y landing.
 
 Analisis de volumen WhatsApp: [25-whatsapp-incluido-en-planes.md](./25-whatsapp-incluido-en-planes.md).
 
@@ -43,7 +43,7 @@ Para **conocer Medfile** sin riesgo: consultorio ordenado, datos que no expiran.
 
 - Historia clinica, consultas, documentos, enlace paciente
 - WhatsApp **manual** (`wa.me`) sin limite
-- **Codigo Medfile** (compartir con colegas cuando el receptor tenga plan pago con share)
+- **Codigo Medfile** (compartir historial con colegas: plan Profesional)
 - Sin recordatorios automaticos email/WhatsApp API
 
 ### Basico — $14 / ~Bs 98
@@ -53,9 +53,10 @@ Para el medico independiente con **consulta regular** que quiere automatizar rec
 Todo Gratis, mas:
 
 - Mas pacientes y storage (tabla arriba)
-- **100 WhatsApp automaticos/mes incluidos** (~3/dia; cubre perfil regular)
-- Recordatorios **email**
-- Logo / nombre del consultorio en enlaces al paciente
+- **Cupo 100 WhatsApp automaticos/mes** (envio automatico proximamente)
+- Recordatorios **email** (proximamente)
+- Logo / nombre del consultorio en enlaces (proximamente)
+- **1 asistente o secretaria** incluida: filiacion, enlaces de subida, bandeja y recordatorios ([29-equipo-colaboradores-y-acceso-delegado.md](./29-equipo-colaboradores-y-acceso-delegado.md))
 
 ### Profesional — $32 / ~Bs 224
 
@@ -64,10 +65,12 @@ Para el **mismo medico** con **alto volumen** o automatizaciones avanzadas — *
 Todo Basico, mas:
 
 - Mas pacientes, storage y subidas
-- **600 WhatsApp automaticos/mes incluidos** (~20/dia; uso intensivo practico)
-- Automatizaciones, **digest semanal**
-- **Compartir historial** con colegas Medfile (Codigo Medfile)
-- Reportes, soporte prioritario
+- **Cupo 600 WhatsApp automaticos/mes** (envio automatico proximamente)
+- **Enfermeria delegada:** signos vitales, cola del dia, triage (permiso temporal revocable)
+- **Auditoria por usuario** en acciones del equipo
+- Automatizaciones, **digest semanal** (proximamente)
+- **Compartir historial** con colegas Medfile (Codigo Medfile; API exige plan Profesional)
+- Reportes, soporte prioritario (proximamente)
 
 ---
 
@@ -114,6 +117,8 @@ Con uso medio (~60 % cupo WA): margen **~88 %** Basico, **~80 %** Profesional.
 
 Al **80 %** del cupo WhatsApp: aviso en app. Al **100 %**: pausa WA auto hasta mes nuevo o upgrade.
 
+**Anual:** paga **10 meses**, recibe **12 meses** de servicio (2 meses gratis). WhatsApp incluido sigue siendo **por mes** (100 Basico / 600 Profesional).
+
 ---
 
 ## Por que estos precios
@@ -134,15 +139,17 @@ Al **80 %** del cupo WhatsApp: aviso en app. Al **100 %**: pausa WA auto hasta m
 | Pacientes / consultas / documentos | ✅ | ✅ | ✅ |
 | Codigo Medfile | ✅ | ✅ | ✅ |
 | wa.me manual | ✅ | ✅ | ✅ |
-| Email automatico | ❌ | ✅ | ✅ |
-| WhatsApp automatico (incluido) | ❌ | **100/mes** | **600/mes** |
-| Logo en enlaces | ❌ | ✅ | ✅ |
+| Email automatico | ❌ | 🟡 proximamente | 🟡 proximamente |
+| WhatsApp automatico (incluido) | ❌ | **100/mes** cupo | **600/mes** cupo |
+| Logo en enlaces | ❌ | 🟡 proximamente | 🟡 proximamente |
 | Compartir historial con colega | ❌ | ❌ | ✅ |
-| Digest / automatizaciones | ❌ | ❌ | ✅ |
-| Reportes avanzados | ❌ | ❌ | ✅ |
-| Asistente / segundo usuario | ❌ | ❌* | ❌* |
+| Digest / automatizaciones | ❌ | ❌ | 🟡 proximamente |
+| Reportes avanzados | ❌ | ❌ | 🟡 proximamente |
+| Asistente administrativo | ❌ | ✅ **1** | ✅ **hasta 2 slots** |
+| Captura clinica (enfermeria delegada) | ❌ | ❌ | ✅ **1** |
+| Auditoria por usuario | ❌ | ❌ | ✅ |
 
-\*Futuro add-on o plan Clinica.
+Detalle permisos y roadmap: [29-equipo-colaboradores-y-acceso-delegado.md](./29-equipo-colaboradores-y-acceso-delegado.md).
 
 ---
 
@@ -155,11 +162,13 @@ Al **80 %** del cupo WhatsApp: aviso en app. Al **100 %**: pausa WA auto hasta m
 | API | `subscriptions.service.ts` → `usage.whatsappMessages` |
 | Landing | `apps/web/pages/index.vue` |
 | Suscripcion | `apps/web/pages/suscripcion/index.vue` |
+| Compartir historial | `clinical-shares.service.ts` → `assertCanShareClinicalHistory` (plan Pro) |
 
 ---
 
 ## Documentos relacionados
 
+- [29-equipo-colaboradores-y-acceso-delegado.md](./29-equipo-colaboradores-y-acceso-delegado.md)
 - [25-whatsapp-incluido-en-planes.md](./25-whatsapp-incluido-en-planes.md)
 - [11-suscripciones-limites.md](./11-suscripciones-limites.md)
 - [20-gratis-vs-pago.md](./20-gratis-vs-pago.md)

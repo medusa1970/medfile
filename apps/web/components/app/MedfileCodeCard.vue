@@ -17,6 +17,8 @@
 </template>
 
 <script setup lang="ts">
+import { copyTextToClipboard } from '~/utils/copy-to-clipboard'
+
 const props = defineProps<{
   code?: string | null
   compact?: boolean
@@ -26,14 +28,14 @@ const copied = ref(false)
 
 async function copyCode() {
   if (!props.code || !import.meta.client) return
-  try {
-    await navigator.clipboard.writeText(props.code)
-    copied.value = true
+
+  const ok = await copyTextToClipboard(props.code)
+  copied.value = ok
+
+  if (ok) {
     window.setTimeout(() => {
       copied.value = false
     }, 2000)
-  } catch {
-    copied.value = false
   }
 }
 </script>

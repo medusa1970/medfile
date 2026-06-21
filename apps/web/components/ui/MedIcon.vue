@@ -108,6 +108,17 @@
       <path d="M8 11V8a4 4 0 118 0v3" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" />
     </template>
 
+    <!-- Atrás -->
+    <template v-else-if="name === 'arrow-left'">
+      <path
+        d="M15 6l-6 6 6 6"
+        stroke="currentColor"
+        stroke-width="1.75"
+        stroke-linecap="round"
+        stroke-linejoin="round"
+      />
+    </template>
+
     <!-- Inicio -->
     <template v-else-if="name === 'home'">
       <path
@@ -174,6 +185,12 @@
         stroke-linejoin="round"
       />
     </template>
+
+    <!-- Buscar -->
+    <template v-else-if="name === 'search'">
+      <circle cx="11" cy="11" r="6.5" stroke="currentColor" stroke-width="1.75" />
+      <path d="M16 16l4 4" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" />
+    </template>
   </svg>
 </template>
 
@@ -192,12 +209,14 @@ export type MedIconName =
   | 'gift'
   | 'lock'
   | 'home'
+  | 'arrow-left'
   | 'user'
   | 'mail'
   | 'clinic'
   | 'eye'
   | 'eye-off'
   | 'key'
+  | 'search'
 
 const props = withDefaults(
   defineProps<{

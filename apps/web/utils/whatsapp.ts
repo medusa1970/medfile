@@ -22,9 +22,20 @@ export function buildUploadRequestWhatsAppMessage(input: {
   title?: string;
 }) {
   const greeting = input.patientName ? `Hola ${input.patientName},` : 'Hola,';
-  const doctor = input.doctorLabel ?? 'tu medico';
-  const task = input.title ?? 'subir tus examenes o documentos medicos';
-  return `${greeting} ${doctor} te solicita ${task}. Puedes enviarlos de forma segura aqui: ${input.uploadUrl}`;
+  const doctor = input.doctorLabel ?? 'Tu medico';
+  const task = input.title ?? 'enviar tus examenes o documentos medicos';
+  const url = input.uploadUrl.trim();
+
+  return [
+    `${greeting}`,
+    '',
+    `${doctor} te solicita ${task}.`,
+    '',
+    'Abre este enlace seguro:',
+    url,
+    '',
+    'Puedes tomar una foto o subir un PDF desde tu celular.',
+  ].join('\n');
 }
 
 export function openWhatsAppShare(message: string, phone?: string) {

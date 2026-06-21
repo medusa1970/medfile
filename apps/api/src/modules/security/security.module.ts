@@ -3,6 +3,7 @@ import { ConfigService } from '@nestjs/config';
 import { JwtModule } from '@nestjs/jwt';
 import { getJwtModuleOptions } from '../../config/jwt-options';
 import { UsersModule } from '../users/users.module';
+import { RolesGuard } from './roles.guard';
 import { TenantAuthGuard } from './tenant-auth.guard';
 
 @Global()
@@ -14,7 +15,7 @@ import { TenantAuthGuard } from './tenant-auth.guard';
       useFactory: (config: ConfigService) => getJwtModuleOptions(config),
     }),
   ],
-  providers: [TenantAuthGuard],
-  exports: [TenantAuthGuard, JwtModule, UsersModule],
+  providers: [TenantAuthGuard, RolesGuard],
+  exports: [TenantAuthGuard, RolesGuard, JwtModule, UsersModule],
 })
 export class SecurityModule {}

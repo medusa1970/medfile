@@ -1,6 +1,5 @@
 <template>
-  <DoctorShell>
-    <div class="dashboard-page">
+  <div class="dashboard-page">
       <header class="dashboard-topbar">
         <div class="dashboard-topbar__main">
           <EyebrowPill>{{ planLabel }}</EyebrowPill>
@@ -9,18 +8,24 @@
             Resumen clínico de {{ clinicName }}.
           </p>
         </div>
-        <input
-          class="search-input search-input--dashboard"
-          type="search"
+        <SearchInput
+          v-model="searchQuery"
+          block
           placeholder="Buscar paciente o documento"
+          aria-label="Buscar paciente o documento"
+          @submit="goToSearch"
         />
       </header>
+
+      <QuickAccessGrid :items="quickAccessItems" :subtitle="quickAccessSubtitle" />
 
       <MedfileCodeCard
         v-if="medfileCode"
         :code="medfileCode"
         compact
       />
+
+      <StatStrip :items="dashboardStats" aria-label="Indicadores del consultorio" />
 
       <div v-if="usageWarnings.length" class="plan-usage-warnings" role="status">
         <article v-for="warning in usageWarnings" :key="warning.resource" class="plan-usage-warning">
@@ -32,75 +37,87 @@
         </article>
       </div>
 
-      <section class="metric-grid metric-grid--dashboard" aria-label="Indicadores clínicos">
-        <MetricCard
-          v-for="metric in metrics"
-          :key="metric.label"
-          :label="metric.label"
-          :value="metric.value"
-          :note="metric.note"
-          :tone="metric.tone"
-        />
-      </section>
-
-      <section class="dashboard-grid dashboard-grid--compact">
-        <PanelCard padded>
+      <section class="dashboard-grid dashboard-grid--compact" aria-label="Actividad reciente">
+        <PanelCard padded class="patient-panel-compact dashboard-panel-compact">
           <template #header>
-            <div class="dashboard-panel-heading">
-              <h2>Pacientes que requieren atención</h2>
-              <p class="panel-description">
-                Priorizados por riesgo y documentos pendientes.
-              </p>
-            </div>
-            <MfButton to="/pacientes/nuevo">Nuevo paciente</MfButton>
+            <h2>Pacientes que requieren atención</h2>
           </template>
 
-          <p v-if="isLoading" class="panel-empty">Cargando tu panel…</p>
+          <div class="panel-toolbar">
+            <span class="panel-toolbar__meta">
+              {{ patients.length }} registrados
+              <template v-if="priorityPatients.length">
+                · {{ priorityPatients.length }} prioritarios
+              </template>
+            </span>
+            <NuxtLink to="/pacientes/nuevo" class="panel-toolbar__link">Nuevo paciente</NuxtLink>
+          </div>
+
+          <p v-if="isLoading" class="panel-empty panel-empty--compact">Cargando tu panel…</p>
 
           <p v-else-if="loadError" class="form-error dashboard-notice">
             No pudimos cargar tus datos. Inicia sesión nuevamente o verifica que el API esté activo.
           </p>
 
-          <p v-else-if="priorityPatients.length === 0" class="panel-empty">
-            Aún no tienes pacientes. Crea el primero para empezar.
+          <p v-else-if="priorityPatients.length === 0" class="panel-empty panel-empty--compact">
+            Aún no tienes pacientes.
+            <NuxtLink to="/pacientes/nuevo">Crear el primero</NuxtLink>
           </p>
 
-          <PatientRow
-            v-for="patient in priorityPatients"
-            :key="patient.id"
-            :initials="patient.initials"
-            :name="patient.name"
-            :detail="patient.detail"
-            :status="patient.status"
-            :tone="patient.tone"
-            :to="`/pacientes/${patient.id}`"
-          />
+          <div v-else class="dashboard-patient-list">
+            <PatientRow
+              v-for="patient in priorityPatients"
+              :key="patient.id"
+              :initials="patient.initials"
+              :name="patient.name"
+              :detail="patient.detail"
+              :status="patient.status"
+              :tone="patient.tone"
+              :to="`/pacientes/${patient.id}`"
+            />
+          </div>
         </PanelCard>
 
-        <PanelCard
-          title="Bandeja de archivos"
-          :badge="pendingDocumentsLabel"
-          badge-tone="warning"
-          padded
-        >
-          <UploadZone
-            compact
-            icon="DOC"
-            title="Documentos recibidos"
-            description="Revisa archivos enviados por pacientes y adjúntalos a la historia clínica."
-          >
-            <MfButton variant="secondary" to="/documentos">Ver bandeja</MfButton>
-          </UploadZone>
+        <PanelCard padded class="patient-panel-compact dashboard-panel-compact">
+          <template #header>
+            <h2>Bandeja de archivos</h2>
+          </template>
+
+          <div class="panel-toolbar">
+            <span class="panel-toolbar__meta">
+              {{ documents.length }} recibidos
+              <template v-if="pendingDocuments > 0">
+                · <strong class="panel-toolbar__emphasis">{{ pendingDocuments }} por revisar</strong>
+              </template>
+            </span>
+            <NuxtLink to="/documentos" class="panel-toolbar__link">Ver bandeja</NuxtLink>
+          </div>
+
+          <p v-if="pendingDocuments === 0 && documents.length === 0" class="panel-empty panel-empty--compact">
+            Sin documentos pendientes. Pide a tus pacientes que suban exámenes con un enlace seguro.
+          </p>
+
+          <p v-else-if="pendingDocuments === 0" class="panel-empty panel-empty--compact">
+            Bandeja al día. No hay archivos pendientes de revisión.
+          </p>
+
+          <p v-else class="panel-hint panel-hint--compact">
+            Tienes {{ pendingDocuments }} archivo(s) por clasificar en la historia clínica.
+          </p>
         </PanelCard>
       </section>
     </div>
-  </DoctorShell>
 </template>
 
 <script setup lang="ts">
+import { buildDoctorQuickAccess } from '~/utils/doctor-quick-access'
+import type { PlanCapabilities } from '@medfile/types/plans'
+import type { StatStripItem } from '~/components/ui/StatStrip.vue'
+
 import type { PlanLimitResource, PlanUsageWarning } from '@medfile/types/plans'
 
 definePageMeta({
+  layout: 'doctor',
   ssr: false,
 })
 
@@ -112,6 +129,7 @@ interface SessionResponse {
     fullName: string
     email: string
     emailVerified: boolean
+    role?: string
   }
   tenant: {
     name: string
@@ -122,11 +140,13 @@ interface SessionResponse {
     plan: {
       name: string
       tier?: string
+      capabilities?: PlanCapabilities
     }
     usage: {
       patients: { used: number; limit: number }
       uploadRequests: { used: number; limit: number }
       storage: { used: number; limit: number }
+      users?: { used: number; limit: number }
       whatsappMessages?: { used: number; limit: number }
     }
     usageWarnings?: PlanUsageWarning[]
@@ -156,7 +176,19 @@ interface DashboardData {
 }
 
 const { apiFetch, hasSession } = useMedfileApi()
+const router = useRouter()
 const loadError = ref(false)
+const searchQuery = ref('')
+
+function goToSearch() {
+  const q = searchQuery.value.trim()
+  if (!q) {
+    router.push('/pacientes')
+    return
+  }
+
+  router.push({ path: '/pacientes', query: { q } })
+}
 
 const { data: dashboardData, pending } = await useAsyncData('dashboard', async () => {
   if (!hasSession()) {
@@ -176,6 +208,12 @@ const { data: dashboardData, pending } = await useAsyncData('dashboard', async (
         path: '/verificar-correo',
         query: { email: session.user.email },
       })
+      return null
+    }
+
+    const role = session.user.role ?? 'owner'
+    if (role === 'clinical_capture') {
+      await navigateTo('/cola-clinica')
       return null
     }
 
@@ -219,6 +257,7 @@ function warningTitle(resource: PlanLimitResource) {
     uploadRequests: 'Cerca del limite de subidas',
     storage: 'Cerca del limite de almacenamiento',
     whatsappMessages: 'Cerca del limite de WhatsApp',
+    users: 'Cerca del limite de usuarios',
   }
   return titles[resource]
 }
@@ -235,43 +274,81 @@ const pendingDocuments = computed(
   () => documents.value.filter((document) => document.status === 'pending_review').length,
 )
 
-const pendingDocumentsLabel = computed(() =>
-  pendingDocuments.value === 0 ? 'Sin pendientes' : `${pendingDocuments.value} pendientes`,
+const sessionRole = computed(() => session.value?.user.role ?? 'owner')
+
+const quickAccessItems = computed(() =>
+  buildDoctorQuickAccess({
+    pendingDocuments: pendingDocuments.value,
+    role: sessionRole.value,
+    capabilities: session.value?.subscription.plan.capabilities,
+    usersUsed: session.value?.subscription.usage.users?.used,
+    usersLimit: session.value?.subscription.usage.users?.limit,
+    returnTo: '/dashboard',
+  }),
 )
 
-const metrics = computed(() => {
+const quickAccessSubtitle = computed(() => {
+  if (sessionRole.value === 'assistant') {
+    return 'Tareas administrativas de tu consultorio.'
+  }
+  const caps = session.value?.subscription.plan.capabilities
+  if (!caps?.assistantUsers) {
+    return 'Funciones de tu consulta. Los accesos con candado mejoran con plan Básico o Profesional.'
+  }
+  if (!caps.clinicalCaptureUsers) {
+    return 'Tu equipo y consulta. Enfermería delegada requiere plan Profesional.'
+  }
+  return 'Funciones principales de tu consulta y equipo.'
+})
+
+const dashboardStats = computed<StatStripItem[]>(() => {
   const usage = session.value?.subscription.usage
   const criticalCount = patients.value.filter((patient) => patient.status === 'critical').length
   const followUpCount = patients.value.filter((patient) => patient.status === 'follow_up').length
   const patientUsed = usage?.patients.used ?? patients.value.length
   const patientLimit = usage?.patients.limit
+  const usersUsed = usage?.users?.used
+  const usersLimit = usage?.users?.limit
+  const showUsers = sessionRole.value === 'owner' || sessionRole.value === 'doctor'
 
-  return [
+  const stats: StatStripItem[] = [
     {
       label: 'Pacientes',
       value: patientLimit ? `${patientUsed}/${patientLimit}` : String(patientUsed),
-      note: 'registrados',
-      tone: toneForUsage(patientUsed, patientLimit ?? 0),
+      badge: 'registrados',
+      badgeTone: toneForUsage(patientUsed, patientLimit ?? 0),
     },
     {
       label: 'Documentos',
       value: String(documents.value.length),
-      note: pendingDocuments.value ? `${pendingDocuments.value} sin revisar` : 'bandeja vacia',
-      tone: (pendingDocuments.value ? 'warning' : '') as BadgeTone,
+      badge: pendingDocuments.value ? `${pendingDocuments.value} sin revisar` : 'al día',
+      badgeTone: pendingDocuments.value ? 'warning' : 'success',
     },
     {
       label: 'Seguimiento',
       value: String(followUpCount),
-      note: criticalCount ? `${criticalCount} criticos` : 'sin alertas',
-      tone: (criticalCount ? 'danger' : followUpCount ? 'warning' : '') as BadgeTone,
-    },
-    {
-      label: 'Almacenamiento',
-      value: storagePercent.value,
-      note: `plan ${session.value?.subscription.plan.name?.toLowerCase() ?? 'gratis'}`,
-      tone: toneForUsage(usage?.storage.used ?? 0, usage?.storage.limit ?? 0),
+      badge: criticalCount ? `${criticalCount} críticos` : 'sin alertas',
+      badgeTone: criticalCount ? 'danger' : followUpCount ? 'warning' : '',
     },
   ]
+
+  if (showUsers && usersLimit && usersLimit > 1) {
+    stats.push({
+      label: 'Usuarios',
+      value: `${usersUsed ?? 1}/${usersLimit}`,
+      badge: `plan ${session.value?.subscription.plan.name?.toLowerCase() ?? 'gratis'}`,
+      badgeTone: toneForUsage(usersUsed ?? 1, usersLimit),
+    })
+  } else {
+    stats.push({
+      label: 'Almacenamiento',
+      value: storagePercent.value,
+      badge: `plan ${session.value?.subscription.plan.name?.toLowerCase() ?? 'gratis'}`,
+      badgeTone: toneForUsage(usage?.storage.used ?? 0, usage?.storage.limit ?? 0),
+    })
+  }
+
+  return stats
 })
 
 function toneForUsage(used: number, limit: number): BadgeTone {

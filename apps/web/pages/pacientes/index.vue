@@ -1,29 +1,31 @@
 <template>
-  <DoctorShell>
-    <div class="dashboard-page">
-      <header class="dashboard-topbar">
+  <div class="dashboard-page">
+      <header class="dashboard-topbar dashboard-topbar--patients">
         <div class="dashboard-topbar__main">
           <EyebrowPill>Módulo clínico</EyebrowPill>
           <h1 class="dashboard-topbar__title">Pacientes</h1>
-          <p class="dashboard-topbar__lead">Archivo médico de tu consulta.</p>
+          <p class="dashboard-topbar__lead">
+            {{ listSubtitle }}
+          </p>
         </div>
-        <MfButton to="/pacientes/nuevo">Nuevo paciente</MfButton>
       </header>
 
-      <section class="metric-grid metric-grid--dashboard" aria-label="Resumen de pacientes">
-        <MetricCard label="Registrados" :value="String(patients.length)" note="tenant actual" />
-        <MetricCard label="Seguimiento" :value="String(followUpCount)" note="revisar" tone="warning" />
-        <MetricCard label="Críticos" :value="String(criticalCount)" note="prioridad" tone="danger" />
-        <MetricCard label="Documentos" :value="String(pendingDocuments)" note="pendientes" />
-      </section>
-
-      <PanelCard badge="Beta" padded class="dashboard-panel">
+      <PanelCard badge="Beta" padded class="dashboard-panel dashboard-panel--patients">
         <template #header>
           <div class="dashboard-panel-heading">
             <h2>Listado de pacientes</h2>
-            <p class="panel-description">Busca por nombre o teléfono.</p>
+            <p class="panel-description patients-summary-line">
+              <span>{{ patients.length }} registrados</span>
+              <span v-if="followUpCount">{{ followUpCount }} seguimiento</span>
+              <span v-if="criticalCount" class="patients-summary-line--danger">{{ criticalCount }} críticos</span>
+              <span v-if="pendingDocuments">{{ pendingDocuments }} docs pendientes</span>
+            </p>
           </div>
-          <input v-model="query" class="search-input search-input--dashboard" type="search" placeholder="Buscar…" />
+          <SearchInput
+            v-model="query"
+            block
+            placeholder="Buscar por nombre o teléfono"
+          />
         </template>
 
         <div v-if="loadError" class="form-error patient-list-notice">
@@ -42,10 +44,10 @@
         />
       </PanelCard>
     </div>
-  </DoctorShell>
 </template>
 
 <script setup lang="ts">
+definePageMeta({ layout: 'doctor', ssr: false })
 type PatientStatus = 'active' | 'follow_up' | 'critical' | 'archived'
 type BadgeTone = '' | 'warning' | 'danger' | 'success'
 
@@ -59,10 +61,34 @@ interface PatientListItem {
   activeAlerts?: string[]
 }
 
+const route = useRoute()
 const { apiFetch } = useMedfileApi()
-const query = ref('')
+const query = ref(String(route.query.q || ''))
+
+watch(
+  () => route.query.q,
+  (value) => {
+    query.value = String(value || '')
+  },
+)
 const loadError = ref(false)
 const pendingDocuments = ref(0)
+const sessionRole = ref('owner')
+
+const listSubtitle = computed(() =>
+  sessionRole.value === 'clinical_capture'
+    ? 'Pacientes en tu cola autorizada de hoy.'
+    : 'Archivo médico de tu consulta.',
+)
+
+onMounted(async () => {
+  try {
+    const me = await apiFetch<{ user: { role?: string } }>('/api/auth/me')
+    sessionRole.value = me.user.role ?? 'owner'
+  } catch {
+    sessionRole.value = 'owner'
+  }
+})
 
 const fallbackPatients: PatientListItem[] = [
   {
@@ -172,5 +198,26 @@ function getStatusTone(status: PatientStatus): BadgeTone {
 
 .dashboard-panel :deep(.patient-row) {
   padding: 10px 14px;
+}
+
+.patients-summary-line {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px 10px;
+  margin-top: 4px;
+  color: var(--mf-slate-600);
+  font-size: 13px;
+  line-height: 1.4;
+}
+
+.patients-summary-line span:not(:first-child)::before {
+  content: '·';
+  margin-right: 10px;
+  color: var(--mf-slate-400);
+}
+
+.patients-summary-line--danger {
+  color: var(--mf-danger-700, #b91c1c);
+  font-weight: 700;
 }
 </style>

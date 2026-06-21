@@ -96,6 +96,39 @@ export class MailService implements OnModuleInit {
     await this.send({ to: input.to, subject, text, html });
   }
 
+  async sendTeamInvitation(input: {
+    to: string;
+    inviteeName: string;
+    clinicName: string;
+    inviterName: string;
+    acceptUrl: string;
+    expiresInDays: number;
+    roleLabel?: string;
+  }) {
+    const roleText = input.roleLabel ?? 'asistente administrativo';
+    const subject = `Invitacion al equipo de ${input.clinicName} en Medfile`;
+    const text = [
+      `Hola ${input.inviteeName},`,
+      '',
+      `${input.inviterName} te invito al consultorio ${input.clinicName} en Medfile como ${roleText}.`,
+      '',
+      `Acepta la invitacion aqui: ${input.acceptUrl}`,
+      '',
+      `El enlace vence en ${input.expiresInDays} dias.`,
+      '',
+      '— Equipo Medfile',
+    ].join('\n');
+
+    const html = `
+      <p>Hola ${input.inviteeName},</p>
+      <p><strong>${input.inviterName}</strong> te invito al consultorio <strong>${input.clinicName}</strong> en Medfile como ${roleText}.</p>
+      <p><a href="${input.acceptUrl}">Aceptar invitacion</a></p>
+      <p>El enlace vence en ${input.expiresInDays} dias.</p>
+    `;
+
+    await this.send({ to: input.to, subject, text, html });
+  }
+
   private getActiveProvider(): MailProvider | null {
     if (this.shouldUseBrevoApi()) {
       return 'brevo';

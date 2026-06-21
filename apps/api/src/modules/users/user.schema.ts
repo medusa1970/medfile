@@ -2,7 +2,7 @@ import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { HydratedDocument } from 'mongoose';
 
 export type UserDocument = HydratedDocument<User>;
-type TenantRole = 'owner' | 'doctor' | 'assistant';
+type TenantRole = 'owner' | 'doctor' | 'assistant' | 'clinical_capture';
 type UserStatus = 'active' | 'invited' | 'disabled';
 
 @Schema({ timestamps: true })
@@ -19,8 +19,11 @@ export class User {
   @Prop({ required: true })
   passwordHash!: string;
 
-  @Prop({ required: true, default: 'owner', enum: ['owner', 'doctor', 'assistant'] })
+  @Prop({ required: true, default: 'owner', enum: ['owner', 'doctor', 'assistant', 'clinical_capture'] })
   role!: TenantRole;
+
+  @Prop({ type: [String], default: [] })
+  clinicContexts!: string[];
 
   @Prop({ required: true, default: 'active', enum: ['active', 'invited', 'disabled'] })
   status!: UserStatus;

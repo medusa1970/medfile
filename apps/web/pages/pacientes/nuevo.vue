@@ -1,13 +1,11 @@
 <template>
-  <DoctorShell>
-    <div class="dashboard-page">
+  <div class="dashboard-page">
       <header class="dashboard-topbar">
         <div class="dashboard-topbar__main">
           <EyebrowPill>Nuevo paciente</EyebrowPill>
           <h1 class="dashboard-topbar__title">Registrar paciente</h1>
           <p class="dashboard-topbar__lead">Filiación inicial; el perfil clínico se completa después.</p>
         </div>
-        <MfButton variant="secondary" to="/pacientes">Volver al listado</MfButton>
       </header>
 
       <PanelCard title="Datos del paciente" padded class="dashboard-panel">
@@ -163,16 +161,17 @@
           <div v-if="saved" class="form-success form-wide">Paciente registrado correctamente.</div>
 
           <div class="form-actions form-wide">
-            <MfButton variant="secondary" to="/pacientes">Cancelar</MfButton>
             <MfButton type="submit">{{ loading ? 'Guardando…' : 'Guardar paciente' }}</MfButton>
           </div>
         </form>
       </PanelCard>
     </div>
-  </DoctorShell>
 </template>
 
 <script setup lang="ts">
+definePageMeta({ layout: 'doctor', ssr: false })
+import { buildPatientBody, getPatientFormErrorMessage } from '~/utils/patient-form-body'
+
 const sexOptions = [
   { value: 'female', label: 'Femenino' },
   { value: 'male', label: 'Masculino' },
@@ -221,54 +220,17 @@ async function submit() {
   try {
     const created = await apiFetch<{ id?: string; _id?: string }>('/api/patients', {
       method: 'POST',
-      body: sanitizeBody(form),
+      body: buildPatientBody(form),
     })
 
     const patientId = resolveApiId(created)
     saved.value = true
     await router.push(patientId ? `/pacientes/${patientId}` : '/pacientes')
   } catch (err) {
-    error.value = getErrorMessage(err)
+    error.value = getPatientFormErrorMessage(err, 'create')
   } finally {
     loading.value = false
   }
-}
-
-function sanitizeBody(input: typeof form) {
-  const body: Record<string, unknown> = {
-    fullName: input.fullName,
-    documentId: input.documentId || undefined,
-    sex: input.sex || undefined,
-    birthDate: input.birthDate || undefined,
-    guardianName: input.guardianName || undefined,
-    phone: input.phone || undefined,
-    email: input.email || undefined,
-    status: input.status,
-    emergencyContactName: input.emergencyContactName || undefined,
-    emergencyContactPhone: input.emergencyContactPhone || undefined,
-    insuranceName: input.insuranceName || undefined,
-    policyNumber: input.policyNumber || undefined,
-  }
-
-  const address = Object.fromEntries(
-    Object.entries(input.address).filter(([, value]) => value !== ''),
-  )
-
-  if (Object.keys(address).length > 0) {
-    body.address = address
-  }
-
-  return body
-}
-
-function getErrorMessage(err: unknown) {
-  if (typeof err === 'object' && err && 'data' in err) {
-    const data = (err as { data?: { message?: string | string[] } }).data
-    if (Array.isArray(data?.message)) return data.message.join(', ')
-    if (data?.message) return data.message
-  }
-
-  return 'No pudimos registrar al paciente. Verifica los datos e intenta nuevamente.'
 }
 </script>
 

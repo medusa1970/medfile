@@ -11,6 +11,7 @@ import { JwtService } from '@nestjs/jwt';
 import { compare, hash } from 'bcryptjs';
 import { createHash, randomBytes } from 'crypto';
 import { verifyAccessToken } from '../../common/verify-access-token';
+import { isPlatformAdminEmail } from '../../common/platform-admin';
 import { MailService } from '../mail/mail.service';
 import { SubscriptionsService } from '../subscriptions/subscriptions.service';
 import { TenantsService } from '../tenants/tenants.service';
@@ -102,6 +103,37 @@ export class AuthService {
     const passwordMatches = await compare(input.password, user.passwordHash);
     if (!passwordMatches) {
       throw new UnauthorizedException('Credenciales invalidas.');
+    }
+
+    const tenant = await this.tenantsService.findById(user.tenantId);
+
+    return this.buildSessionResponse({
+      userId: String(user._id),
+      tenantId: user.tenantId,
+      email: user.email,
+      fullName: user.fullName,
+      role: user.role,
+      tenantName: tenant?.name as string | undefined,
+      tenantSlug: tenant?.slug as string | undefined,
+      medfileCode: tenant?.medfileCode as string | undefined,
+      emailVerified: this.isEmailVerified(user.emailVerified),
+      onboardingCompleted: this.isOnboardingCompleted(user.onboardingCompletedAt),
+    });
+  }
+
+  async adminLogin(input: LoginDto) {
+    const user = await this.usersService.findByEmail(input.email);
+    if (!user || user.status !== 'active') {
+      throw new UnauthorizedException('Credenciales invalidas.');
+    }
+
+    const passwordMatches = await compare(input.password, user.passwordHash);
+    if (!passwordMatches) {
+      throw new UnauthorizedException('Credenciales invalidas.');
+    }
+
+    if (!isPlatformAdminEmail(user.email, this.config)) {
+      throw new ForbiddenException('Acceso reservado al equipo Medfile.');
     }
 
     const tenant = await this.tenantsService.findById(user.tenantId);
@@ -379,6 +411,7 @@ export class AuthService {
         role: user.role,
         emailVerified: this.isEmailVerified(user.emailVerified),
         onboardingCompleted: this.isOnboardingCompleted(user.onboardingCompletedAt),
+        isPlatformAdmin: isPlatformAdminEmail(user.email, this.config),
       },
       tenant: {
         id: String(tenant._id),

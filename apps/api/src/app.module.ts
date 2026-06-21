@@ -1,6 +1,7 @@
 import { Module } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { MongooseModule } from '@nestjs/mongoose';
+import { AdminModule } from './modules/admin/admin.module';
 import { getWorkspaceEnvPaths } from './config/env-paths';
 import { AuthModule } from './modules/auth/auth.module';
 import { TenantsModule } from './modules/tenants/tenants.module';
@@ -12,6 +13,7 @@ import { SecurityModule } from './modules/security/security.module';
 import { PaymentsModule } from './modules/payments/payments.module';
 import { PatientsModule } from './modules/patients/patients.module';
 import { SubscriptionsModule } from './modules/subscriptions/subscriptions.module';
+import { TeamModule } from './modules/team/team.module';
 
 @Module({
   imports: [
@@ -40,6 +42,8 @@ import { SubscriptionsModule } from './modules/subscriptions/subscriptions.modul
     SubscriptionsModule,
     ClinicalSharesModule,
     PaymentsModule,
+    AdminModule,
+    TeamModule,
   ],
 })
 export class AppModule {}

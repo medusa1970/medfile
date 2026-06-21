@@ -44,19 +44,46 @@ Las fuentes se cargan via Google Fonts en `apps/web/nuxt.config.ts`.
 
 Iconografia de landing: componente `MedIcon` (`apps/web/components/ui/MedIcon.vue`) con iconos SVG medicos (calendario, carpeta, subida, escudo, etc.). Evitar numeros solos como unico indicador visual en secciones de marketing.
 
-Layouts compactos en movil: clases `section--compact`, `workflow-grid--compact`, `feature-grid--compact` en `marketing.css`. Preview del producto sin sidebar en landing (`preview-body--compact` con `grid-template-columns: 1fr`; el grid base de `preview-body` reserva 160px para sidebar y deja hueco si no hay columna lateral); metricas en fila de 3; maximo 2 filas de pacientes/documentos.
+Layouts compactos en movil: clases `section--compact`, `workflow-grid--compact`, `feature-grid--compact` en `marketing.css`. Hero landing (`hero--landing`): intro a la izquierda; a la derecha `hero-showcase` con pilares (`trust-row--stacked`) junto al preview (`preview-content--split`: metricas apiladas + lista de pacientes). Seccion `#flujo`: `workflow-showcase` con pasos verticales a la izquierda y `benefits-strip` a la derecha en escritorio. Barra `landing-quick-nav` bajo el hero con enlaces espaciados y CTA alineado a la derecha. Preview del producto sin sidebar en landing (`preview-body--compact` con `grid-template-columns: 1fr`; el grid base de `preview-body` reserva 160px para sidebar y deja hueco si no hay columna lateral); metricas en fila de 3; maximo 2 filas de pacientes/documentos.
 
 Nav marketing (`MarketingNav`, clase `marketing-nav`): cabecera fija en landing con layout de tres zonas en escritorio — logo, enlaces centrales en **píldora** (4 secciones) y acciones a la derecha (texto «Iniciar sesión» + CTA). En móvil solo logo + icono inicio (si aplica) + hamburguesa; acciones y secciones van en **drawer lateral** (`Teleport` a `body`). Estado activo por scroll o ancla solo tras hidratación (`navReady`) para evitar mismatch SSR. CSS global en `nuxt.config` con alias `@/assets/css/…`.
 
-Flujos de cuenta (`AuthShell`, clase `auth-page`, `auth.css`): cabecera `MarketingNav` (sin logo duplicado en el panel intro). Pantallas: `/registro`, `/login`, `/verificar-correo`, `/onboarding`. Registro pide **nombre(s) y apellido(s)** por separado; pilares breves en intro (Gratis, Colegas/compartir, Codigo Medfile, Tus datos). Landing: callout `plan-share-callout` en `#gratis-vs-pago`.
+Flujos de cuenta (`AuthShell`, clase `auth-page`, `auth.css`): cabecera `MarketingNav` (sin logo duplicado en el panel intro). Pantallas: `/registro`, `/login`, `/verificar-correo`, `/onboarding`. En **escritorio**, grid de dos columnas: intro (titulo + pilares de confianza apilados) a la izquierda y formulario alineado arriba a la derecha. En **movil** (<980px), orden intro → formulario → pilares para que login/registro queden visibles al cargar. Registro pide **nombre(s) y apellido(s)** por separado; pilares breves en intro (Gratis, Colegas/compartir, Codigo Medfile, Tus datos). Landing: callout `plan-share-callout--card` dentro de la tarjeta **Profesional** en `#planes`.
 
 Footer marketing (`MarketingFooter`): fondo navy con logo en pastilla blanca, tagline, CTA, columnas de enlaces con áreas táctiles ≥42px, píldoras de confianza y barra legal. Responsive: dos columnas Producto/Cuenta en móvil. Escala tipográfica móvil landing (`--mf-landing-*` en `marketing.css`): títulos 22px, hero 30px, cuerpo 15px, secundario 14px, labels 12px.
 
-Panel medico (`DoctorShell`): en movil el sidebar pasa a drawer lateral; la barra superior fija incluye icono **Inicio** (dashboard), titulo de seccion activa y menu hamburguesa.
+Panel medico (`DoctorShell`): en movil el sidebar pasa a drawer lateral; la barra superior fija muestra **Atrás** (subrutas), **Inicio** (dashboard), **logo Medfile** centrado y menu hamburguesa. Logica en `utils/app-back-route.ts` — sin botones «Volver» duplicados en cabeceras de pagina.
 
-Dashboard (`/dashboard`, clase `dashboard-page`): layout compacto alineado con el **preview de la landing** (`product-preview--compact` en `index.vue`). Cabecera tipo tarjeta (`dashboard-topbar`) con plan, saludo breve y busqueda; metricas en `metric-grid metric-grid--dashboard` (4 columnas escritorio, **2x2 en movil**); `MedfileCodeCard` con prop `compact`; paneles con `dashboard-grid--compact` y `UploadZone compact`. Estilos en `main.css`. Reutiliza `MetricCard`, `PanelCard` y `PatientRow`.
+**Layout `doctor`** (`layouts/doctor.vue`): todas las pantallas autenticadas del modulo medico usan `definePageMeta({ layout: 'doctor' })`. El shell **no se desmonta** al navegar entre paginas (evita errores de DOM en transiciones). Las paginas solo renderizan su contenido dentro del layout. **`app.vue` debe envolver `<NuxtPage />` con `<NuxtLayout>`** para que Nuxt aplique el layout; sin eso no se renderiza `DoctorShell` ni la barra movil (home, atras, logo, menu).
 
-Modulo **Pacientes** (`/pacientes`): mismo patron `dashboard-page` + `metric-grid--dashboard`. La clase legacy `clinical-summary` comparte estilos compactos (2x2 movil) en documentos y suscripcion.
+Dashboard (`/dashboard`, clase `dashboard-page`): layout compacto alineado con perfil de paciente y preview de landing. Cabecera tipo tarjeta (`dashboard-topbar`) con plan + saludo y **`SearchInput`**; **`QuickAccessGrid`** (tiles segun plan/rol; bloqueados con enlace a suscripcion); **`MedfileCodeCard`** `compact`; indicadores con **`StatStrip`** (4 columnas escritorio / 2 movil, mismo componente que perfil); paneles en `dashboard-grid--compact` con clase **`patient-panel-compact`**, toolbar compartido (`.panel-toolbar`: meta + enlace) en pacientes prioritarios y bandeja de archivos — sin `UploadZone` ni `MetricCard` duplicados. Padding de `app-main` igual que perfil (`18px 14px`). Config de tiles en `utils/doctor-quick-access.ts` (`locked`, `lockBadge`, `upgradePlanCode`). Doc funcional medico: [28-medico-funcionalidades-y-roadmap.md](./28-medico-funcionalidades-y-roadmap.md). Estilos en `main.css`. Reutiliza `PanelCard`, `PatientRow`, `StatStrip`.
+
+**Suscripción** (`/suscripcion`, clases `dashboard-page subscription-page`): misma cabecera `dashboard-topbar`, **`StatStrip`** de plan/uso, paneles `patient-panel-compact`, selector de periodo (`.billing-toggle`) y comparador de planes (`.plan-compare-grid`). Padding de `app-main` compartido con dashboard y perfil. Enlaces de upgrade desde subrutas (p. ej. `/pacientes/[id]/compartir` → «Ver planes») usan `subscriptionRoute(returnTo)` (`utils/subscription-route.ts`) para abrir `/suscripcion?returnTo=…` y mostrar **Atrás** en la barra móvil (`canShowAppBack` + `readReturnToQuery`).
+
+**PanelCard:** el cuerpo lleva padding por defecto (`padded: true`, clase `panel-body`). Para listas a sangre (p. ej. preview landing) usar `:padded="false"` (`panel-body--flush`).
+
+### Resúmenes compactos (`StatStrip`, `KeyValueGrid`)
+
+Patrones reutilizables para **muchos datos en poco espacio** (perfil paciente, cabeceras de módulo, futuras bandejas):
+
+| Componente | Ruta | Uso |
+|------------|------|-----|
+| **`StatStrip`** | `components/ui/StatStrip.vue` | Indicadores numéricos o de estado: `label · value` en una línea, badge opcional. CSS: `.stat-strip` en `main.css`. |
+| **`KeyValueGrid`** | `components/ui/KeyValueGrid.vue` | Pares etiqueta/valor (filiación, metadatos). CSS: `.kv-grid`. Estado `missing` para campos sin registrar. |
+
+**Grilla responsive (CSS variables):**
+
+- Móvil: `--stat-strip-cols-mobile` / `--kv-grid-cols-mobile` → **2 columnas** por defecto (`mobileColumns="auto"`); **1 columna** si solo hay un ítem.
+- Escritorio (≥720px): `--stat-strip-cols-desktop` → hasta **4 columnas**; perfil paciente usa **4×1** para indicadores y **4×1** para filiación resumida (≥960px).
+- Prop `span: 2` en un ítem: ocupa ancho doble en móvil; en escritorio vuelve a 1 columna salvo `KeyValueGrid` wide.
+
+**Cuándo usar cada uno:**
+
+- `StatStrip` → métricas cortas (estado, edad, contadores, badges de alerta).
+- `KeyValueGrid` → datos descriptivos (documento, teléfono, domicilio).
+- `MetricCard` → KPIs destacados en dashboard/landing (cifra grande, más aire visual).
+
+Modulo **Pacientes** (`/pacientes/[id]`): `StatStrip` + `KeyValueGrid` en tarjeta de filiación; ver [08-perfil-paciente-consultas.md](./08-perfil-paciente-consultas.md).
 
 Formulario **nuevo paciente** (`/pacientes/nuevo`): campos con etiqueta flotante dentro del control (`FormField` / `FormSelectField` con prop `inset-label` + `icon`; opcionales con `optional` → sufijo «· opcional»). Clases CSS `form-field--inset`, `form-field--date` (fecha sin solapamiento con máscara nativa), `patient-form--inset` en `main.css`. Iconos via `MedIcon` (usuario, documento, calendario, domicilio, telefono, correo, seguro).
 
@@ -187,5 +214,5 @@ Construir estos componentes primero evitara rehacer pantallas despues.
 
 ## Marketing y planes
 
-La landing incluye una seccion **Gratis vs. de pago** (`#gratis-vs-pago`) con badges `plan-tier-badge--free` y `plan-tier-badge--paid`. La pagina `/suscripcion` repite la comparativa con capabilities por plan. Referencia de producto: [20-gratis-vs-pago.md](./20-gratis-vs-pago.md).
+La landing concentra planes y precios en **`#planes`**: franja `pricing-guarantee`, acordeon `plan-team-callout` / `plan-detail-accordion`, toggle de facturacion (anual = paga 10 meses / **2 meses gratis**), tarjetas con `pricing-effective-note`. Referencia: [20-gratis-vs-pago.md](./20-gratis-vs-pago.md), [25-whatsapp-incluido-en-planes.md](./25-whatsapp-incluido-en-planes.md).
 

@@ -4,11 +4,12 @@
 
     <main class="auth-shell">
       <section class="auth-intro">
-        <div>
+        <div class="auth-intro-copy">
           <EyebrowPill>{{ eyebrow }}</EyebrowPill>
           <h1>{{ title }}</h1>
           <p>{{ description }}</p>
         </div>
+
         <div class="trust-row auth-trust">
           <InfoCard
             v-for="item in resolvedTrustItems"

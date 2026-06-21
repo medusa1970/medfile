@@ -307,6 +307,35 @@
   padding: 12px;
 }
 
+.landing-page .preview-content--split {
+  display: grid;
+  grid-template-columns: minmax(92px, 118px) minmax(0, 1fr);
+  gap: 12px;
+  align-items: start;
+}
+
+.landing-page .metric-grid--stacked {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-bottom: 0;
+}
+
+.landing-page .metric-grid--stacked .metric-card {
+  padding: 10px 12px;
+  border-radius: 12px;
+  text-align: left;
+}
+
+.landing-page .metric-grid--stacked .metric-card small {
+  font-size: 11px;
+}
+
+.landing-page .metric-grid--stacked .metric-card strong {
+  margin-top: 4px;
+  font-size: 17px;
+}
+
 .landing-page .metric-grid--compact {
   grid-template-columns: repeat(3, 1fr) !important;
   gap: 8px;
@@ -339,7 +368,138 @@
   -webkit-line-clamp: 1;
 }
 
-/* Trust row con iconos */
+/* Hero landing — intro izquierda, pilares + preview derecha */
+.landing-page .hero--landing {
+  grid-template-columns: minmax(0, 0.92fr) minmax(0, 1.08fr);
+  gap: 40px 52px;
+  align-items: center;
+}
+
+.landing-page .hero-showcase {
+  display: grid;
+  grid-template-columns: minmax(128px, 168px) minmax(0, 1fr);
+  gap: 14px 20px;
+  align-items: stretch;
+  min-width: 0;
+}
+
+.landing-page .hero-showcase .product-preview {
+  max-width: none;
+  margin: 0;
+}
+
+.landing-page .trust-row--stacked {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-top: 0;
+}
+
+.landing-page .hero-showcase .trust-card--icon {
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 10px;
+  text-align: center;
+}
+
+.landing-page .hero-showcase .trust-card-icon {
+  width: 34px;
+  height: 34px;
+  margin: 0;
+  border-radius: 10px;
+}
+
+.landing-page .hero-showcase .trust-card--icon strong {
+  font-size: 14px;
+}
+
+.landing-page .hero-showcase .trust-card--icon .trust-card-body span {
+  font-size: 11px;
+  line-height: 1.35;
+}
+
+/* Acceso rápido bajo el hero */
+.landing-quick-nav {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px 12px;
+  align-items: center;
+  margin: -12px 0 36px;
+  padding: 12px 16px;
+  border: var(--mf-border);
+  border-radius: var(--mf-radius-lg);
+  background: rgb(255 255 255 / 0.9);
+  box-shadow: var(--mf-shadow-sm);
+}
+
+.landing-quick-nav a {
+  display: inline-flex;
+  align-items: center;
+  min-height: 38px;
+  padding: 0 16px;
+  border: var(--mf-border);
+  border-radius: 999px;
+  background: white;
+  color: var(--mf-navy-900);
+  font-size: 14px;
+  font-weight: 600;
+  line-height: 1.2;
+  text-decoration: none;
+  white-space: nowrap;
+  transition:
+    color 160ms ease,
+    border-color 160ms ease,
+    background 160ms ease;
+}
+
+.landing-quick-nav a:hover {
+  border-color: rgb(0 169 206 / 0.35);
+  background: rgb(238 248 252 / 0.92);
+  color: var(--mf-teal-600);
+}
+
+.landing-quick-nav .btn,
+.landing-quick-nav .mf-button {
+  margin-left: auto;
+}
+
+/* Flujo diario — pasos + ventajas en fila en escritorio */
+.landing-page .workflow-showcase {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  gap: 16px 20px;
+  align-items: start;
+}
+
+.landing-page .workflow-showcase .workflow-grid--compact {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin: 0;
+  min-width: 0;
+}
+
+.landing-page .workflow-showcase .workflow-step {
+  padding: 14px 16px;
+}
+
+.landing-page .workflow-showcase .benefits-strip--icons {
+  margin-top: 0;
+  min-height: 100%;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  align-content: start;
+}
+
+.landing-page .hero-intro .hero-actions {
+  margin-top: 32px;
+}
+
+.landing-page .hero-intro .hero-note {
+  margin-top: 24px;
+}
+
+/* Trust row con iconos (secciones fuera del hero) */
 .landing-page .trust-row {
   grid-template-columns: repeat(3, 1fr);
   gap: 8px;
@@ -568,12 +728,6 @@
 }
 
 
-.plan-compare-landing {
-  display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: 20px;
-}
-
 .plan-share-callout {
   display: flex;
   gap: 16px;
@@ -584,6 +738,160 @@
   border-radius: var(--mf-radius-lg);
   background: linear-gradient(135deg, rgb(0 169 206 / 0.08), rgb(255 255 255 / 0.92));
   color: var(--mf-slate-700);
+}
+
+.plan-share-callout--card {
+  margin: 16px 0 0;
+  padding: 14px 16px;
+  font-size: 14px;
+}
+
+.plan-share-callout--card strong {
+  font-size: 14px;
+}
+
+.plan-share-callout--card p {
+  font-size: 13px;
+  line-height: 1.55;
+}
+
+.plan-team-callout {
+  margin: 0 0 28px;
+  border: 1px solid rgb(0 31 92 / 0.12);
+  border-radius: var(--mf-radius-lg);
+  background: rgb(248 250 252 / 0.92);
+  color: var(--mf-slate-700);
+}
+
+.plan-team-callout-body {
+  padding: 0 20px 18px 46px;
+}
+
+.plan-team-callout-body p {
+  margin: 0;
+  font-size: 15px;
+  line-height: 1.6;
+}
+
+.plan-detail-accordion {
+  border: 1px solid rgb(0 169 206 / 0.22);
+  border-radius: var(--mf-radius-md);
+  background: rgb(238 248 252 / 0.55);
+  overflow: hidden;
+}
+
+.plan-detail-accordion--wide {
+  border-color: rgb(0 31 92 / 0.12);
+  background: rgb(248 250 252 / 0.92);
+}
+
+.plan-detail-accordion summary {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 12px;
+  cursor: pointer;
+  list-style: none;
+  color: var(--mf-navy-900);
+  font-size: 13px;
+  font-weight: 600;
+  line-height: 1.35;
+}
+
+.plan-detail-accordion--wide summary {
+  padding: 14px 18px;
+  font-size: 15px;
+}
+
+.plan-detail-accordion summary::-webkit-details-marker {
+  display: none;
+}
+
+.plan-detail-accordion summary::after {
+  content: '+';
+  flex-shrink: 0;
+  margin-left: auto;
+  color: var(--mf-teal-600);
+  font-size: 16px;
+  font-weight: 700;
+  line-height: 1;
+}
+
+.plan-detail-accordion[open] summary::after {
+  content: '−';
+}
+
+.plan-detail-accordion summary svg {
+  flex-shrink: 0;
+  color: var(--mf-teal-600);
+}
+
+.plan-detail-accordion p {
+  margin: 0;
+  padding: 0 12px 12px 36px;
+  color: var(--mf-slate-600);
+  font-size: 12px;
+  line-height: 1.55;
+}
+
+.pricing-extras {
+  display: grid;
+  gap: 8px;
+  margin-top: 12px;
+}
+
+.pricing-card-footer {
+  margin-top: auto;
+  padding-top: 20px;
+}
+
+.pricing-card-footer .btn,
+.pricing-card-footer .mf-button {
+  width: 100%;
+}
+
+.plan-team-callout-list {
+  margin: 12px 0 0;
+  padding-left: 18px;
+  font-size: 14px;
+  line-height: 1.6;
+}
+
+.plan-team-callout-list li + li {
+  margin-top: 8px;
+}
+
+.pricing-guarantee {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px 20px;
+  margin: 0 0 28px;
+  padding: 0;
+  list-style: none;
+  color: var(--mf-slate-700);
+  font-size: 14px;
+}
+
+.pricing-guarantee li {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.pricing-guarantee li::before {
+  content: '';
+  flex-shrink: 0;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--mf-teal-600);
+}
+
+.pricing-tier-note {
+  margin: -12px 0 16px;
+  color: var(--mf-teal-600);
+  font-size: 13px;
+  font-weight: 600;
 }
 
 .plan-share-callout svg {
@@ -611,25 +919,6 @@
   font-size: 14px !important;
 }
 
-.plan-compare-block {
-  padding: 28px;
-  border: var(--mf-border);
-  border-radius: var(--mf-radius-lg);
-  background: white;
-}
-
-.plan-compare-block h3 {
-  margin: 0 0 16px;
-  font-size: 20px;
-}
-
-.plan-compare-block ul {
-  margin: 0;
-  padding-left: 18px;
-  color: var(--mf-slate-700);
-  line-height: 1.65;
-}
-
 .plan-tier-badge {
   display: inline-flex;
   margin-bottom: 12px;
@@ -651,22 +940,23 @@
   color: var(--mf-navy-900);
 }
 
-.plan-compare-block--free {
-  border-color: rgb(0 169 206 / 0.25);
-}
-
-.plan-compare-block--paid {
-  border-color: rgb(0 31 92 / 0.12);
-}
-
 @media (max-width: 760px) {
-  .plan-compare-landing {
-    grid-template-columns: 1fr;
-  }
-
   .plan-share-callout {
     flex-direction: column;
     gap: 10px;
+  }
+
+  .plan-team-callout-body {
+    padding: 0 16px 14px;
+  }
+
+  .plan-detail-accordion p {
+    padding: 0 12px 12px;
+  }
+
+  .pricing-guarantee {
+    flex-direction: column;
+    gap: 8px;
   }
 }
 
@@ -681,10 +971,46 @@
   display: inline-flex;
   gap: 4px;
   padding: 4px;
-  margin-bottom: 32px;
   border: var(--mf-border);
   border-radius: 999px;
   background: white;
+}
+
+.pricing-billing-picker {
+  margin: 0 0 24px;
+}
+
+.pricing-billing-picker--above-grid {
+  padding: 16px 18px;
+  border: 1px solid rgb(0 169 206 / 0.28);
+  border-radius: var(--mf-radius-lg);
+  background: white;
+  box-shadow: var(--mf-shadow-sm);
+}
+
+.pricing-billing-picker__label {
+  margin: 0 0 12px;
+  color: var(--mf-navy-900);
+  font-size: 15px;
+  font-weight: 700;
+}
+
+.pricing-billing-picker__hint {
+  margin: 12px 0 0;
+  color: var(--mf-slate-600);
+  font-size: 13px;
+  line-height: 1.55;
+}
+
+.pricing-annual-teaser {
+  margin: -8px 0 10px;
+  padding: 8px 10px;
+  border-radius: var(--mf-radius-md);
+  background: rgb(238 248 252 / 0.95);
+  color: var(--mf-teal-600);
+  font-size: 13px;
+  font-weight: 600;
+  line-height: 1.4;
 }
 
 .pricing-toggle button {
@@ -803,6 +1129,19 @@
   font-size: 13px;
 }
 
+.pricing-effective-note {
+  margin: -12px 0 6px;
+  color: var(--mf-teal-600);
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.pricing-usd-ref {
+  margin: 0 0 18px;
+  color: var(--mf-neutral-400);
+  font-size: 12px;
+}
+
 .pricing-features {
   display: grid;
   gap: 10px;
@@ -825,10 +1164,6 @@
   flex-shrink: 0;
   color: var(--mf-teal-500);
   font-weight: 700;
-}
-
-.pricing-card .btn {
-  margin-top: auto;
 }
 
 .cta-band {
@@ -1218,6 +1553,18 @@
     padding: 8px 11px;
     font-size: 13px;
   }
+
+  .landing-page .hero--landing {
+    grid-template-columns: 1fr;
+    gap: 32px;
+    padding: 56px 0 48px;
+  }
+
+  .landing-page .hero-showcase {
+    grid-template-columns: minmax(120px, 152px) minmax(0, 1fr);
+    max-width: none;
+    margin: 0;
+  }
 }
 
 @media (max-width: 980px) {
@@ -1225,11 +1572,20 @@
     padding: 36px 0;
   }
 
-  .landing-page .workflow-grid--compact,
-  .pricing-grid,
-  .landing-page .benefits-strip--icons {
+  .pricing-grid {
     grid-template-columns: 1fr;
     gap: 8px;
+  }
+
+  .landing-page .workflow-showcase .workflow-grid--compact {
+    display: flex;
+    flex-direction: column;
+  }
+
+  .landing-page .workflow-showcase .benefits-strip--icons {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    margin-top: 0;
+    padding: 16px;
   }
 
   .landing-page .benefits-strip--icons {
@@ -1258,9 +1614,66 @@
 }
 
 @media (max-width: 680px) {
-  .landing-page .hero {
+  .landing-page .hero--landing {
     padding: 32px 0 28px;
     gap: 24px;
+  }
+
+  .landing-page .hero-showcase {
+    grid-template-columns: 1fr;
+    gap: 12px;
+  }
+
+  .landing-page .trust-row--stacked {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr) !important;
+    gap: 8px;
+  }
+
+  .landing-page .hero-showcase .trust-card--icon {
+    flex-direction: column;
+    align-items: center;
+    gap: 6px;
+    padding: 12px 8px;
+    text-align: center;
+  }
+
+  .landing-page .hero-showcase .trust-card-icon {
+    width: 30px;
+    height: 30px;
+    margin: 0 0 2px;
+  }
+
+  .landing-page .preview-content--split {
+    grid-template-columns: 1fr;
+    gap: 10px;
+  }
+
+  .landing-page .metric-grid--stacked {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr) !important;
+  }
+
+  .landing-page .metric-grid--stacked .metric-card {
+    text-align: center;
+    padding: 10px 8px;
+  }
+
+  .landing-quick-nav {
+    margin: -8px 0 24px;
+    padding: 10px 12px;
+    gap: 8px;
+  }
+
+  .landing-quick-nav .btn,
+  .landing-quick-nav .mf-button {
+    margin-left: 0;
+    width: 100%;
+  }
+
+  .landing-page .workflow-showcase {
+    grid-template-columns: 1fr;
+    gap: 12px;
   }
 
   .landing-page .hero h1 {
@@ -1429,6 +1842,10 @@
     border-radius: var(--mf-radius-md);
   }
 
+  .pricing-billing-picker {
+    margin-bottom: 20px;
+  }
+
   .pricing-toggle button {
     flex: 1;
     min-width: 0;
@@ -1495,10 +1912,6 @@
 }
 
 @media (min-width: 681px) and (max-width: 980px) {
-  .landing-page .workflow-grid--compact {
-    grid-template-columns: 1fr;
-  }
-
   .pricing-grid {
     grid-template-columns: 1fr;
     max-width: 420px;
@@ -1507,12 +1920,6 @@
 
   .benefits-strip {
     grid-template-columns: repeat(2, 1fr);
-  }
-}
-
-@media (min-width: 981px) {
-  .landing-page .workflow-grid--compact {
-    grid-template-columns: repeat(3, 1fr);
   }
 }
 

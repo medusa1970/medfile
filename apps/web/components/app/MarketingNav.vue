@@ -148,7 +148,6 @@ const mobileLinks = computed<NavLink[]>(() => {
 
   return [
     ...primaryLinks.value,
-    { href: `${prefix}#gratis-vs-pago`, label: 'Gratis vs pago', id: 'gratis-vs-pago' },
   ]
 })
 

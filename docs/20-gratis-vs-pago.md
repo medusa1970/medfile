@@ -26,7 +26,7 @@ Documento corto para tener **al alcance** que incluye cada grupo. Detalle comerc
 - Hasta **50** pacientes
 - Historia clinica, consultas, antecedentes, urgencias
 - Timeline, alertas, busqueda, dashboard
-- **Codigo Medfile** para identificarte entre colegas
+- **Codigo Medfile** para identificarte entre colegas (compartir historial: plan Profesional)
 - Lectura y edicion de todo lo ya guardado
 
 ### Documentos
@@ -46,10 +46,11 @@ Documento corto para tener **al alcance** que incluye cada grupo. Detalle comerc
 Todo lo **Gratis**, mas:
 
 - Hasta **200** pacientes · **8 GB** · **150** subidas/mes
-- **1 medico** (sin asistente en este plan)
-- **100 WhatsApp automaticos/mes incluidos**
-- Recordatorios **email**
-- Logo del consultorio en enlaces
+- **1 usuario asistente o secretaria** (filiacion, subidas, bandeja, recordatorios) — [29-equipo-colaboradores-y-acceso-delegado.md](./29-equipo-colaboradores-y-acceso-delegado.md)
+- El medico titular invita por correo, define permisos y revoca acceso al instante
+- **100 WhatsApp automaticos/mes incluidos** (cupo reservado; envio automatico proximamente)
+- Recordatorios **email** (proximamente)
+- Logo del consultorio en enlaces (proximamente)
 
 ---
 
@@ -58,10 +59,13 @@ Todo lo **Gratis**, mas:
 Todo lo **Basico**, mas:
 
 - Hasta **800** pacientes · **25 GB** · **500** subidas/mes
-- **600 WhatsApp automaticos/mes incluidos** (uso intensivo)
-- Automatizaciones y **digest semanal**
+- **600 WhatsApp automaticos/mes incluidos** (cupo reservado; envio automatico proximamente)
+- **Equipo ampliado:** medico titular + asistente/secretaria + **1 colaborador clinico (enfermeria)**
+- **Enfermeria delegada:** signos vitales, triage, cola del dia — acceso **temporal** que el medico autoriza y revoca — doc [29](./29-equipo-colaboradores-y-acceso-delegado.md)
+- **Auditoria por usuario** en acciones del equipo (implementado)
+- Automatizaciones y **digest semanal** (proximamente)
 - **Compartir historial** con colegas Medfile (permisos, alcance, duracion y revocacion por el medico titular)
-- Reportes y soporte prioritario
+- Reportes y soporte prioritario (proximamente)
 
 ### Compartir historial — que significa en producto
 
@@ -76,6 +80,17 @@ Todo lo **Basico**, mas:
 | **Registro / Gratis** | Codigo Medfile activo; mensaje en `/registro` y landing `#planes` |
 
 Ver flujos completos: [22-intercambio-historiales-entre-medicos.md](./22-intercambio-historiales-entre-medicos.md).
+
+### Equipo interno vs compartir colega
+
+| | Equipo (asistente / enfermeria) | Compartir colega |
+|--|--------------------------------|------------------|
+| Doc | [29](./29-equipo-colaboradores-y-acceso-delegado.md) | [22](./22-intercambio-historiales-entre-medicos.md) |
+| Alcance | Mismo tenant del medico | Otro medico Medfile |
+| Quien invita | Medico titular | Medico titular |
+| Asistente (Basico) | Filiacion, subidas, bandeja, recordatorios | — |
+| Enfermeria (Profesional) | Vitales, cola, triage; permiso temporal revocable | — |
+| Plan | Basico (asistente) / Pro (enfermeria) | Profesional |
 
 ---
 

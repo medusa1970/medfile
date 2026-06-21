@@ -9,7 +9,7 @@ export class PaymentEvent {
   eventKey!: string;
 
   @Prop({ required: true, index: true })
-  provider!: 'mercadopago' | 'mock';
+  provider!: 'mercadopago' | 'mock' | 'economico_qr';
 
   @Prop({ required: true })
   topic!: string;

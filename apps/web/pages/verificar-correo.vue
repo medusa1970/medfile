@@ -103,13 +103,13 @@ onMounted(async () => {
     email.value = String(route.query.email)
   }
 
-  const config = useRuntimeConfig()
+  const apiBaseUrl = usePublicApiBaseUrl()
   const token = import.meta.client ? localStorage.getItem('medfile_access_token') : null
 
   if (token) {
     try {
       const me = await $fetch<{ user: { email: string; emailVerified: boolean } }>(
-        `${config.public.apiUrl}/api/auth/me`,
+        `${apiBaseUrl}/api/auth/me`,
         { headers: { Authorization: `Bearer ${token}` } },
       )
       email.value = me.user.email
@@ -157,8 +157,8 @@ async function submit() {
   loading.value = true
 
   try {
-    const config = useRuntimeConfig()
-    const accessToken = await verifyWithPublicEndpoint(config.public.apiUrl, targetEmail)
+    const apiBaseUrl = usePublicApiBaseUrl()
+    const accessToken = await verifyWithPublicEndpoint(apiBaseUrl, targetEmail)
 
     if (!storeSession(accessToken)) {
       throw new Error('missing_access_token')
@@ -215,8 +215,8 @@ async function resend() {
       throw new Error('missing_email')
     }
 
-    const config = useRuntimeConfig()
-    const url = `${config.public.apiUrl}/api/auth/resend-verification-public`
+    const apiBaseUrl = usePublicApiBaseUrl()
+    const url = `${apiBaseUrl}/api/auth/resend-verification-public`
     const controller = new AbortController()
     const timeoutId = window.setTimeout(() => {
       console.warn('[Medfile verify] timeout esperando respuesta del API (20s)')

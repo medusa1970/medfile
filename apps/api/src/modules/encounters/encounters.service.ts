@@ -1,8 +1,10 @@
 import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
+import type { TenantRole } from '@medfile/types';
 import { assertValidObjectId } from '../../common/assert-valid-object-id';
 import { serializeDocument, serializeDocuments } from '../../common/serialize-document';
+import { AuditService } from '../team/audit.service';
 import { CreateEncounterDto } from './dto/create-encounter.dto';
 import { Encounter, EncounterDocument } from './encounter.schema';
 
@@ -11,6 +13,7 @@ export class EncountersService {
   constructor(
     @InjectModel(Encounter.name)
     private readonly encounterModel: Model<EncounterDocument>,
+    private readonly auditService: AuditService,
   ) {}
 
   async findForPatient(tenantId: string, patientId: string) {
@@ -26,7 +29,11 @@ export class EncountersService {
     return serializeDocuments(encounters);
   }
 
-  async createForTenant(tenantId: string, input: CreateEncounterDto) {
+  async createForTenant(
+    tenantId: string,
+    input: CreateEncounterDto,
+    actor?: { userId: string; role: TenantRole },
+  ) {
     assertValidObjectId(input.patientId, 'patientId');
 
     const tags = ['Consulta'];
@@ -69,6 +76,18 @@ export class EncountersService {
       vitalSigns: input.vitalSigns,
       tags,
     });
+
+    if (actor) {
+      await this.auditService.log({
+        tenantId,
+        userId: actor.userId,
+        userRole: actor.role,
+        action: 'encounter.create',
+        resourceType: 'encounter',
+        resourceId: String(encounter._id),
+        metadata: { patientId: input.patientId },
+      });
+    }
 
     return serializeDocument(encounter.toObject());
   }

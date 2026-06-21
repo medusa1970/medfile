@@ -61,7 +61,6 @@ const hashPrefix = computed(() => (route.path === '/' ? '' : '/'))
 const productLinks = computed(() => [
   { href: `${hashPrefix.value}#producto`, label: 'Funcionalidades' },
   { href: `${hashPrefix.value}#flujo`, label: 'Cómo funciona' },
-  { href: `${hashPrefix.value}#gratis-vs-pago`, label: 'Gratis vs. de pago' },
   { href: `${hashPrefix.value}#planes`, label: 'Planes y precios' },
 ])
 </script>

@@ -101,6 +101,7 @@ watch(
   (value) => {
     Object.assign(form, createBackgroundForm(value))
   },
+  { deep: true },
 )
 
 function submitForm() {
@@ -142,41 +143,65 @@ function createBackgroundForm(value?: PatientMedicalBackground) {
 }
 
 function serializeBackground(value: ReturnType<typeof createBackgroundForm>): PatientMedicalBackground {
-  return {
-    familyDiabetes: value.familyDiabetes,
-    familyHypertension: value.familyHypertension,
-    familyOtherNotes: value.familyOtherNotes || undefined,
-    habitAlcohol: value.habitAlcohol,
-    habitTobacco: value.habitTobacco,
-    habitDrugs: value.habitDrugs,
-    habitMedications: value.habitMedications,
-    chronicDiabetes: value.chronicDiabetes,
-    chronicHypertension: value.chronicHypertension,
-    chronicTuberculosis: value.chronicTuberculosis,
-    chronicAsthma: value.chronicAsthma,
-    chronicAllergies: value.chronicAllergies,
-    chronicSurgeries: value.chronicSurgeries,
-    chronicOtherNotes: value.chronicOtherNotes || undefined,
-    gynecological: {
-      menarche: value.gynecological.menarche || undefined,
-      sexualActivityStart: value.gynecological.sexualActivityStart || undefined,
-      contraception: value.gynecological.contraception || undefined,
-      lastMenstrualPeriod: value.gynecological.lastMenstrualPeriod || undefined,
-      cycleDuration: value.gynecological.cycleDuration || undefined,
-    },
-    obstetric: {
+  const background: PatientMedicalBackground = {
+    familyDiabetes: cleanYesNoNote(value.familyDiabetes),
+    familyHypertension: cleanYesNoNote(value.familyHypertension),
+    familyOtherNotes: value.familyOtherNotes.trim() || undefined,
+    habitAlcohol: cleanYesNoNote(value.habitAlcohol),
+    habitTobacco: cleanYesNoNote(value.habitTobacco),
+    habitDrugs: cleanYesNoNote(value.habitDrugs),
+    habitMedications: cleanYesNoNote(value.habitMedications),
+    chronicDiabetes: cleanYesNoNote(value.chronicDiabetes),
+    chronicHypertension: cleanYesNoNote(value.chronicHypertension),
+    chronicTuberculosis: cleanYesNoNote(value.chronicTuberculosis),
+    chronicAsthma: cleanYesNoNote(value.chronicAsthma),
+    chronicAllergies: cleanYesNoNote(value.chronicAllergies),
+    chronicSurgeries: cleanYesNoNote(value.chronicSurgeries),
+    chronicOtherNotes: value.chronicOtherNotes.trim() || undefined,
+    gynecological: cleanNestedRecord({
+      menarche: value.gynecological.menarche.trim() || undefined,
+      sexualActivityStart: value.gynecological.sexualActivityStart.trim() || undefined,
+      contraception: value.gynecological.contraception.trim() || undefined,
+      lastMenstrualPeriod: value.gynecological.lastMenstrualPeriod.trim() || undefined,
+      cycleDuration: value.gynecological.cycleDuration.trim() || undefined,
+    }),
+    obstetric: cleanNestedRecord({
       pregnancies: toNumber(value.obstetric.pregnancies),
       births: toNumber(value.obstetric.births),
       abortions: toNumber(value.obstetric.abortions),
       cesareans: toNumber(value.obstetric.cesareans),
       ectopic: toNumber(value.obstetric.ectopic),
-      gestationalAge: value.obstetric.gestationalAge || undefined,
-    },
+      gestationalAge: value.obstetric.gestationalAge.trim() || undefined,
+    }),
   }
+
+  return Object.fromEntries(
+    Object.entries(background).filter(([, entry]) => entry !== undefined),
+  ) as PatientMedicalBackground
+}
+
+function cleanYesNoNote(note?: { value?: boolean; notes?: string }) {
+  if (!note) return undefined
+
+  const hasValue = note.value === true || note.value === false
+  const trimmedNotes = note.notes?.trim()
+
+  if (!hasValue && !trimmedNotes) return undefined
+
+  return {
+    ...(hasValue ? { value: note.value } : {}),
+    ...(trimmedNotes ? { notes: trimmedNotes } : {}),
+  }
+}
+
+function cleanNestedRecord<T extends Record<string, unknown>>(record: T) {
+  const entries = Object.entries(record).filter(([, value]) => value !== undefined && value !== '')
+  return entries.length > 0 ? (Object.fromEntries(entries) as T) : undefined
 }
 
 function toNumber(value: string | number | undefined) {
   if (value === '' || value == null) return undefined
-  return Number(value)
+  const numeric = Number(value)
+  return Number.isFinite(numeric) ? numeric : undefined
 }
 </script>

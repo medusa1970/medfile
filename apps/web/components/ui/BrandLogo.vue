@@ -1,5 +1,10 @@
 <template>
-  <NuxtLink class="brand" :to="to" :aria-label="ariaLabel">
+  <NuxtLink
+    class="brand"
+    :class="{ 'brand--compact': compact }"
+    :to="to"
+    :aria-label="ariaLabel"
+  >
     <img class="brand-logo-image" :src="src" :alt="alt" width="490" height="180" />
   </NuxtLink>
 </template>
@@ -11,6 +16,7 @@ withDefaults(
     src?: string
     alt?: string
     ariaLabel?: string
+    compact?: boolean
   }>(),
   {
     to: '/',

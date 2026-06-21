@@ -4,8 +4,8 @@
 
     <main>
       <!-- Hero -->
-      <section class="container hero">
-        <div>
+      <section class="container hero hero--landing">
+        <div class="hero-intro">
           <EyebrowPill>
             SaaS clínico para médicos independientes
           </EyebrowPill>
@@ -42,8 +42,10 @@
               Tus datos, tu espacio privado
             </span>
           </div>
+        </div>
 
-          <div class="trust-row" aria-label="Beneficios principales">
+        <div class="hero-showcase">
+          <div class="trust-row trust-row--stacked" aria-label="Beneficios principales">
             <InfoCard
               v-for="item in trustItems"
               :key="item.value"
@@ -52,39 +54,39 @@
               :label="item.label"
             />
           </div>
-        </div>
 
-        <aside class="product-preview product-preview--compact" aria-label="Vista previa de Medfile">
-          <div class="preview-window">
-            <div class="preview-topbar preview-topbar--compact">
-              <strong>Consultorio Dr. Rivas</strong>
-              <StatusBadge tone="success">En línea</StatusBadge>
-            </div>
-            <div class="preview-body preview-body--compact">
-              <div class="preview-content">
-                <div class="metric-grid metric-grid--compact">
-                  <MetricCard label="Pacientes" value="1,284" />
-                  <MetricCard label="Hoy" value="23" />
-                  <MetricCard label="Pendiente" value="7" />
-                </div>
-
-                <PanelCard title="Pacientes recientes" badge="En vivo">
-                  <div class="preview-patient-list">
-                    <PatientRow
-                      v-for="patient in previewPatients"
-                      :key="patient.id"
-                      :initials="patient.initials"
-                      :name="patient.name"
-                      :detail="patient.detail"
-                      :status="patient.status"
-                      :tone="patient.tone"
-                    />
+          <aside class="product-preview product-preview--compact" aria-label="Vista previa de Medfile">
+            <div class="preview-window">
+              <div class="preview-topbar preview-topbar--compact">
+                <strong>Consultorio Dr. Rivas</strong>
+                <StatusBadge tone="success">En línea</StatusBadge>
+              </div>
+              <div class="preview-body preview-body--compact">
+                <div class="preview-content preview-content--split">
+                  <div class="metric-grid metric-grid--stacked">
+                    <MetricCard label="Pacientes" value="1,284" />
+                    <MetricCard label="Hoy" value="23" />
+                    <MetricCard label="Pendiente" value="7" />
                   </div>
-                </PanelCard>
+
+                  <PanelCard title="Pacientes recientes" badge="En vivo" :padded="false">
+                    <div class="preview-patient-list">
+                      <PatientRow
+                        v-for="patient in previewPatients"
+                        :key="patient.id"
+                        :initials="patient.initials"
+                        :name="patient.name"
+                        :detail="patient.detail"
+                        :status="patient.status"
+                        :tone="patient.tone"
+                      />
+                    </div>
+                  </PanelCard>
+                </div>
               </div>
             </div>
-          </div>
-        </aside>
+          </aside>
+        </div>
       </section>
 
       <nav class="landing-quick-nav container" aria-label="Acceso rápido">
@@ -102,25 +104,27 @@
           description="Lo esencial de tu mañana clínica, explicado de forma simple."
         />
 
-        <div class="workflow-grid workflow-grid--compact">
-          <article v-for="step in workflowSteps" :key="step.title" class="workflow-step">
-            <div class="workflow-step-icon" aria-hidden="true">
-              <MedIcon :name="step.icon" size="md" />
-            </div>
-            <div class="workflow-step-body">
-              <h3>{{ step.title }}</h3>
-              <p>{{ step.description }}</p>
-            </div>
-          </article>
-        </div>
+        <div class="workflow-showcase">
+          <div class="workflow-grid workflow-grid--compact">
+            <article v-for="step in workflowSteps" :key="step.title" class="workflow-step">
+              <div class="workflow-step-icon" aria-hidden="true">
+                <MedIcon :name="step.icon" size="md" />
+              </div>
+              <div class="workflow-step-body">
+                <h3>{{ step.title }}</h3>
+                <p>{{ step.description }}</p>
+              </div>
+            </article>
+          </div>
 
-        <div class="benefits-strip benefits-strip--icons" aria-label="Ventajas para el médico">
-          <div v-for="benefit in dailyBenefits" :key="benefit.title" class="benefit-item">
-            <span class="benefit-icon" aria-hidden="true">
-              <MedIcon :name="benefit.icon" size="sm" />
-            </span>
-            <strong>{{ benefit.title }}</strong>
-            <span>{{ benefit.detail }}</span>
+          <div class="benefits-strip benefits-strip--icons" aria-label="Ventajas para el médico">
+            <div v-for="benefit in dailyBenefits" :key="benefit.title" class="benefit-item">
+              <span class="benefit-icon" aria-hidden="true">
+                <MedIcon :name="benefit.icon" size="sm" />
+              </span>
+              <strong>{{ benefit.title }}</strong>
+              <span>{{ benefit.detail }}</span>
+            </div>
           </div>
         </div>
       </section>
@@ -188,68 +192,68 @@
         </div>
       </section>
 
-      <!-- Gratis vs de pago -->
-      <section id="gratis-vs-pago" class="container section section--compact">
-        <SectionHeading
-          eyebrow="Qué incluye cada plan"
-          title="Gratis para siempre. De pago cuando crezcas."
-          description="Tus datos clínicos nunca se borran por impago. Los planes de pago desbloquean capacidad, automatización y compartir historiales con colegas Medfile bajo permisos y restricciones."
-        />
-
-        <aside class="plan-share-callout" aria-label="Compartir historiales entre médicos">
-          <MedIcon name="users" size="sm" />
-          <div>
-            <strong>Historiales entre médicos, cuando lo requieras</strong>
-            <p>
-              Referencias, coberturas o segunda opinión: comparte solo lo necesario con otro médico
-              Medfile. Tú defines alcance, duración y permisos; puedes revocar el acceso en cualquier
-              momento. Sin mezclar consultorios ni ver pacientes ajenos sin autorización.
-            </p>
-            <p class="plan-share-callout-foot">
-              Incluido en <strong>Plan Profesional</strong>. Desde el registro ya tienes tu
-              <strong>Código Medfile</strong> para identificarte entre colegas.
-            </p>
-          </div>
-        </aside>
-
-        <div class="plan-compare-landing">
-          <article class="plan-compare-block plan-compare-block--free">
-            <span class="plan-tier-badge plan-tier-badge--free">Gratis</span>
-            <h3>Incluido sin pagar</h3>
-            <ul>
-              <li v-for="item in freeIncludes" :key="item">{{ item }}</li>
-            </ul>
-          </article>
-          <article class="plan-compare-block plan-compare-block--paid">
-            <span class="plan-tier-badge plan-tier-badge--paid">De pago</span>
-            <h3>Básico y Profesional</h3>
-            <ul>
-              <li v-for="item in paidIncludes" :key="item">{{ item }}</li>
-            </ul>
-          </article>
-        </div>
-      </section>
-
       <!-- Planes -->
       <section id="planes" class="pricing-section">
         <div class="container">
           <SectionHeading
-            eyebrow="Planes flexibles"
-            title="Gratis para empezar. Paga solo lo que necesites."
-            description="Un médico, una cuenta, un pago. WhatsApp automático incluido en planes de pago. Plan Profesional: compartir historiales con colegas Medfile con permisos y restricciones."
+            eyebrow="Planes y precios"
+            title="Gratis para siempre. De pago cuando crezcas."
+            description="Un médico, una cuenta, un pago. Planes mensual, trimestral o anual (paga 10 meses, 12 de servicio). Tus datos clínicos nunca se borran por impago."
           />
 
-          <div class="pricing-toggle" role="group" aria-label="Periodo de facturación">
-            <button
-              v-for="option in billingOptions"
-              :key="option.id"
-              type="button"
-              :class="{ active: billingPeriod === option.id }"
-              @click="billingPeriod = option.id"
-            >
-              {{ option.label }}
-              <span v-if="option.save" class="save-badge">{{ option.save }}</span>
-            </button>
+          <ul class="pricing-guarantee" aria-label="Compromisos de los planes">
+            <li v-for="item in planGuarantees" :key="item">{{ item }}</li>
+          </ul>
+
+          <details class="plan-team-callout plan-detail-accordion plan-detail-accordion--wide">
+            <summary>
+              <MedIcon name="users" size="sm" aria-hidden="true" />
+              <span>Tu equipo dentro del consultorio</span>
+            </summary>
+            <div class="plan-team-callout-body">
+              <p>
+                Tú invitas por correo, defines permisos y revocas el acceso cuando quieras. Es distinto
+                de compartir historial con otro médico Medfile (solo plan Profesional).
+              </p>
+              <ul class="plan-team-callout-list">
+                <li>
+                  <strong>Plan Básico y Profesional:</strong>
+                  1 asistente o secretaria para filiación, enlaces de subida, bandeja y recordatorios.
+                </li>
+                <li>
+                  <strong>Solo Profesional:</strong>
+                  enfermería en la clínica donde atiendes — signos vitales, cola del día, auditoría y
+                  permiso temporal que tú autorizas y revocas.
+                </li>
+              </ul>
+            </div>
+          </details>
+
+          <div class="pricing-billing-picker pricing-billing-picker--above-grid">
+            <p class="pricing-billing-picker__label">¿Cómo prefieres pagar?</p>
+            <div class="pricing-toggle" role="group" aria-label="Periodo de facturación">
+              <button
+                v-for="option in billingOptions"
+                :key="option.id"
+                type="button"
+                :class="{ active: billingPeriod === option.id }"
+                @click="billingPeriod = option.id"
+              >
+                {{ option.label }}
+                <span v-if="option.save" class="save-badge">{{ option.save }}</span>
+              </button>
+            </div>
+            <p class="pricing-billing-picker__hint">
+              <template v-if="billingPeriod === 'annual'">
+                Paga <strong>10 meses</strong> y usa Medfile <strong>12 meses</strong> — WhatsApp incluido cada mes.
+              </template>
+              <template v-else-if="billingPeriod === 'quarterly'">
+                Facturación cada 3 meses con <strong>10 % de descuento</strong>.
+              </template>
+              <template v-else>
+                También disponible <strong>plan anual</strong>: paga 10 meses, lleva 12 (<strong>2 meses gratis</strong>).
+              </template>
+            </p>
           </div>
 
           <div class="pricing-grid">
@@ -262,18 +266,40 @@
               <span v-if="plan.featured" class="pricing-card-badge">Más popular</span>
               <h3>{{ plan.name }}</h3>
               <p class="pricing-card-desc">{{ plan.description }}</p>
+              <p v-if="plan.tierNote" class="pricing-tier-note">{{ plan.tierNote }}</p>
               <div class="pricing-amount">
-                <strong>{{ formatPrice(plan.price) }}</strong>
-                <span v-if="plan.priceUsdMonthly"> {{ formatPriceBob(plan.priceUsdMonthly) }}</span>
-                <span v-if="plan.price > 0">/ {{ billingLabel }}</span>
+                <strong>{{ plan.priceLabel }}</strong>
+                <span v-if="plan.priceRef" class="pricing-usd-ref">{{ plan.priceRef }}</span>
               </div>
+              <p v-if="plan.priceEffective" class="pricing-effective-note">{{ plan.priceEffective }}</p>
+              <p
+                v-if="billingPeriod === 'monthly' && plan.annualTeaser"
+                class="pricing-annual-teaser"
+              >
+                {{ plan.annualTeaser }}
+              </p>
               <p class="pricing-period-note">{{ plan.priceNote }}</p>
               <ul class="pricing-features">
                 <li v-for="feature in plan.features" :key="feature">{{ feature }}</li>
               </ul>
-              <MfButton :to="plan.ctaTo" block>
-                {{ plan.ctaLabel }}
-              </MfButton>
+              <div v-if="extrasForPlan(plan.code).length" class="pricing-extras">
+                <details
+                  v-for="extra in extrasForPlan(plan.code)"
+                  :key="extra.id"
+                  class="plan-detail-accordion"
+                >
+                  <summary>
+                    <MedIcon :name="extra.icon" size="sm" aria-hidden="true" />
+                    <span>{{ extra.title }}</span>
+                  </summary>
+                  <p>{{ extra.detail }}</p>
+                </details>
+              </div>
+              <div class="pricing-card-footer">
+                <MfButton :to="plan.ctaTo" block>
+                  {{ plan.ctaLabel }}
+                </MfButton>
+              </div>
             </article>
           </div>
         </div>
@@ -301,129 +327,131 @@
 
 <script setup lang="ts">
 import type { MedIconName } from '~/components/ui/MedIcon.vue'
+import type { BillingPeriod, PlanCode } from '@medfile/types/plans'
+import { subscriptionPlans } from '@medfile/types/plans'
+import {
+  formatPlanEffectiveMonthlyNote,
+  formatPlanPeriodNote,
+  formatPlanPricePrimary,
+  formatPlanUsdReference,
+} from '~/utils/plan-pricing-display'
 
 type BadgeTone = '' | 'warning' | 'danger' | 'success'
-type BillingPeriod = 'monthly' | 'quarterly' | 'annual'
 
 const billingPeriod = ref<BillingPeriod>('monthly')
 
-const freeIncludes = [
-  'Hasta 50 pacientes y 2 GB',
-  'Historia clínica, consultas y alertas',
-  'Enlace seguro para que el paciente suba exámenes',
-  'Compartir enlace por WhatsApp manual (wa.me)',
-  'Código Medfile para identificarte entre colegas',
-  '1 usuario · lectura de todo lo ya guardado',
+const planGuarantees = [
+  'Sin tarjeta para empezar con el plan Gratis',
+  'Plan anual: paga 10 meses, 12 de servicio (2 meses gratis)',
+  'Datos clínicos que no expiran aunque no pagues',
+  'WhatsApp manual (wa.me) siempre disponible',
 ]
-
-const paidIncludes = [
-  'Más pacientes y almacenamiento (solo tú, 1 médico)',
-  'Recordatorios automáticos por email',
-  '100 o 600 WhatsApp automáticos/mes incluidos (según plan)',
-  'Profesional: compartir historial con colegas Medfile (permisos, alcance y revocación)',
-  'Profesional: automatizaciones, reportes y soporte prioritario',
-]
-
-const BOB_PER_USD = 7
 
 const billingOptions = [
   { id: 'monthly' as BillingPeriod, label: 'Mensual', save: '' },
   { id: 'quarterly' as BillingPeriod, label: 'Trimestral', save: '-10%' },
-  { id: 'annual' as BillingPeriod, label: 'Anual', save: '-20%' },
+  { id: 'annual' as BillingPeriod, label: 'Anual', save: '2 meses gratis' },
 ]
 
-const billingLabel = computed(() => {
-  if (billingPeriod.value === 'quarterly') return 'trimestre'
-  if (billingPeriod.value === 'annual') return 'año'
-  return 'mes'
+type PlanExtra = {
+  id: string
+  icon: MedIconName
+  title: string
+  detail: string
+  plans: PlanCode[]
+}
+
+const planExtras: PlanExtra[] = [
+  {
+    id: 'assistant',
+    icon: 'clipboard',
+    title: 'Asistente o secretaria incluida',
+    detail:
+      'Delega altas, solicitudes de subida y la bandeja administrativa. Tú sigues siendo responsable clínico; revocas su acceso desde Equipo en cualquier momento.',
+    plans: ['basic'],
+  },
+  {
+    id: 'nurse',
+    icon: 'alert',
+    title: 'Enfermería con permiso temporal',
+    detail:
+      'Habilita personal de enfermería para registrar signos vitales, triage y cola del día en la clínica que indiques. Acceso acotado, con auditoría, revocable por ti.',
+    plans: ['professional'],
+  },
+  {
+    id: 'share',
+    icon: 'users',
+    title: 'Compartir historial con colegas Medfile',
+    detail:
+      'Referencias o segunda opinión: tú eliges qué bloques compartir, por cuánto tiempo y con qué permisos. Revocable en cualquier momento.',
+    plans: ['professional'],
+  },
+]
+
+function extrasForPlan(code: PlanCode) {
+  return planExtras.filter((extra) => extra.plans.includes(code))
+}
+
+const pricingPlans = computed(() => {
+  const period = billingPeriod.value
+  const freePlan = subscriptionPlans.find((plan) => plan.code === 'free')
+  const basicPlan = subscriptionPlans.find((plan) => plan.code === 'basic')
+  const professionalPlan = subscriptionPlans.find((plan) => plan.code === 'professional')
+
+  return [
+    {
+      code: 'free' as PlanCode,
+      name: 'Gratis',
+      description: 'Tu consultorio ordenado sin fecha de corte.',
+      tierNote: '',
+      priceLabel: 'Para siempre',
+      priceRef: '',
+      priceEffective: '',
+      priceNote: 'Sin tarjeta · 1 médico · 2 GB · hasta 50 pacientes',
+      annualTeaser: '',
+      features: [...(freePlan?.features ?? [])],
+      ctaLabel: 'Crear cuenta gratis',
+      ctaTo: '/registro',
+      featured: false,
+    },
+    {
+      code: 'basic' as PlanCode,
+      name: 'Básico',
+      description: 'Consulta regular con asistente y recordatorios automáticos.',
+      tierNote: 'Incluye todo el plan Gratis, más:',
+      priceLabel: formatPlanPricePrimary('basic', period),
+      priceRef: formatPlanUsdReference('basic', period),
+      priceEffective: formatPlanEffectiveMonthlyNote('basic', period),
+      priceNote: formatPlanPeriodNote('basic', period),
+      annualTeaser:
+        period === 'monthly'
+          ? `Anual: ${formatPlanPricePrimary('basic', 'annual')} · 2 meses gratis`
+          : '',
+      features: [...(basicPlan?.features ?? [])],
+      ctaLabel: 'Elegir plan Básico',
+      ctaTo: '/registro',
+      featured: true,
+    },
+    {
+      code: 'professional' as PlanCode,
+      name: 'Profesional',
+      description: 'Alto volumen, enfermería delegada y colaboración con colegas.',
+      tierNote: 'Incluye todo el plan Básico, más:',
+      priceLabel: formatPlanPricePrimary('professional', period),
+      priceRef: formatPlanUsdReference('professional', period),
+      priceEffective: formatPlanEffectiveMonthlyNote('professional', period),
+      priceNote: formatPlanPeriodNote('professional', period),
+      annualTeaser:
+        period === 'monthly'
+          ? `Anual: ${formatPlanPricePrimary('professional', 'annual')} · 2 meses gratis`
+          : '',
+      features: [...(professionalPlan?.features ?? [])],
+      ctaLabel: 'Elegir plan Profesional',
+      ctaTo: '/registro',
+      featured: false,
+    },
+  ]
 })
-
-function calcPrice(monthlyUsd: number) {
-  if (monthlyUsd === 0) return 0
-  if (billingPeriod.value === 'quarterly') return Math.round(monthlyUsd * 3 * 0.9)
-  if (billingPeriod.value === 'annual') return Math.round(monthlyUsd * 12 * 0.8)
-  return monthlyUsd
-}
-
-function formatPrice(amount: number) {
-  if (amount === 0) return 'Gratis'
-  return `$${amount}`
-}
-
-function formatPriceBob(usdMonthly: number) {
-  if (usdMonthly === 0) return ''
-  const bob = usdMonthly === 14 ? 98 : usdMonthly === 32 ? 224 : Math.round(usdMonthly * BOB_PER_USD)
-  return `(~Bs ${bob}/mes)`
-}
-
-const pricingPlans = computed(() => [
-  {
-    code: 'free',
-    name: 'Gratis',
-    description: 'Para siempre. Tu consultorio ordenado sin fecha de corte.',
-    price: 0,
-    priceUsdMonthly: 0,
-    priceNote: 'Sin tarjeta · 1 médico · tus datos no expiran',
-    features: [
-      'Hasta 50 pacientes',
-      'Historia clínica y consultas',
-      'Enlace de subida para pacientes',
-      'WhatsApp manual (compartir enlace)',
-      'Código Medfile · preparado para compartir con colegas',
-      '2 GB',
-    ],
-    ctaLabel: 'Crear cuenta gratis',
-    ctaTo: '/registro',
-    featured: false,
-  },
-  {
-    code: 'basic',
-    name: 'Básico',
-    description: 'Médico independiente con consulta regular.',
-    price: calcPrice(14),
-    priceUsdMonthly: 14,
-    priceNote:
-      billingPeriod.value === 'monthly'
-        ? '1 médico · 100 WhatsApp/mes incluidos'
-        : billingPeriod.value === 'quarterly'
-          ? 'Equivale a ~$13/mes · ahorras 10%'
-          : 'Equivale a ~$11/mes · ahorras 20%',
-    features: [
-      'Hasta 200 pacientes',
-      '8 GB de almacenamiento',
-      '100 WhatsApp automáticos/mes incluidos',
-      'Recordatorios por email',
-      'Logo del consultorio en enlaces',
-    ],
-    ctaLabel: 'Elegir plan Básico',
-    ctaTo: '/registro',
-    featured: true,
-  },
-  {
-    code: 'professional',
-    name: 'Profesional',
-    description: 'Alto volumen — mismo médico, más capacidad.',
-    price: calcPrice(32),
-    priceUsdMonthly: 32,
-    priceNote:
-      billingPeriod.value === 'monthly'
-        ? '1 médico · 600 WhatsApp/mes · uso intensivo'
-        : billingPeriod.value === 'quarterly'
-          ? 'Equivale a ~$29/mes · ahorras 10%'
-          : 'Equivale a ~$26/mes · ahorras 20%',
-    features: [
-      'Hasta 800 pacientes',
-      '25 GB de almacenamiento',
-      '600 WhatsApp automáticos/mes incluidos',
-      'Automatizaciones y digest semanal',
-      'Compartir historial con colegas (permisos y revocación)',
-      'Reportes y soporte prioritario',
-    ],
-    ctaLabel: 'Elegir plan Profesional',
-    ctaTo: '/registro',
-    featured: false,
-  },
-])
 
 const patients = [
   {

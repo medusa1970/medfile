@@ -1,5 +1,5 @@
 /**
- * En desarrollo, si el paciente abre el enlace desde el móvil (IP LAN)
+ * En desarrollo, si la web se abre por IP LAN (p. ej. móvil en la misma WiFi)
  * pero NUXT_PUBLIC_API_URL apunta a localhost, reescribe el host al de la página.
  */
 export function resolvePublicApiUrl(configuredUrl: string) {

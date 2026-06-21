@@ -56,7 +56,7 @@ interface LoginResponse {
   }
 }
 
-const config = useRuntimeConfig()
+const apiBaseUrl = usePublicApiBaseUrl()
 const router = useRouter()
 const route = useRoute()
 const loading = ref(false)
@@ -76,7 +76,7 @@ async function submit() {
   loading.value = true
 
   try {
-    const response = await $fetch<LoginResponse>(`${config.public.apiUrl}/api/auth/login`, {
+    const response = await $fetch<LoginResponse>(`${apiBaseUrl}/api/auth/login`, {
       method: 'POST',
       body: form,
     })

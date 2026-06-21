@@ -1,6 +1,8 @@
 import { Body, Controller, Get, Param, Post, Query, UseGuards } from '@nestjs/common';
 import { AuthContext } from '../security/auth-context';
 import { CurrentTenant } from '../security/current-tenant.decorator';
+import { RequireRoles } from '../security/roles.decorator';
+import { RolesGuard } from '../security/roles.guard';
 import { TenantAuthGuard } from '../security/tenant-auth.guard';
 import { CompleteUploadRequestDto } from './dto/complete-upload-request.dto';
 import { CreateUploadUrlDto } from './dto/create-upload-url.dto';
@@ -24,7 +26,8 @@ export class DocumentsController {
   }
 
   @Get()
-  @UseGuards(TenantAuthGuard)
+  @UseGuards(RolesGuard)
+  @RequireRoles('owner', 'doctor', 'assistant')
   findForPatient(
     @CurrentTenant() auth: AuthContext,
     @Query('patientId') patientId: string,
@@ -38,7 +41,10 @@ export class DocumentsController {
     @CurrentTenant() auth: AuthContext,
     @Body() body: CreateUploadRequestDto,
   ) {
-    return this.documentsService.createUploadRequest(auth.tenantId, body);
+    return this.documentsService.createUploadRequest(auth.tenantId, body, {
+      userId: auth.userId,
+      role: auth.role as 'owner' | 'doctor' | 'assistant' | 'clinical_capture',
+    });
   }
 
   @Get('upload-requests/:token')

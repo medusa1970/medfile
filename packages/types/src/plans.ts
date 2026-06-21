@@ -7,6 +7,15 @@ export type BillingPeriod = 'monthly' | 'quarterly' | 'annual';
 /** Tipo de cambio referencial para mostrar precios en BOB (Bolivia). */
 export const PLAN_PRICE_BOB_PER_USD = 7;
 
+/** Facturacion anual: meses que paga el medico por 12 meses de servicio. */
+export const ANNUAL_BILLING_MONTHS_PAID = 10;
+
+/** Meses de servicio incluidos en un pago anual. */
+export const ANNUAL_BILLING_MONTHS_INCLUDED = 12;
+
+/** Descuento trimestral (3 meses × factor). */
+export const QUARTERLY_BILLING_DISCOUNT = 0.9;
+
 /**
  * Costo Meta Utility por mensaje entregado a paciente (+591 Bolivia).
  * @see docs/25-whatsapp-incluido-en-planes.md
@@ -19,6 +28,8 @@ export interface PlanCapabilities {
   emailReminders: boolean;
   smsReminders: boolean;
   assistantUsers: boolean;
+  clinicalCaptureUsers: boolean;
+  auditLog: boolean;
   automatedDigest: boolean;
   advancedReports: boolean;
   customBranding: boolean;
@@ -55,26 +66,30 @@ export const FREE_PLAN_FEATURES = [
   'Historia clinica y consultas',
   'Enlace para subida de examenes',
   'WhatsApp manual (wa.me) sin limite',
-  'Codigo Medfile para colegas',
+  'Codigo Medfile (compartir historial en plan Profesional)',
   '1 medico · 2 GB · sin vencimiento',
 ] as const;
 
 export const PAID_BASIC_FEATURES = [
   'Hasta 200 pacientes',
   '8 GB almacenamiento',
-  '100 WhatsApp automaticos / mes incluidos',
-  'Recordatorios por email incluidos',
-  'Logo del consultorio en enlaces',
-  '1 medico independiente',
+  'Cupo 100 WhatsApp automaticos / mes (envio proximamente)',
+  'Recordatorios por email (proximamente)',
+  'Logo del consultorio en enlaces (proximamente)',
+  '1 medico + 1 asistente o secretaria',
+  'Asistente: filiacion, subidas, bandeja y recordatorios',
 ] as const;
 
 export const PAID_PROFESSIONAL_FEATURES = [
   'Hasta 800 pacientes',
   '25 GB almacenamiento',
-  '600 WhatsApp automaticos / mes incluidos',
-  'Automatizaciones y digest semanal',
+  'Cupo 600 WhatsApp automaticos / mes (envio proximamente)',
+  'Equipo ampliado: asistente + enfermeria delegada',
+  'Enfermeria: vitales, cola y triage (permiso temporal)',
+  'Auditoria por usuario en acciones del equipo',
   'Compartir historial con colegas Medfile',
-  'Reportes y soporte prioritario',
+  'Automatizaciones y digest semanal (proximamente)',
+  'Reportes y soporte prioritario (proximamente)',
 ] as const;
 
 const capabilitiesFree: PlanCapabilities = {
@@ -83,6 +98,8 @@ const capabilitiesFree: PlanCapabilities = {
   emailReminders: false,
   smsReminders: false,
   assistantUsers: false,
+  clinicalCaptureUsers: false,
+  auditLog: false,
   automatedDigest: false,
   advancedReports: false,
   customBranding: false,
@@ -95,7 +112,9 @@ const capabilitiesBasic: PlanCapabilities = {
   whatsappAutomated: true,
   emailReminders: true,
   smsReminders: false,
-  assistantUsers: false,
+  assistantUsers: true,
+  clinicalCaptureUsers: false,
+  auditLog: false,
   automatedDigest: false,
   advancedReports: false,
   customBranding: true,
@@ -108,7 +127,9 @@ const capabilitiesProfessional: PlanCapabilities = {
   whatsappAutomated: true,
   emailReminders: true,
   smsReminders: false,
-  assistantUsers: false,
+  assistantUsers: true,
+  clinicalCaptureUsers: true,
+  auditLog: true,
   automatedDigest: true,
   advancedReports: true,
   customBranding: true,
@@ -141,7 +162,7 @@ export const subscriptionPlans: SubscriptionPlanDefinition[] = [
     monthlyPriceBob: 98,
     limits: {
       patients: 200,
-      users: 1,
+      users: 2,
       storageBytes: 8589934592,
       uploadRequestsPerMonth: 150,
       whatsappMessagesPerMonth: 100,
@@ -157,7 +178,7 @@ export const subscriptionPlans: SubscriptionPlanDefinition[] = [
     monthlyPriceBob: 224,
     limits: {
       patients: 800,
-      users: 1,
+      users: 3,
       storageBytes: 26843545600,
       uploadRequestsPerMonth: 500,
       whatsappMessagesPerMonth: 600,
@@ -195,9 +216,44 @@ export function calculatePlanChargeBob(planCode: PlanCode, billingPeriod: Billin
   if (plan.tier === 'free') return 0;
 
   const monthlyBob = plan.monthlyPriceBob;
-  if (billingPeriod === 'quarterly') return Math.round(monthlyBob * 3 * 0.9);
-  if (billingPeriod === 'annual') return Math.round(monthlyBob * 12 * 0.8);
+  if (billingPeriod === 'quarterly') {
+    return Math.round(monthlyBob * 3 * QUARTERLY_BILLING_DISCOUNT);
+  }
+  if (billingPeriod === 'annual') {
+    return Math.round(monthlyBob * ANNUAL_BILLING_MONTHS_PAID);
+  }
   return monthlyBob;
+}
+
+/** Precio mensual efectivo al pagar trimestral o anual (para copy en UI). */
+export function calculatePlanEffectiveMonthlyBob(
+  planCode: PlanCode,
+  billingPeriod: BillingPeriod = 'monthly',
+) {
+  const plan = getPlanByCode(planCode);
+  if (plan.tier === 'free') return 0;
+
+  if (billingPeriod === 'quarterly') {
+    return Math.round(calculatePlanChargeBob(planCode, billingPeriod) / 3);
+  }
+  if (billingPeriod === 'annual') {
+    return Math.round(calculatePlanChargeBob(planCode, billingPeriod) / ANNUAL_BILLING_MONTHS_INCLUDED);
+  }
+  return plan.monthlyPriceBob;
+}
+
+export function calculatePlanChargeUsd(planCode: PlanCode, billingPeriod: BillingPeriod = 'monthly') {
+  const plan = getPlanByCode(planCode);
+  if (plan.tier === 'free') return 0;
+
+  const monthlyUsd = plan.monthlyPriceUsd;
+  if (billingPeriod === 'quarterly') {
+    return Math.round(monthlyUsd * 3 * QUARTERLY_BILLING_DISCOUNT);
+  }
+  if (billingPeriod === 'annual') {
+    return Math.round(monthlyUsd * ANNUAL_BILLING_MONTHS_PAID);
+  }
+  return monthlyUsd;
 }
 
 export function getMercadoPagoRecurringConfig(billingPeriod: BillingPeriod) {
@@ -263,7 +319,8 @@ export type PlanLimitResource =
   | 'patients'
   | 'uploadRequests'
   | 'storage'
-  | 'whatsappMessages';
+  | 'whatsappMessages'
+  | 'users';
 
 export interface PlanUsageWarning {
   resource: PlanLimitResource;

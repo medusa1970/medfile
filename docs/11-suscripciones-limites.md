@@ -11,20 +11,21 @@ Medfile monetiza **por medico**, no por clinica ni grupo. El medico **nunca pier
 
 - Cada registro crea un `Tenant` y una `Subscription` propios.
 - Alta → plan **`free`** activo, sin vencimiento.
-- **Siempre 1 usuario** (el medico) en todos los planes del MVP.
+- **Siempre 1 usuario** (el medico) en todos los planes del **MVP actual**.
+- **Roadmap:** Basico = medico + 1 asistente; Profesional = medico + 2 colaboradores (asistente + captura clinica). Ver [29-equipo-colaboradores-y-acceso-delegado.md](./29-equipo-colaboradores-y-acceso-delegado.md).
 - Limites desde el plan actual; backend es autoridad.
 - No borrar datos por impago; bloquear solo premium y topes de creacion.
 - **WhatsApp automatico:** incluido en planes de pago con cupo mensual ([25](./25-whatsapp-incluido-en-planes.md)).
 
 ## Planes (vigentes)
 
-| Plan | USD/mes | Pacientes | Storage | Subidas/mes | WhatsApp/mes | Usuarios |
-|------|---------|-----------|---------|-------------|--------------|----------|
-| Gratis | 0 | 50 | 2 GB | 30 | 0 | 1 |
-| Basico | 14 | 200 | 8 GB | 150 | 100 | 1 |
-| Profesional | 32 | 800 | 25 GB | 500 | 600 | 1 |
+| Plan | USD/mes | Pacientes | Storage | Subidas/mes | WhatsApp/mes | Usuarios (MVP) | Usuarios (objetivo) |
+|------|---------|-----------|---------|-------------|--------------|----------------|---------------------|
+| Gratis | 0 | 50 | 2 GB | 30 | 0 | 1 | 1 |
+| Basico | 14 | 200 | 8 GB | 150 | 100 | 1 | **2** (medico + asistente) |
+| Profesional | 32 | 800 | 25 GB | 500 | 600 | 1 | **3** (medico + 2 colaboradores) |
 
-Codigo: `packages/types/src/plans.ts`.
+Codigo vigente: `limits.users` — Gratis **1**, Basico **2**, Profesional **3**. Ver doc [29](./29-equipo-colaboradores-y-acceso-delegado.md).
 
 ### Gratis
 Historia clinica, documentos, wa.me, Codigo Medfile. Sin automatizacion email/WA API.
@@ -33,7 +34,7 @@ Historia clinica, documentos, wa.me, Codigo Medfile. Sin automatizacion email/WA
 Email + **100 WhatsApp/mes incluidos**, mas capacidad, branding.
 
 ### Profesional
-Alto volumen **mismo medico**, **600 WhatsApp/mes**, automatizaciones, compartir historial, reportes.
+Alto volumen **mismo medico**, **600 WhatsApp/mes**, automatizaciones, **compartir historial con colega**, captura clinica delegada (enfermeria), reportes.
 
 ## Uso WhatsApp
 
@@ -72,19 +73,25 @@ Contadores sincronizados: pacientes (count DB en cada `/me` y `/subscriptions/cu
 
 ## Pantalla web
 
-- `/suscripcion`: plan, uso, comparativa, checkout (pendiente)
+- `/suscripcion`: plan, uso, comparativa; **precios en BOB**; Mercado Pago + QR Banco Económico
 
 ## Pago
 
-Mercado Pago (Bolivia) — ver [26-mercadopago-bolivia.md](./26-mercadopago-bolivia.md).
+**Moneda comercial:** bolivianos (BOB) en UI; referencia USD secundaria (`packages/types/src/plans.ts`).
 
-- `POST /api/payments/checkout`
+| Proveedor | Doc | Endpoints |
+|-----------|-----|-----------|
+| Mercado Pago (recurrente) | [26](./26-mercadopago-bolivia.md) | `POST /api/payments/checkout`, webhook MP |
+| QR Banco Económico | [30](./30-banco-economico-qr-bolivia.md) | `POST /api/payments/economico-qr/checkout` |
+| Opciones visibles | [31](./31-panel-admin-plataforma.md) | `GET /api/payments/options` |
+
 - `POST /api/payments/sync-checkout`
-- `POST /api/webhooks/mercadopago`
-- `/suscripcion`: checkout real + modo mock sin credenciales
+- Modo mock sin credenciales (`PAYMENTS_PROVIDER=mock`)
 
 ## Documentos relacionados
 
+- [29-equipo-colaboradores-y-acceso-delegado.md](./29-equipo-colaboradores-y-acceso-delegado.md)
 - [24-planes-medico-independiente-bolivia.md](./24-planes-medico-independiente-bolivia.md)
 - [18-modelo-freemium-y-oferta.md](./18-modelo-freemium-y-oferta.md)
-- [25-whatsapp-incluido-en-planes.md](./25-whatsapp-incluido-en-planes.md)
+- [30-banco-economico-qr-bolivia.md](./30-banco-economico-qr-bolivia.md)
+- [31-panel-admin-plataforma.md](./31-panel-admin-plataforma.md)

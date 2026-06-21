@@ -25,6 +25,11 @@ export class AuthController {
     return this.authService.login(body);
   }
 
+  @Post('admin/login')
+  adminLogin(@Body() body: LoginDto) {
+    return this.authService.adminLogin(body);
+  }
+
   @Post('verify-email')
   verifyEmail(@Headers('authorization') authorizationHeader: string | undefined, @Body() body: VerifyEmailDto) {
     return this.authService.verifyEmail(authorizationHeader, body);

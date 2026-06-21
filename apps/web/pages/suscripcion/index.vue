@@ -1,12 +1,12 @@
 <template>
-  <DoctorShell>
-    <header class="app-header">
-      <div>
-        <EyebrowPill>Facturacion</EyebrowPill>
-        <h1>Suscripcion</h1>
-        <p>
-          Plan actual, limites y uso. Tus datos clinicos permanecen aunque no pagues; los planes de
-          pago desbloquean capacidad y automatizacion.
+  <div class="dashboard-page subscription-page">
+    <header class="dashboard-topbar">
+      <div class="dashboard-topbar__main">
+        <EyebrowPill>Facturación</EyebrowPill>
+        <h1 class="dashboard-topbar__title">Suscripción</h1>
+        <p class="dashboard-topbar__lead">
+          Plan actual, límites y uso. Tus datos clínicos permanecen aunque no pagues; los planes de
+          pago desbloquean capacidad y automatización.
         </p>
       </div>
       <StatusBadge :tone="statusTone">{{ statusLabel }}</StatusBadge>
@@ -17,51 +17,49 @@
       <p>{{ checkoutNotice.message }}</p>
     </div>
 
-    <section class="section compact-section billing-period-section">
-      <SectionHeading
-        title="Periodo de facturacion"
-        description="El cobro recurrente se procesa con Mercado Pago en bolivianos."
-      />
+    <PanelCard padded class="patient-panel-compact">
+      <template #header>
+        <h2>Periodo de facturación</h2>
+      </template>
+      <p class="panel-hint panel-hint--compact">
+        Precios en <strong>bolivianos (Bs)</strong>. Elige Mercado Pago o QR Banco Económico según
+        disponibilidad.
+      </p>
       <div class="billing-toggle" role="group" aria-label="Periodo de facturacion">
         <button
           v-for="option in billingOptions"
           :key="option.id"
           type="button"
-          :class="{ active: billingPeriod === option.id }"
+          class="billing-toggle__btn"
+          :class="{ 'billing-toggle__btn--active': billingPeriod === option.id }"
           @click="billingPeriod = option.id"
         >
           {{ option.label }}
-          <span v-if="option.save" class="save-badge">{{ option.save }}</span>
+          <span v-if="option.save" class="billing-toggle__save">{{ option.save }}</span>
         </button>
       </div>
-    </section>
+    </PanelCard>
 
-    <section class="clinical-summary" aria-label="Resumen de suscripcion">
-      <MetricCard label="Plan actual" :value="subscription.plan.name" :note="planTierLabel" />
-      <MetricCard label="Pacientes" :value="formatUsage(subscription.usage.patients)" note="limite" />
-      <MetricCard
-        v-if="whatsappUsage"
-        label="WhatsApp / mes"
-        :value="formatUsage(whatsappUsage)"
-        :note="whatsappUsageNote"
-      />
-      <MetricCard label="Subidas / mes" :value="formatUsage(subscription.usage.uploadRequests)" note="limite" />
-      <MetricCard label="Storage" :value="formatStorageUsage" note="usado" />
-    </section>
+    <StatStrip :items="subscriptionStats" aria-label="Resumen del plan" />
 
-    <div v-if="whatsappWarning" class="whatsapp-quota-banner" role="status">
+    <div v-if="upgradeHint" class="subscription-alert subscription-alert--upgrade" role="status">
+      <strong>{{ upgradeHint.title }}</strong>
+      <p>{{ upgradeHint.message }}</p>
+    </div>
+
+    <div v-if="whatsappWarning" class="subscription-alert" role="status">
       <strong>{{ whatsappWarning.title }}</strong>
       <p>{{ whatsappWarning.message }}</p>
-      <MfButton v-if="subscription.planCode === 'basic'" variant="primary" to="/suscripcion">
+      <MfButton v-if="subscription.planCode === 'basic'" variant="secondary" to="/suscripcion">
         Ver plan Profesional
       </MfButton>
     </div>
 
-    <section class="dashboard-grid">
-      <PanelCard title="Uso del plan" padded>
-        <div class="usage-list">
+    <section class="dashboard-grid dashboard-grid--compact">
+      <PanelCard title="Uso del plan" padded class="patient-panel-compact">
+        <div class="usage-list usage-list--compact">
           <div v-for="item in usageItems" :key="item.label" class="usage-item">
-            <div>
+            <div class="usage-item__head">
               <strong>{{ item.label }}</strong>
               <span>{{ item.used }} de {{ item.limit }}</span>
             </div>
@@ -71,51 +69,81 @@
           </div>
         </div>
 
-        <div v-if="loadError" class="form-error upload-page-notice">
-          No se pudo conectar al API. Mostrando suscripcion demo.
-        </div>
+        <p v-if="loadError" class="form-error upload-page-notice">
+          No se pudo conectar al API. Mostrando suscripción demo.
+        </p>
       </PanelCard>
 
-      <PanelCard title="Incluido en tu plan" padded>
+      <PanelCard title="Incluido en tu plan" padded class="patient-panel-compact">
         <ul class="plan-capability-list">
           <li v-for="feature in subscription.plan.features" :key="feature">{{ feature }}</li>
         </ul>
-        <p class="mobile-copy plan-data-note">
+        <p class="panel-hint panel-hint--compact">
           Si bajas de plan, conservas acceso a pacientes y documentos ya registrados. Solo se
-          pausan funciones premium y topes de creacion.
+          pausan funciones premium y topes de creación.
         </p>
         <MfButton variant="secondary" block to="/documentos">Probar enlace + WhatsApp</MfButton>
       </PanelCard>
     </section>
 
-    <section class="section compact-section">
-      <SectionHeading
-        title="Comparar planes"
-        description="Gratis permanente. Basico y Profesional incluyen WhatsApp automatico. Profesional permite compartir historiales con colegas Medfile bajo permisos, alcance y revocacion que tu defines."
-      />
+    <PanelCard padded class="patient-panel-compact subscription-plans-panel">
+      <template #header>
+        <h2>Comparar planes</h2>
+      </template>
+      <p class="panel-hint panel-hint--compact">
+        Gratis permanente. Básico incluye 1 asistente o secretaria. Profesional añade enfermería con
+        permiso temporal del médico y compartir historiales con colegas Medfile.
+      </p>
 
       <div class="plan-compare-grid">
-        <article v-for="plan in plans" :key="plan.code" class="feature-card plan-card plan-compare-card">
+        <article
+          v-for="plan in plans"
+          :key="plan.code"
+          :id="`plan-${plan.code}`"
+          class="plan-compare-card"
+          :class="{ 'plan-compare-card--highlight': highlightPlanCode === plan.code }"
+        >
           <span class="plan-tier-badge" :class="`plan-tier-badge--${plan.tier}`">
             {{ plan.tier === 'free' ? 'Gratis' : 'De pago' }}
           </span>
           <h3>{{ plan.name }}</h3>
-          <p>
-            <strong>{{ plan.monthlyPriceUsd === 0 ? '$0' : `$${plan.monthlyPriceUsd}/mes` }}</strong>
+          <p class="plan-compare-card__price">
+            <strong>{{ formatPlanCardPrice(plan.code) }}</strong>
+            <span v-if="plan.tier === 'paid'" class="plan-compare-card__price-ref">
+              {{ formatPlanUsdReference(plan.code, billingPeriod) }}
+            </span>
+          </p>
+          <p
+            v-if="plan.tier === 'paid' && formatPlanEffectiveMonthlyNote(plan.code, billingPeriod)"
+            class="plan-compare-card__effective"
+          >
+            {{ formatPlanEffectiveMonthlyNote(plan.code, billingPeriod) }}
           </p>
           <ul class="plan-features">
             <li v-for="feature in plan.features" :key="feature">{{ feature }}</li>
           </ul>
           <ul v-if="plan.capabilities" class="plan-capabilities-mini">
-            <li :class="{ off: !plan.capabilities.emailReminders }">Email automatico</li>
-            <li :class="{ off: !plan.capabilities.whatsappAutomated }">WhatsApp automatico</li>
+            <li :class="{ off: !plan.capabilities.emailReminders }">Email automático</li>
+            <li :class="{ off: !plan.capabilities.whatsappAutomated }">WhatsApp automático</li>
+            <li :class="{ off: !plan.capabilities.assistantUsers }">Asistente o secretaria</li>
+            <li :class="{ off: !plan.capabilities.clinicalCaptureUsers }">Enfermería delegada</li>
+            <li :class="{ off: !plan.capabilities.auditLog }">Auditoría por usuario</li>
             <li :class="{ off: !plan.capabilities.clinicalShare }">Compartir historial colega</li>
-            <li :class="{ off: !plan.capabilities.assistantUsers }">Usuario asistente</li>
           </ul>
+          <MfButton
+            v-if="plan.tier === 'paid' && plan.code !== subscription.planCode && paymentOptions.economicoQr"
+            block
+            variant="secondary"
+            class="plan-checkout-secondary"
+            :disabled="checkoutLoading === plan.code"
+            @click="startEconomicoCheckout(plan.code)"
+          >
+            {{ economicoButtonLabel(plan.code) }}
+          </MfButton>
           <MfButton
             block
             :variant="planButtonVariant(plan.code)"
-            :disabled="checkoutLoading === plan.code"
+            :disabled="isPlanCheckoutDisabled(plan.code)"
             @click="handlePlanAction(plan.code)"
           >
             {{ planButtonLabel(plan.code) }}
@@ -125,27 +153,103 @@
           </p>
         </article>
       </div>
-    </section>
-  </DoctorShell>
+    </PanelCard>
+
+    <PanelCard
+      v-if="economicoCheckout"
+      title="Pago con QR — Banco Económico"
+      padded
+      class="patient-panel-compact economico-checkout-panel"
+    >
+      <p class="panel-hint panel-hint--compact">
+        Escanea el QR con la app del Banco Económico. Monto:
+        <strong>Bs {{ economicoCheckout.amountBob }}</strong>
+      </p>
+      <div v-if="economicoCheckout.status === 'paid'" class="checkout-notice success" role="status">
+        <strong>Pago confirmado</strong>
+        <p>Tu plan se activó correctamente.</p>
+      </div>
+      <div v-else-if="economicoCheckout.status === 'expired'" class="checkout-notice warning" role="status">
+        <strong>QR expirado</strong>
+        <p>Genera un nuevo código para continuar.</p>
+      </div>
+      <p v-else-if="qrPolling" class="panel-hint panel-hint--compact">
+        Esperando confirmación del banco…
+      </p>
+      <p v-if="economicoCheckout.instructions" class="economico-instructions">
+        {{ economicoCheckout.instructions }}
+      </p>
+      <img
+        v-if="economicoQrSrc && economicoCheckout.status === 'pending'"
+        :src="economicoQrSrc"
+        alt="Codigo QR de pago"
+        class="economico-qr-image"
+      />
+      <p class="panel-hint panel-hint--compact">
+        Referencia: {{ economicoCheckout.orderId }} · Vence
+        {{ formatEconomicoExpiry(economicoCheckout.expiresAt) }}
+      </p>
+      <MfButton
+        v-if="economicoCheckout.mode === 'mock' && economicoCheckout.status === 'pending'"
+        block
+        :disabled="mockConfirmLoading"
+        @click="confirmMockQrPayment"
+      >
+        {{ mockConfirmLoading ? 'Activando…' : 'Simular pago confirmado (dev)' }}
+      </MfButton>
+      <MfButton variant="secondary" block @click="closeEconomicoCheckout">Cerrar</MfButton>
+    </PanelCard>
+  </div>
 </template>
 
 <script setup lang="ts">
+definePageMeta({ layout: 'doctor', ssr: false })
 import type { BillingPeriod, PlanCapabilities, PlanCode, PlanTier } from '@medfile/types/plans'
 import {
   calculatePlanChargeBob,
   shouldWarnWhatsAppQuota,
   isWhatsAppQuotaExceeded,
 } from '@medfile/types/plans'
+import type { StatStripItem } from '~/components/ui/StatStrip.vue'
+import { readReturnToQuery } from '~/utils/app-back-route'
+import { subscriptionRoute } from '~/utils/subscription-route'
+import {
+  billingPeriodSuffix,
+  formatPlanEffectiveMonthlyNote,
+  formatPlanPricePrimary,
+  formatPlanUsdReference,
+} from '~/utils/plan-pricing-display'
 
 type BadgeTone = '' | 'warning' | 'danger' | 'success'
 
 interface CheckoutResponse {
-  mode: 'mercadopago' | 'mock'
+  mode: 'mercadopago' | 'mock' | 'economico_qr'
   preapprovalId: string
   initPoint: string
   amountBob: number
   planCode: PlanCode
   billingPeriod: BillingPeriod
+}
+
+interface EconomicoCheckoutResponse {
+  checkoutId: string
+  mode: 'economico_qr' | 'mock'
+  orderId: string
+  amountBob: number
+  planCode: PlanCode
+  billingPeriod: BillingPeriod
+  qrImage: string
+  qrImageUrl?: string
+  expiresAt: string
+  status: 'pending' | 'paid' | 'expired'
+  instructions?: string
+}
+
+interface PaymentOptionsResponse {
+  mercadopago: boolean
+  economicoQr: boolean
+  defaultProvider: string
+  currency: 'BOB'
 }
 
 interface Plan {
@@ -183,7 +287,7 @@ interface Usage {
   limit: number
 }
 
-const config = useRuntimeConfig()
+const apiBaseUrl = usePublicApiBaseUrl()
 const route = useRoute()
 const router = useRouter()
 const { apiFetch } = useMedfileApi()
@@ -191,11 +295,31 @@ const loadError = ref(false)
 const checkoutLoading = ref<PlanCode | ''>('')
 const checkoutNotice = ref<{ title: string; message: string; tone: string } | null>(null)
 const billingPeriod = ref<BillingPeriod>('monthly')
+const paymentOptions = ref<PaymentOptionsResponse>({
+  mercadopago: true,
+  economicoQr: false,
+  defaultProvider: 'mock',
+  currency: 'BOB',
+})
+const economicoCheckout = ref<EconomicoCheckoutResponse | null>(null)
+const qrPolling = ref(false)
+const mockConfirmLoading = ref(false)
+let qrPollTimer: ReturnType<typeof setInterval> | null = null
+
+const economicoQrSrc = computed(() => {
+  const checkout = economicoCheckout.value
+  if (!checkout) return ''
+  if (checkout.qrImageUrl) return checkout.qrImageUrl
+  if (checkout.qrImage?.startsWith('data:') || checkout.qrImage?.startsWith('http')) {
+    return checkout.qrImage
+  }
+  return checkout.qrImage ? `data:image/png;base64,${checkout.qrImage}` : ''
+})
 
 const billingOptions = [
   { id: 'monthly' as BillingPeriod, label: 'Mensual', save: '' },
   { id: 'quarterly' as BillingPeriod, label: 'Trimestral', save: '-10%' },
-  { id: 'annual' as BillingPeriod, label: 'Anual', save: '-20%' },
+  { id: 'annual' as BillingPeriod, label: 'Anual', save: '2 meses gratis' },
 ]
 
 const freePlan: Plan = {
@@ -208,8 +332,8 @@ const freePlan: Plan = {
     'Hasta 50 pacientes',
     'Historia clinica y consultas',
     'Enlace subida paciente',
-    'WhatsApp manual (compartir enlace)',
-    'Codigo Medfile · preparado para compartir con colegas',
+    'WhatsApp manual (wa.me)',
+    'Codigo Medfile (compartir historial en plan Profesional)',
     '1 usuario · 2 GB',
   ],
   capabilities: {
@@ -218,6 +342,8 @@ const freePlan: Plan = {
     emailReminders: false,
     smsReminders: false,
     assistantUsers: false,
+    clinicalCaptureUsers: false,
+    auditLog: false,
     automatedDigest: false,
     advancedReports: false,
     customBranding: false,
@@ -233,19 +359,21 @@ const fallbackPlans: Plan[] = [
     name: 'Basico',
     tier: 'paid',
     monthlyPriceUsd: 14,
-    limits: { patients: 200, users: 1, storageBytes: 8589934592, uploadRequestsPerMonth: 150, whatsappMessagesPerMonth: 100 },
+    limits: { patients: 200, users: 2, storageBytes: 8589934592, uploadRequestsPerMonth: 150, whatsappMessagesPerMonth: 100 },
     features: [
       'Hasta 200 pacientes',
-      '8 GB · 1 medico',
-      '100 WhatsApp automaticos / mes incluidos',
-      'Email y logo en enlaces',
+      '8 GB · 1 medico + 1 asistente',
+      'Cupo 100 WhatsApp / mes (envio proximamente)',
+      'Email y logo en enlaces (proximamente)',
     ],
     capabilities: {
       whatsappShareLink: true,
       whatsappAutomated: true,
       emailReminders: true,
       smsReminders: false,
-      assistantUsers: false,
+      assistantUsers: true,
+      clinicalCaptureUsers: false,
+      auditLog: false,
       automatedDigest: false,
       advancedReports: false,
       customBranding: true,
@@ -258,20 +386,24 @@ const fallbackPlans: Plan[] = [
     name: 'Profesional',
     tier: 'paid',
     monthlyPriceUsd: 32,
-    limits: { patients: 800, users: 1, storageBytes: 26843545600, uploadRequestsPerMonth: 500, whatsappMessagesPerMonth: 600 },
+    limits: { patients: 800, users: 3, storageBytes: 26843545600, uploadRequestsPerMonth: 500, whatsappMessagesPerMonth: 600 },
     features: [
       'Hasta 800 pacientes',
-      '25 GB · 1 medico alto volumen',
-      '600 WhatsApp automaticos / mes incluidos',
-      'Compartir historial con colegas (permisos y revocacion)',
-      'Automatizaciones y reportes',
+      '25 GB · equipo ampliado',
+      'Cupo 600 WhatsApp / mes (envio proximamente)',
+      'Enfermeria: vitales, cola y triage',
+      'Auditoria por usuario',
+      'Compartir historial con colegas',
+      'Automatizaciones y reportes (proximamente)',
     ],
     capabilities: {
       whatsappShareLink: true,
       whatsappAutomated: true,
       emailReminders: true,
       smsReminders: false,
-      assistantUsers: false,
+      assistantUsers: true,
+      clinicalCaptureUsers: true,
+      auditLog: true,
       automatedDigest: true,
       advancedReports: true,
       customBranding: true,
@@ -310,7 +442,7 @@ const { data: subscriptionData, refresh: refreshSubscription } = await useAsyncD
 
 const { data: plansData } = await useAsyncData('subscription-plans', async () => {
   try {
-    return await $fetch<Plan[]>(`${config.public.apiUrl}/api/subscriptions/plans`)
+    return await $fetch<Plan[]>(`${apiBaseUrl}/api/subscriptions/plans`)
   } catch {
     return fallbackPlans
   }
@@ -318,6 +450,40 @@ const { data: plansData } = await useAsyncData('subscription-plans', async () =>
 
 const subscription = computed(() => subscriptionData.value ?? fallbackSubscription)
 const plans = computed(() => plansData.value ?? fallbackPlans)
+
+const highlightPlanCode = computed(() => {
+  const upgrade = String(route.query.upgrade ?? '')
+  if (upgrade === 'basic' || upgrade === 'professional') return upgrade as PlanCode
+  return null
+})
+
+const upgradeHint = computed(() => {
+  if (highlightPlanCode.value === 'basic') {
+    return {
+      title: 'Mejora a plan Básico',
+      message:
+        'Desbloquea 1 asistente o secretaria para filiación, solicitudes de subida y bandeja administrativa.',
+    }
+  }
+  if (highlightPlanCode.value === 'professional') {
+    return {
+      title: 'Mejora a plan Profesional',
+      message:
+        'Desbloquea enfermería delegada, cola clínica, auditoría por usuario y compartir historial con colegas.',
+    }
+  }
+  return null
+})
+
+onMounted(() => {
+  if (!highlightPlanCode.value || !import.meta.client) return
+  nextTick(() => {
+    document.getElementById(`plan-${highlightPlanCode.value}`)?.scrollIntoView({
+      behavior: 'smooth',
+      block: 'center',
+    })
+  })
+})
 
 const planTierLabel = computed(() =>
   subscription.value.plan.tier === 'paid' ? 'plan de pago' : 'gratis permanente',
@@ -356,6 +522,45 @@ const whatsappUsageNote = computed(() => {
   const usage = whatsappUsage.value
   if (!usage || usage.limit <= 0) return 'solo wa.me manual'
   return 'incluidos en tu plan'
+})
+
+const subscriptionStats = computed<StatStripItem[]>(() => {
+  const sub = subscription.value
+  const items: StatStripItem[] = [
+    {
+      label: 'Plan',
+      value: sub.plan.name,
+      badge: planTierLabel.value,
+      badgeTone: sub.plan.tier === 'paid' ? 'success' : '',
+    },
+    {
+      label: 'Pacientes',
+      value: formatUsage(sub.usage.patients),
+      badge: 'límite',
+    },
+    {
+      label: 'Subidas',
+      value: formatUsage(sub.usage.uploadRequests),
+      badge: 'límite',
+    },
+    {
+      label: 'Storage',
+      value: formatStorageUsage.value,
+      badge: 'usado',
+    },
+  ]
+
+  const wa = whatsappUsage.value
+  if (wa) {
+    items.push({
+      label: 'WhatsApp',
+      value: formatUsage(wa),
+      badge: whatsappUsageNote.value,
+      badgeTone: wa.limit <= 0 ? '' : wa.used / wa.limit >= 0.8 ? 'warning' : '',
+    })
+  }
+
+  return items
 })
 
 const whatsappWarning = computed(() => {
@@ -401,23 +606,39 @@ const usageItems = computed(() => {
   return items
 })
 
+function formatPlanCardPrice(planCode: PlanCode) {
+  return formatPlanPricePrimary(planCode, billingPeriod.value)
+}
+
 function formatCheckoutPrice(planCode: PlanCode) {
   if (planCode === 'free') return ''
   const amount = calculatePlanChargeBob(planCode, billingPeriod.value)
-  const suffix =
-    billingPeriod.value === 'quarterly'
-      ? '/ trimestre'
-      : billingPeriod.value === 'annual'
-        ? '/ año'
-        : '/ mes'
-  return `~Bs ${amount}${suffix} · Mercado Pago`
+  const provider =
+    paymentOptions.value.economicoQr && !paymentOptions.value.mercadopago
+      ? 'QR Banco Económico'
+      : paymentOptions.value.mercadopago
+        ? 'Mercado Pago o QR'
+        : 'modo prueba'
+  return `Bs ${amount}${billingPeriodSuffix(billingPeriod.value)} · ${provider}`
 }
 
 function planButtonLabel(planCode: PlanCode) {
   if (planCode === subscription.value.planCode) return 'Plan actual'
   if (planCode === 'free') return 'Plan Gratis'
-  if (checkoutLoading.value === planCode) return 'Redirigiendo...'
+  if (checkoutLoading.value === planCode) return 'Procesando…'
+  if (!paymentOptions.value.mercadopago) return 'Mercado Pago no disponible'
   return 'Pagar con Mercado Pago'
+}
+
+function isPlanCheckoutDisabled(planCode: PlanCode) {
+  if (checkoutLoading.value === planCode) return true
+  if (planCode === subscription.value.planCode || planCode === 'free') return false
+  return !paymentOptions.value.mercadopago
+}
+
+function economicoButtonLabel(planCode: PlanCode) {
+  if (checkoutLoading.value === planCode) return 'Generando QR…'
+  return 'Pagar con QR Banco Económico'
 }
 
 function planButtonVariant(planCode: PlanCode) {
@@ -429,6 +650,136 @@ function planButtonVariant(planCode: PlanCode) {
 async function handlePlanAction(planCode: PlanCode) {
   if (planCode === subscription.value.planCode || planCode === 'free') return
   await startCheckout(planCode)
+}
+
+async function startEconomicoCheckout(planCode: PlanCode) {
+  checkoutLoading.value = planCode
+  checkoutNotice.value = null
+  stopQrPolling()
+  economicoCheckout.value = null
+
+  try {
+    const checkout = await apiFetch<EconomicoCheckoutResponse>('/api/payments/checkout/qr', {
+      method: 'POST',
+      body: { planCode, billingPeriod: billingPeriod.value },
+    })
+    economicoCheckout.value = checkout
+    checkoutNotice.value = {
+      tone: 'success',
+      title: 'QR generado',
+      message:
+        'Escanea el codigo con tu app del Banco Economico. El plan se activara al confirmar el pago.',
+    }
+    if (checkout.status === 'pending') {
+      startQrPolling(checkout.checkoutId)
+    }
+  } catch (error) {
+    checkoutNotice.value = {
+      tone: 'error',
+      title: 'No se pudo generar el QR',
+      message: getErrorMessage(error),
+    }
+  } finally {
+    checkoutLoading.value = ''
+  }
+}
+
+function startQrPolling(checkoutId: string) {
+  stopQrPolling()
+  qrPolling.value = true
+  qrPollTimer = setInterval(() => {
+    void pollQrStatus(checkoutId)
+  }, 2500)
+  void pollQrStatus(checkoutId)
+}
+
+function stopQrPolling() {
+  if (qrPollTimer) {
+    clearInterval(qrPollTimer)
+    qrPollTimer = null
+  }
+  qrPolling.value = false
+}
+
+async function pollQrStatus(checkoutId: string) {
+  try {
+    const status = await apiFetch<EconomicoCheckoutResponse>(
+      `/api/payments/checkout/${checkoutId}/status`,
+    )
+    if (!economicoCheckout.value || economicoCheckout.value.checkoutId !== checkoutId) return
+
+    economicoCheckout.value = { ...economicoCheckout.value, ...status }
+
+    if (status.status === 'paid') {
+      stopQrPolling()
+      checkoutNotice.value = {
+        tone: 'success',
+        title: 'Pago confirmado',
+        message: 'Tu plan quedó activo. Gracias por suscribirte a Medfile.',
+      }
+      await refreshSubscription()
+    } else if (status.status === 'expired') {
+      stopQrPolling()
+    }
+  } catch {
+    // Ignorar errores transitorios de polling
+  }
+}
+
+async function confirmMockQrPayment() {
+  const checkout = economicoCheckout.value
+  if (!checkout || checkout.mode !== 'mock') return
+
+  mockConfirmLoading.value = true
+  try {
+    const updated = await apiFetch<EconomicoCheckoutResponse>(
+      `/api/payments/checkout/${checkout.checkoutId}/confirm-mock`,
+      { method: 'POST' },
+    )
+    economicoCheckout.value = { ...checkout, ...updated, status: 'paid' }
+    stopQrPolling()
+    checkoutNotice.value = {
+      tone: 'success',
+      title: 'Plan activado (modo prueba)',
+      message: 'Pago QR simulado. En produccion el banco confirma via webhook.',
+    }
+    await refreshSubscription()
+  } catch (error) {
+    checkoutNotice.value = {
+      tone: 'error',
+      title: 'No se pudo simular el pago',
+      message: getErrorMessage(error),
+    }
+  } finally {
+    mockConfirmLoading.value = false
+  }
+}
+
+function closeEconomicoCheckout() {
+  stopQrPolling()
+  economicoCheckout.value = null
+}
+
+function formatEconomicoExpiry(value: string) {
+  return new Date(value).toLocaleString('es-BO', {
+    day: '2-digit',
+    month: 'short',
+    hour: '2-digit',
+    minute: '2-digit',
+  })
+}
+
+async function loadPaymentOptions() {
+  try {
+    paymentOptions.value = await apiFetch<PaymentOptionsResponse>('/api/payments/options')
+  } catch {
+    paymentOptions.value = {
+      mercadopago: true,
+      economicoQr: false,
+      defaultProvider: 'mock',
+      currency: 'BOB',
+    }
+  }
 }
 
 async function startCheckout(planCode: PlanCode) {
@@ -483,7 +834,8 @@ async function handleCheckoutReturn() {
       loadError.value = true
     } finally {
       await refreshSubscription()
-      await router.replace({ path: '/suscripcion' })
+      const returnTo = readReturnToQuery(route.query)
+      await router.replace(returnTo ? subscriptionRoute(returnTo) : { path: '/suscripcion' })
     }
     return
   }
@@ -504,7 +856,8 @@ async function handleCheckoutReturn() {
       }
     } finally {
       await refreshSubscription()
-      await router.replace({ path: '/suscripcion' })
+      const returnTo = readReturnToQuery(route.query)
+      await router.replace(returnTo ? subscriptionRoute(returnTo) : { path: '/suscripcion' })
     }
   }
 }
@@ -521,6 +874,11 @@ function getErrorMessage(error: unknown) {
 
 onMounted(() => {
   void handleCheckoutReturn()
+  void loadPaymentOptions()
+})
+
+onUnmounted(() => {
+  stopQrPolling()
 })
 
 function buildUsageItem(label: string, usage: Usage, bytes = false) {
@@ -558,13 +916,8 @@ function formatBytes(bytes: number) {
 
 .plan-compare-grid {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 16px;
-}
-
-.plan-compare-card {
-  display: flex;
-  flex-direction: column;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
 }
 
 .plan-tier-badge {
@@ -643,42 +996,6 @@ function formatBytes(bytes: number) {
   line-height: 1.5;
 }
 
-.billing-period-section {
-  margin-bottom: 20px;
-}
-
-.billing-toggle {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
-}
-
-.billing-toggle button {
-  border: 1px solid rgb(0 31 92 / 0.12);
-  background: #fff;
-  border-radius: 999px;
-  padding: 8px 14px;
-  font-size: 14px;
-  cursor: pointer;
-}
-
-.billing-toggle button.active {
-  background: var(--mf-navy-900);
-  color: #fff;
-  border-color: var(--mf-navy-900);
-}
-
-.save-badge {
-  margin-left: 6px;
-  font-size: 11px;
-  font-weight: 700;
-  color: var(--mf-teal-600);
-}
-
-.billing-toggle button.active .save-badge {
-  color: rgb(255 255 255 / 0.85);
-}
-
 .plan-price-bob {
   margin: 10px 0 0;
   font-size: 13px;
@@ -686,24 +1003,45 @@ function formatBytes(bytes: number) {
   text-align: center;
 }
 
-.whatsapp-quota-banner {
-  margin-bottom: 20px;
-  padding: 16px 18px;
-  border-radius: 12px;
-  border: 1px solid rgb(245 158 11 / 0.35);
-  background: rgb(245 158 11 / 0.1);
-  color: var(--mf-slate-800);
-}
-
-.whatsapp-quota-banner strong {
+.plan-compare-card__price-ref {
   display: block;
-  margin-bottom: 6px;
+  margin-top: 4px;
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--mf-slate-500);
 }
 
-.whatsapp-quota-banner p {
+.plan-compare-card__effective {
+  margin: 6px 0 0;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--mf-teal-600);
+  text-align: center;
+}
+
+.plan-checkout-secondary {
+  margin-bottom: 8px;
+}
+
+.economico-checkout-panel {
+  margin-top: 10px;
+}
+
+.economico-qr-image {
+  display: block;
+  max-width: 240px;
+  margin: 12px auto;
+  border-radius: 12px;
+  border: 1px solid rgb(15 23 42 / 0.08);
+}
+
+.economico-instructions,
+.economico-qr-payload {
   margin: 0 0 12px;
   font-size: 14px;
   line-height: 1.5;
+  color: var(--mf-slate-700);
+  word-break: break-word;
 }
 
 @media (max-width: 980px) {

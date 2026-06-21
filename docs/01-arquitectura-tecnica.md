@@ -61,7 +61,7 @@ Requisitos minimos:
 - Email/password con verificacion de correo.
 - Recuperacion de contrasena.
 - Sesiones seguras con refresh token rotativo o cookies httpOnly.
-- Roles por tenant: owner, doctor, assistant.
+- Roles por tenant: `owner`, `doctor`, `assistant` (roadmap: `clinical_capture` para enfermeria delegada). Ver [29-equipo-colaboradores-y-acceso-delegado.md](./29-equipo-colaboradores-y-acceso-delegado.md) y [22-intercambio-historiales-entre-medicos.md](./22-intercambio-historiales-entre-medicos.md) (compartir **entre tenants**).
 - Guards en NestJS para `tenantId`, rol y estado de suscripcion.
 - Auditoria para ver, crear, editar, eliminar, imprimir y descargar historia clinica.
 

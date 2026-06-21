@@ -9,11 +9,15 @@ Medfile es una aplicacion SaaS **para medicos independientes**. Esta carpeta con
 | Entender que es Medfile y para quien | [00-vision-producto.md](./00-vision-producto.md) |
 | Saber que debe sentirse la app (moderna, practica, elegante, intuitiva) | [16-principios-experiencia.md](./16-principios-experiencia.md) |
 | Ver que pantallas y flujos existen hoy | [17-funcionalidad-catalogo.md](./17-funcionalidad-catalogo.md) |
+| **Funcionalidades del medico + roadmap** | [28-medico-funcionalidades-y-roadmap.md](./28-medico-funcionalidades-y-roadmap.md) |
 | Ver **gratis vs. de pago** | [20-gratis-vs-pago.md](./20-gratis-vs-pago.md) |
 | Ver **Mercado Pago / checkout** | [26-mercadopago-bolivia.md](./26-mercadopago-bolivia.md) |
+| **QR Banco Económico (BOB)** | [30-banco-economico-qr-bolivia.md](./30-banco-economico-qr-bolivia.md) |
+| **Panel admin plataforma** | [31-panel-admin-plataforma.md](./31-panel-admin-plataforma.md) |
 | **Publicar en produccion (Railway + medfile.my)** | [27-despliegue-railway-medfile-my.md](./27-despliegue-railway-medfile-my.md) |
 | Ver **planes medico independiente + costos** | [24-planes-medico-independiente-bolivia.md](./24-planes-medico-independiente-bolivia.md) |
 | **Compartir historial** entre medicos Medfile | [22-intercambio-historiales-entre-medicos.md](./22-intercambio-historiales-entre-medicos.md) |
+| **Equipo del medico** (asistente, enfermeria, vs compartir colega) | [29-equipo-colaboradores-y-acceso-delegado.md](./29-equipo-colaboradores-y-acceso-delegado.md) |
 | **Codigo Medfile** (identificador del consultorio) | [23-codigo-medfile.md](./23-codigo-medfile.md) |
 | Que servicios adicionales podemos ofrecer | [19-servicios-adicionales-catalogo.md](./19-servicios-adicionales-catalogo.md) |
 | Colores, tipografia, componentes UI | [03-sistema-diseno.md](./03-sistema-diseno.md) |
@@ -35,6 +39,9 @@ Medfile es una aplicacion SaaS **para medicos independientes**. Esta carpeta con
 | [21-whatsapp-cobro-por-medico-bolivia.md](./21-whatsapp-cobro-por-medico-bolivia.md) | WhatsApp API: **cobro por medico**, tarifas Bolivia (+591) |
 | [23-codigo-medfile.md](./23-codigo-medfile.md) | **Codigo Medfile** (`MF-XXXXXX`) |
 | [24-planes-medico-independiente-bolivia.md](./24-planes-medico-independiente-bolivia.md) | **Planes 1 medico**, precios USD/BOB y costos |
+| [30-banco-economico-qr-bolivia.md](./30-banco-economico-qr-bolivia.md) | **QR Banco Económico**, precios BOB, checkout |
+| [31-panel-admin-plataforma.md](./31-panel-admin-plataforma.md) | **Panel admin**: clientes, pagos, estados |
+| [29-equipo-colaboradores-y-acceso-delegado.md](./29-equipo-colaboradores-y-acceso-delegado.md) | **Asistente**, captura clinica (enfermeria), permisos y planes |
 
 ### Experiencia e interfaz
 
@@ -49,11 +56,16 @@ Medfile es una aplicacion SaaS **para medicos independientes**. Esta carpeta con
 | Doc | Contenido |
 |-----|-----------|
 | [17-funcionalidad-catalogo.md](./17-funcionalidad-catalogo.md) | **Indice vivo** de rutas, estado y enlaces |
+| [28-medico-funcionalidades-y-roadmap.md](./28-medico-funcionalidades-y-roadmap.md) | Beneficios medico, accesos rapidos y roadmap |
 | [06-auth-onboarding.md](./06-auth-onboarding.md) | Registro, login, tenant, onboarding |
 | [07-pacientes-historia-clinica.md](./07-pacientes-historia-clinica.md) | Pacientes e historia clinica base |
 | [08-perfil-paciente-consultas.md](./08-perfil-paciente-consultas.md) | Perfil clinico y consultas |
 | [09-documentos-solicitudes-subida.md](./09-documentos-solicitudes-subida.md) | Documentos y enlaces para pacientes |
 | [15-historia-clinica-emergencia.md](./15-historia-clinica-emergencia.md) | Formulario de urgencias |
+| [22-intercambio-historiales-entre-medicos.md](./22-intercambio-historiales-entre-medicos.md) | Compartir historial entre medicos |
+| [29-equipo-colaboradores-y-acceso-delegado.md](./29-equipo-colaboradores-y-acceso-delegado.md) | Equipo delegado vs compartir colega |
+| [30-banco-economico-qr-bolivia.md](./30-banco-economico-qr-bolivia.md) | Pago QR Banco Económico |
+| [31-panel-admin-plataforma.md](./31-panel-admin-plataforma.md) | Admin interno Medfile |
 
 ### Tecnico y operacion
 

@@ -37,8 +37,8 @@ export class Subscription {
   @Prop({ default: () => new Date().toISOString().slice(0, 7) })
   usagePeriodMonth!: string;
 
-  @Prop({ enum: ['mock', 'mercadopago'] })
-  paymentProvider?: 'mock' | 'mercadopago';
+  @Prop({ enum: ['mock', 'mercadopago', 'economico_qr'] })
+  paymentProvider?: 'mock' | 'mercadopago' | 'economico_qr';
 
   @Prop({ index: true })
   mercadopagoPreapprovalId?: string;

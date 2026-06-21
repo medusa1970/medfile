@@ -16,7 +16,7 @@ El beneficio de **compartir historiales entre medicos Medfile** debe quedar visi
 |------------|---------------|
 | **`/registro`** | Pilares `AuthShell`: «Colegas · compartes con permiso», «Tu código · Medfile incluido» (texto breve, sin caja en el formulario) |
 | **`AuthShell` (registro)** | Cuatro pilares breves: Gratis, Colegas, Tu codigo Medfile, Tus datos |
-| **Landing `#gratis-vs-pago`** | Callout `plan-share-callout` + bullets en comparativa de pago |
+| **Landing `#planes`** | Callout `plan-share-callout--card` en tarjeta Profesional + bullets del plan |
 | **Landing `#planes`** | Feature en Profesional; Gratis menciona Codigo Medfile y preparacion para compartir |
 | **`/suscripcion`** | Capability `Compartir historial colega` en comparador de planes |
 
@@ -31,7 +31,24 @@ Copy orientativo: *«Cuando lo requieras, comparte historiales con colegas Medfi
 | **Medico titular** | El que lleva la ficha del paciente en su consultorio; responsable principal del historial | `Tenant` origen + `Patient` “dueño” |
 | **Medico invitado / receptor** | Colega que necesita ver o atender por referencia, cobertura o segunda opinion | `Tenant` destino |
 | **Paciente** | Titular de sus datos; debe autorizar compartir o transferir | Consentimiento registrado |
-| **Asistente** | Secretaria del titular o del receptor | Solo si el medico lo permite en su tenant |
+| **Asistente** | Secretaria del titular o del receptor | Solo si el medico lo permite en su tenant — ver [29-equipo-colaboradores-y-acceso-delegado.md](./29-equipo-colaboradores-y-acceso-delegado.md) |
+| **Colaborador clinico (enfermeria)** | Personal de clinica donde atiende el titular | Captura delegada en tenant del medico; **no** es compartir con colega — doc 29 |
+
+---
+
+## Equipo interno vs compartir con colega
+
+Son **tres modelos distintos** (no intercambiables):
+
+| Modelo | Alcance | Documento |
+|--------|---------|-----------|
+| Enlace paciente (`/paciente/subir`) | Paciente sube archivos sin cuenta | [09-documentos-solicitudes-subida.md](./09-documentos-solicitudes-subida.md) |
+| **Equipo delegado** (asistente / enfermeria) | Mismo tenant del medico titular | [29-equipo-colaboradores-y-acceso-delegado.md](./29-equipo-colaboradores-y-acceso-delegado.md) |
+| **Compartir con colega** | Otro tenant medico (Codigo Medfile) | Este documento (22) |
+
+- **Compartir con colega** lo inicia **solo el medico titular** (no el asistente por defecto).
+- **Asistente** no recibe copia del historial en otro tenant; trabaja **dentro** del consultorio del titular.
+- Plan **Profesional** incluye compartir colega; plan **Basico+** incluira asistente (roadmap doc 29).
 
 El **medico titular** siempre puede:
 
@@ -212,9 +229,10 @@ Si el paciente **revoca**, el share pasa a `revoked` aunque el titular no quiera
 
 ### Medico titular — ficha del paciente
 
-- Boton **“Compartir con colega Medfile”**
-- Lista **“Accesos activos”** (con quien, permisos, vence cuando)
-- Accion **“Revocar”** / **“Prorrogar”** / **“Transferir paciente”**
+- Perfil `/pacientes/[id]`: resumen + timeline + documentos; **barra de acciones** (no formularios largos embebidos).
+- Botones abren vistas dedicadas: **Antecedentes**, **Nueva atención**, **Solicitar subida**, **Compartir con colega**, **Editar filiación**.
+- Compartir: vista `/pacientes/[id]/compartir` con presets clínicos (interconsulta / referencia), alcance granular y consentimiento.
+- Lista **Accesos enviados** (pendientes/activos) en la vista compartir; revocación en `/compartidos`.
 
 ### Medico receptor
 
@@ -314,6 +332,7 @@ Implementar **de a poco**; cada fase entrega valor real sin abrir un agujero de 
 
 ## Documentos relacionados
 
+- [29-equipo-colaboradores-y-acceso-delegado.md](./29-equipo-colaboradores-y-acceso-delegado.md) — asistente y enfermeria (**mismo tenant**; distinto de compartir colega)
 - [00-vision-producto.md](./00-vision-producto.md)
 - [07-pacientes-historia-clinica.md](./07-pacientes-historia-clinica.md)
 - [12-seguridad-tenant-sesion.md](./12-seguridad-tenant-sesion.md)

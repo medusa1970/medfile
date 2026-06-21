@@ -1,11 +1,21 @@
 <template>
   <div class="app-layout">
-    <header class="app-mobile-bar">
+    <header :class="['app-mobile-bar', { 'app-mobile-bar--with-back': showBack }]">
+      <button
+        v-if="showBack"
+        type="button"
+        class="app-mobile-back"
+        aria-label="Volver atrás"
+        @click="goBack"
+      >
+        <MedIcon name="arrow-left" size="sm" />
+      </button>
+
       <NuxtLink to="/dashboard" class="app-mobile-home" aria-label="Ir al dashboard">
         <MedIcon name="home" size="sm" />
       </NuxtLink>
 
-      <span class="app-mobile-title">{{ mobileTitle }}</span>
+      <BrandLogo to="/dashboard" compact aria-label="Ir al dashboard de Medfile" />
 
       <button
         type="button"
@@ -24,16 +34,14 @@
       </button>
     </header>
 
-    <Transition name="nav-backdrop">
-      <button
-        v-if="mobileNavOpen"
-        type="button"
-        class="app-sidebar-backdrop"
-        aria-label="Cerrar menú"
-        tabindex="-1"
-        @click="closeMobileNav"
-      />
-    </Transition>
+    <button
+      v-show="mobileNavOpen"
+      type="button"
+      class="app-sidebar-backdrop"
+      aria-label="Cerrar menú"
+      tabindex="-1"
+      @click="closeMobileNav"
+    />
 
     <aside :class="['app-sidebar', { 'app-sidebar--open': mobileNavOpen }]">
       <BrandLogo />
@@ -69,25 +77,87 @@
 </template>
 
 <script setup lang="ts">
+import { canShowAppBack, readReturnToQuery, resolveAppBackRoute } from '~/utils/app-back-route'
+
 interface SessionUser {
   fullName: string
   email: string
+  role?: string
+  isPlatformAdmin?: boolean
+}
+
+interface NavItem {
+  label: string
+  href: string
+  count?: string
+  active?: boolean
 }
 
 const route = useRoute()
+const router = useRouter()
 const { apiFetch, clearSession, hasSession } = useMedfileApi()
 const sessionUser = ref<SessionUser | null>(null)
 const mobileNavOpen = ref(false)
 
+const showBack = computed(() => canShowAppBack(route.path, readReturnToQuery(route.query)))
+
+async function goBack() {
+  const returnTo = readReturnToQuery(route.query)
+
+  if (returnTo) {
+    await navigateTo(returnTo)
+    return
+  }
+
+  if (import.meta.client && window.history.length > 1) {
+    router.back()
+    return
+  }
+
+  await navigateTo(resolveAppBackRoute(route.path))
+}
+
 const navItems = computed(() => {
-  const items = [
+  const role = sessionUser.value?.role ?? 'owner'
+  const isAssistant = role === 'assistant'
+  const isClinicalCapture = role === 'clinical_capture'
+
+  if (isClinicalCapture) {
+    const items: NavItem[] = [
+      { label: 'Cola clínica', href: '/cola-clinica' },
+      { label: 'Pacientes', href: '/pacientes' },
+      { label: 'Mi perfil', href: '/cuenta' },
+    ]
+    return items.map((item) => ({
+      ...item,
+      active: route.path === item.href || route.path.startsWith(`${item.href}/`),
+    }))
+  }
+
+  const items: NavItem[] = [
     { label: 'Dashboard', href: '/dashboard', count: '12' },
     { label: 'Pacientes', href: '/pacientes' },
     { label: 'Documentos', href: '/documentos', count: '4' },
-    { label: 'Compartidos', href: '/compartidos' },
-    { label: 'Suscripcion', href: '/suscripcion' },
-    { label: 'Mi perfil', href: '/cuenta' },
   ]
+
+  if (!isAssistant) {
+    items.push({ label: 'Compartidos', href: '/compartidos' })
+    items.push({ label: 'Suscripcion', href: '/suscripcion' })
+  }
+
+  if (!isAssistant && (role === 'owner' || role === 'doctor')) {
+    items.splice(2, 0, { label: 'Cola clínica', href: '/cola-clinica' })
+  }
+
+  items.push({ label: 'Mi perfil', href: '/cuenta' })
+
+  if (!isAssistant && (role === 'owner' || role === 'doctor')) {
+    items.splice(items.length - 1, 0, { label: 'Equipo', href: '/cuenta/equipo' })
+  }
+
+  if (sessionUser.value?.isPlatformAdmin) {
+    items.push({ label: 'Admin plataforma', href: '/admin' })
+  }
 
   return items.map((item) => ({
     ...item,
@@ -95,11 +165,6 @@ const navItems = computed(() => {
       item.href !== '#' &&
       (route.path === item.href || route.path.startsWith(`${item.href}/`)),
   }))
-})
-
-const mobileTitle = computed(() => {
-  const activeItem = navItems.value.find((item) => item.active)
-  return activeItem?.label ?? 'Medfile'
 })
 
 function toggleMobileNav() {
@@ -148,7 +213,9 @@ async function loadSessionUser() {
   }
 
   try {
-    const response = await apiFetch<{ user: SessionUser }>('/api/auth/me')
+    const response = await apiFetch<{ user: SessionUser & { role?: string; isPlatformAdmin?: boolean } }>(
+      '/api/auth/me',
+    )
     sessionUser.value = response.user
   } catch {
     sessionUser.value = null

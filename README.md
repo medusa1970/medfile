@@ -59,6 +59,8 @@ Documentos clave:
 - `docs/21-whatsapp-cobro-por-medico-bolivia.md`: WhatsApp API — cobro por medico, tarifas Bolivia.
 - `docs/23-codigo-medfile.md`: Codigo Medfile del consultorio.
 - `docs/24-planes-medico-independiente-bolivia.md`: planes 1 medico, precios y costos Bolivia.
+- `docs/30-banco-economico-qr-bolivia.md`: cobro con QR Banco Economico y precios en bolivianos.
+- `docs/31-panel-admin-plataforma.md`: panel admin (clientes, configuracion de pagos).
 
 ## Decision tecnica inicial
 

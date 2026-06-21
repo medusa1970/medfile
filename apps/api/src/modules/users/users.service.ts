@@ -1,6 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
+import type { TenantRole } from '@medfile/types';
 import { User, UserDocument } from './user.schema';
 
 @Injectable()
@@ -16,6 +17,115 @@ export class UsersService {
 
   findById(userId: string) {
     return this.userModel.findById(userId).lean().exec();
+  }
+
+  findActiveForTenant(tenantId: string) {
+    return this.userModel
+      .find({ tenantId, status: { $in: ['active', 'invited'] } })
+      .sort({ role: 1, createdAt: 1 })
+      .lean()
+      .exec();
+  }
+
+  countSeatsForTenant(tenantId: string) {
+    return this.userModel
+      .countDocuments({ tenantId, status: { $in: ['active', 'invited'] } })
+      .exec();
+  }
+
+  createTeamMember(input: {
+    tenantId: string;
+    fullName: string;
+    email: string;
+    passwordHash: string;
+    role: 'assistant' | 'clinical_capture';
+    clinicContexts?: string[];
+  }) {
+    return this.userModel.create({
+      tenantId: input.tenantId,
+      fullName: input.fullName.trim(),
+      email: this.normalizeEmail(input.email),
+      passwordHash: input.passwordHash,
+      role: input.role,
+      clinicContexts: input.clinicContexts ?? [],
+      status: 'active',
+      emailVerified: true,
+      onboardingCompletedAt: new Date(),
+    });
+  }
+
+  /** @deprecated usar createTeamMember */
+  createAssistant(input: {
+    tenantId: string;
+    fullName: string;
+    email: string;
+    passwordHash: string;
+  }) {
+    return this.createTeamMember({ ...input, role: 'assistant' });
+  }
+
+  disableMember(userId: string, tenantId: string) {
+    return this.userModel
+      .findOneAndUpdate(
+        { _id: userId, tenantId, role: { $ne: 'owner' } },
+        { status: 'disabled' },
+        { new: true },
+      )
+      .lean()
+      .exec();
+  }
+
+  reactivateTeamMember(input: {
+    userId: string;
+    tenantId: string;
+    fullName: string;
+    passwordHash: string;
+    role: 'assistant' | 'clinical_capture';
+    clinicContexts?: string[];
+  }) {
+    return this.userModel
+      .findOneAndUpdate(
+        { _id: input.userId, tenantId: input.tenantId, role: { $in: ['assistant', 'clinical_capture'] } },
+        {
+          fullName: input.fullName.trim(),
+          passwordHash: input.passwordHash,
+          role: input.role,
+          clinicContexts: input.clinicContexts ?? [],
+          status: 'active',
+          emailVerified: true,
+          onboardingCompletedAt: new Date(),
+        },
+        { new: true },
+      )
+      .lean()
+      .exec();
+  }
+
+  /** @deprecated usar reactivateTeamMember */
+  reactivateAssistant(input: {
+    userId: string;
+    tenantId: string;
+    fullName: string;
+    passwordHash: string;
+  }) {
+    return this.reactivateTeamMember({ ...input, role: 'assistant' });
+  }
+
+  countByRole(tenantId: string, role: TenantRole) {
+    return this.userModel
+      .countDocuments({ tenantId, role, status: { $in: ['active', 'invited'] } })
+      .exec();
+  }
+
+  updateClinicContexts(userId: string, tenantId: string, clinicContexts: string[]) {
+    return this.userModel
+      .findOneAndUpdate(
+        { _id: userId, tenantId, role: 'clinical_capture' },
+        { clinicContexts },
+        { new: true },
+      )
+      .lean()
+      .exec();
   }
 
   findByPasswordResetTokenHash(tokenHash: string) {
