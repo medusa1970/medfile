@@ -60,7 +60,7 @@
 }
 
 .marketing-nav .nav-brand .brand {
-  width: 148px;
+  width: 172px;
   min-height: 0;
   line-height: 0;
   transform: translateY(1px);
@@ -697,7 +697,7 @@
 }
 
 .patient-upload-header .brand {
-  width: 120px;
+  width: 142px;
   min-height: auto;
 }
 
@@ -1237,7 +1237,7 @@
 }
 
 .footer-brand .brand {
-  width: 156px;
+  width: 180px;
   min-height: 52px;
   padding: 10px 12px;
   border-radius: 16px;
@@ -1433,7 +1433,7 @@
 }
 
 .nav-mobile-drawer-header .brand {
-  width: 132px;
+  width: 154px;
   min-height: 44px;
 }
 
@@ -1523,7 +1523,7 @@
   }
 
   .marketing-nav .nav-brand .brand {
-    width: 128px;
+    width: 148px;
     min-height: 0;
   }
 

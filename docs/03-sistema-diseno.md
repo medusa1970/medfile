@@ -14,6 +14,8 @@ Las pantallas no deben definir estilos propios salvo excepciones justificadas. D
 
 El logo oficial de Medfile es `logo_medfile.svg`. En la aplicacion web se sirve desde `apps/web/public/brand/logo_medfile.svg` y debe consumirse mediante el componente `BrandLogo`.
 
+La palabra **MedFile** va en paths vectoriales (azul marino + teal). El sufijo de dominio **`.my`** va inmediatamente despues de «File», en naranja `#f97316`, reflejando el sitio `MedFile.my` / `medfile.my`.
+
 No se debe volver a crear el logo con texto, iconos sueltos o monogramas por pantalla. Si cambia el logo, se reemplaza el asset central y se ajusta `BrandLogo` si hace falta.
 
 ### Colores de marca (logotipo)
@@ -28,6 +30,7 @@ Los tokens en `packages/ui/src/tokens.css` reflejan la paleta oficial:
 | `--mf-teal-500` | `#00A9CE` | CTAs, acentos activos, gradientes |
 | `--mf-teal-400` | `#00B5E2` | Hover y highlights |
 | `--mf-neutral-500` | `#75787B` | Texto secundario, slogan |
+| (logo) | `#f97316` | Sufijo `.my` del wordmark (dominio) |
 
 Los botones primarios usan gradiente `--mf-teal-500` → `--mf-brand-500`.
 

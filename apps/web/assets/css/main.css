@@ -69,7 +69,7 @@ select {
 .brand {
   display: inline-flex;
   align-items: center;
-  width: 154px;
+  width: 178px;
   min-height: 56px;
 }
 
@@ -80,7 +80,7 @@ select {
 }
 
 .brand--compact {
-  width: 132px;
+  width: 154px;
   min-height: 36px;
   padding: 5px 10px;
   border-radius: 12px;
@@ -130,7 +130,7 @@ select {
 
 .app-sidebar .brand {
   flex-shrink: 0;
-  width: 164px;
+  width: 188px;
   padding: 10px 12px;
   border-radius: 18px;
   background: white;
