@@ -14,7 +14,7 @@ Las pantallas no deben definir estilos propios salvo excepciones justificadas. D
 
 El logo oficial de Medfile es `logo_medfile.svg`. En la aplicacion web se sirve desde `apps/web/public/brand/logo_medfile.svg` y debe consumirse mediante el componente `BrandLogo`.
 
-La palabra **MedFile** va en paths vectoriales (azul marino + teal). El sufijo de dominio **`.my`** va inmediatamente despues de «File», en naranja `#f97316`, reflejando el sitio `MedFile.my` / `medfile.my`.
+La palabra **MedFile** va en paths vectoriales (azul marino + teal). El punto del dominio va en **negro** (`#000`); el sufijo **`my`** inmediatamente despues, en naranja `#f97316`, reflejando el sitio `MedFile.my` / `medfile.my`.
 
 No se debe volver a crear el logo con texto, iconos sueltos o monogramas por pantalla. Si cambia el logo, se reemplaza el asset central y se ajusta `BrandLogo` si hace falta.
 
@@ -30,7 +30,8 @@ Los tokens en `packages/ui/src/tokens.css` reflejan la paleta oficial:
 | `--mf-teal-500` | `#00A9CE` | CTAs, acentos activos, gradientes |
 | `--mf-teal-400` | `#00B5E2` | Hover y highlights |
 | `--mf-neutral-500` | `#75787B` | Texto secundario, slogan |
-| (logo) | `#f97316` | Sufijo `.my` del wordmark (dominio) |
+| (logo) | `#000` | Punto separador antes de `my` |
+| (logo) | `#f97316` | Sufijo `my` del wordmark (dominio) |
 
 Los botones primarios usan gradiente `--mf-teal-500` → `--mf-brand-500`.
 
@@ -88,7 +89,7 @@ Patrones reutilizables para **muchos datos en poco espacio** (perfil paciente, c
 
 Modulo **Pacientes** (`/pacientes/[id]`): `StatStrip` + `KeyValueGrid` en tarjeta de filiación; ver [08-perfil-paciente-consultas.md](./08-perfil-paciente-consultas.md).
 
-Formulario **nuevo paciente** (`/pacientes/nuevo`): campos con etiqueta flotante dentro del control (`FormField` / `FormSelectField` con prop `inset-label` + `icon`; opcionales con `optional` → sufijo «· opcional»). Clases CSS `form-field--inset`, `form-field--date` (fecha sin solapamiento con máscara nativa), `patient-form--inset` en `main.css`. Iconos via `MedIcon` (usuario, documento, calendario, domicilio, telefono, correo, seguro).
+Formulario **nuevo paciente** (`/pacientes/nuevo`) y **editar** (`/pacientes/[id]/editar`): campos con etiqueta flotante dentro del control (`FormField` / `FormSelectField` con prop `inset-label` + `icon`; opcionales con `optional` → sufijo «· opcional»). Layout PC: secciones apiladas (Filiación, Domicilio, Contacto) y rejilla interna **máx. 3 columnas** (2 en tablet, 1 en móvil) — clase `patient-form` + `form-grid-2` en `main.css`. Iconos via `MedIcon`.
 
 ## Capas recomendadas
 

@@ -1788,6 +1788,22 @@ a.patient-row:hover {
   gap: 10px;
 }
 
+.patient-form {
+  grid-template-columns: minmax(0, 1fr);
+}
+
+.patient-form .form-section {
+  min-width: 0;
+}
+
+.patient-form .form-grid-2 {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.patient-form .form-grid-2 > * {
+  min-width: 0;
+}
+
 .emergency-form {
   display: grid;
   gap: 14px;
@@ -2079,10 +2095,6 @@ a.patient-row:hover {
 
 .patient-list-notice {
   margin: 18px;
-}
-
-.patient-form {
-  grid-template-columns: repeat(2, minmax(0, 1fr));
 }
 
 .form-wide {
@@ -3256,6 +3268,10 @@ a.patient-row:hover {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
+  .patient-form .form-grid-2 {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
   .medical-background-form--compact .background-sections-grid,
   .medical-background-form--compact .background-family-grid,
   .medical-background-form--compact .background-habits-grid,
@@ -3336,6 +3352,10 @@ a.patient-row:hover {
   }
 
   .patient-form {
+    grid-template-columns: 1fr;
+  }
+
+  .patient-form .form-grid-2 {
     grid-template-columns: 1fr;
   }
 

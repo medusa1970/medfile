@@ -79,6 +79,13 @@
         font-size: 86px;
         font-weight: 700;
       }
+
+      .cls-domain-dot {
+        fill: #000;
+        font-family: Arial, Helvetica, 'Segoe UI', sans-serif;
+        font-size: 86px;
+        font-weight: 700;
+      }
     </style>
     <linearGradient id="linear-gradient" x1="51.75" y1="54.18" x2="102.49" y2="41.84" gradientUnits="userSpaceOnUse">
       <stop offset="0" stop-color="#0ca8e4"/>
@@ -133,7 +140,9 @@
       <path class="cls-13" d="m372.93,75.1c5.55,0,10.06-4.5,10.06-10.06,0-5.55-4.5-10.06-10.06-10.06-5.55,0-10.06,4.5-10.06,10.06s4.5,10.06,10.06,10.06Z"/>
     </g>
   </g>
-  <text class="cls-domain" x="492" y="140">.my</text>
+  <text y="140">
+    <tspan class="cls-domain-dot" x="492">.</tspan><tspan class="cls-domain">my</tspan>
+  </text>
   <g>
     <path class="cls-3" d="m146.23,165.31h1.58v4.78h5.73v-4.78h1.58v11.66h-1.58v-5.55h-5.73v5.55h-1.58v-11.66Z"/>
     <path class="cls-3" d="m160.12,164.81h1.44v1.83h-1.44v-1.83Zm0,3.41h1.44v8.75h-1.44v-8.75Z"/>

@@ -12,11 +12,6 @@
       <StatusBadge :tone="statusTone">{{ statusLabel }}</StatusBadge>
     </header>
 
-    <div v-if="checkoutNotice" class="checkout-notice" :class="checkoutNotice.tone" role="status">
-      <strong>{{ checkoutNotice.title }}</strong>
-      <p>{{ checkoutNotice.message }}</p>
-    </div>
-
     <PanelCard padded class="patient-panel-compact">
       <template #header>
         <h2>Periodo de facturación</h2>
@@ -199,6 +194,34 @@
       </MfButton>
       <MfButton variant="secondary" block @click="closeEconomicoCheckout">Cerrar</MfButton>
     </PanelCard>
+
+    <div
+      v-if="checkoutNotice"
+      class="checkout-notice checkout-notice--inline"
+      :class="checkoutNotice.tone"
+      role="status"
+      aria-live="polite"
+    >
+      <strong>{{ checkoutNotice.title }}</strong>
+      <p>{{ checkoutNotice.message }}</p>
+    </div>
+
+    <Teleport to="body">
+      <div
+        v-if="paymentToast.visible"
+        class="subscription-payment-toast"
+        role="status"
+        aria-live="polite"
+      >
+        <div class="subscription-payment-toast__content">
+          <strong>{{ paymentToast.title }}</strong>
+          <p>{{ paymentToast.message }}</p>
+        </div>
+        <button type="button" class="subscription-payment-toast__close" @click="dismissPaymentToast">
+          Cerrar
+        </button>
+      </div>
+    </Teleport>
   </div>
 </template>
 
@@ -287,13 +310,22 @@ interface Usage {
   limit: number
 }
 
+const config = useRuntimeConfig()
 const apiBaseUrl = usePublicApiBaseUrl()
 const route = useRoute()
 const router = useRouter()
 const { apiFetch } = useMedfileApi()
+const paymentsCheckoutEnabled = computed(() => config.public.paymentsCheckoutEnabled === true)
 const loadError = ref(false)
 const checkoutLoading = ref<PlanCode | ''>('')
 const checkoutNotice = ref<{ title: string; message: string; tone: string } | null>(null)
+const PAYMENTS_COMING_SOON_NOTICE = {
+  title: 'Pagos en línea — disponibles muy pronto',
+  message:
+    'Estamos habilitando Mercado Pago y el pago con QR del Banco Económico. Por ahora puedes seguir usando Medfile con tu plan actual; cuando el cobro esté listo, podrás activarlo desde estos mismos botones.',
+}
+const paymentToast = ref({ visible: false, title: '', message: '' })
+let paymentToastTimer: ReturnType<typeof setTimeout> | null = null
 const billingPeriod = ref<BillingPeriod>('monthly')
 const paymentOptions = ref<PaymentOptionsResponse>({
   mercadopago: true,
@@ -633,6 +665,7 @@ function planButtonLabel(planCode: PlanCode) {
 function isPlanCheckoutDisabled(planCode: PlanCode) {
   if (checkoutLoading.value === planCode) return true
   if (planCode === subscription.value.planCode || planCode === 'free') return false
+  if (!paymentsCheckoutEnabled.value) return false
   return !paymentOptions.value.mercadopago
 }
 
@@ -647,12 +680,42 @@ function planButtonVariant(planCode: PlanCode) {
   return 'primary'
 }
 
+function dismissPaymentToast() {
+  paymentToast.value.visible = false
+  if (paymentToastTimer) {
+    clearTimeout(paymentToastTimer)
+    paymentToastTimer = null
+  }
+}
+
+function notifyPaymentsComingSoon() {
+  if (paymentToastTimer) clearTimeout(paymentToastTimer)
+
+  paymentToast.value = {
+    visible: true,
+    ...PAYMENTS_COMING_SOON_NOTICE,
+  }
+
+  paymentToastTimer = setTimeout(() => {
+    dismissPaymentToast()
+  }, 7000)
+}
+
 async function handlePlanAction(planCode: PlanCode) {
   if (planCode === subscription.value.planCode || planCode === 'free') return
+  if (!paymentsCheckoutEnabled.value) {
+    notifyPaymentsComingSoon()
+    return
+  }
   await startCheckout(planCode)
 }
 
 async function startEconomicoCheckout(planCode: PlanCode) {
+  if (!paymentsCheckoutEnabled.value) {
+    notifyPaymentsComingSoon()
+    return
+  }
+
   checkoutLoading.value = planCode
   checkoutNotice.value = null
   stopQrPolling()
@@ -879,6 +942,7 @@ onMounted(() => {
 
 onUnmounted(() => {
   stopQrPolling()
+  dismissPaymentToast()
 })
 
 function buildUsageItem(label: string, usage: Usage, bytes = false) {
@@ -974,9 +1038,18 @@ function formatBytes(bytes: number) {
   background: rgb(0 169 206 / 0.08);
 }
 
+.checkout-notice--inline {
+  margin-top: 10px;
+}
+
 .checkout-notice.success {
   border-color: rgb(16 185 129 / 0.35);
   background: rgb(16 185 129 / 0.1);
+}
+
+.checkout-notice.info {
+  border-color: rgb(0 169 206 / 0.3);
+  background: rgb(0 169 206 / 0.1);
 }
 
 .checkout-notice.warning,
@@ -1047,6 +1120,61 @@ function formatBytes(bytes: number) {
 @media (max-width: 980px) {
   .plan-compare-grid {
     grid-template-columns: 1fr;
+  }
+}
+
+.subscription-payment-toast {
+  position: fixed;
+  left: 14px;
+  right: 14px;
+  bottom: calc(14px + env(safe-area-inset-bottom, 0px));
+  z-index: 1200;
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 14px 16px;
+  border-radius: 14px;
+  border: 1px solid rgb(0 169 206 / 0.3);
+  background: var(--mf-white, #fff);
+  box-shadow: 0 12px 32px rgb(15 23 42 / 0.18);
+}
+
+.subscription-payment-toast__content {
+  flex: 1;
+  min-width: 0;
+}
+
+.subscription-payment-toast__content strong {
+  display: block;
+  margin-bottom: 4px;
+  font-size: 14px;
+  color: var(--mf-navy-900);
+}
+
+.subscription-payment-toast__content p {
+  margin: 0;
+  font-size: 13px;
+  line-height: 1.45;
+  color: var(--mf-slate-700);
+}
+
+.subscription-payment-toast__close {
+  flex-shrink: 0;
+  border: 0;
+  background: transparent;
+  color: var(--mf-teal-600);
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+  padding: 2px 0;
+}
+
+@media (min-width: 720px) {
+  .subscription-payment-toast {
+    left: auto;
+    right: 20px;
+    bottom: 20px;
+    width: min(380px, calc(100vw - 40px));
   }
 }
 </style>

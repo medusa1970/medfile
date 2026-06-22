@@ -175,6 +175,8 @@ NUXT_PUBLIC_APP_NAME=medfile
 NUXT_PUBLIC_API_URL=https://api.medfile.my
 HOST=0.0.0.0
 PORT=3000
+# Omitir o false hasta activar cobro en produccion; true habilita Mercado Pago y QR en /suscripcion
+# NUXT_PUBLIC_PAYMENTS_CHECKOUT_ENABLED=true
 ```
 
 > Railway inyecta `PORT`; Nuxt/Nitro lo respeta en runtime.

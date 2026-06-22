@@ -74,6 +74,7 @@ Contadores sincronizados: pacientes (count DB en cada `/me` y `/subscriptions/cu
 ## Pantalla web
 
 - `/suscripcion`: plan, uso, comparativa; **precios en BOB**; Mercado Pago + QR Banco Económico
+- Checkout pausado en produccion por defecto: sin `NUXT_PUBLIC_PAYMENTS_CHECKOUT_ENABLED=true`, los botones de pago siguen visibles y al pulsarlos muestran un toast flotante (sin banner superior ni iniciar checkout).
 
 ## Pago
 
